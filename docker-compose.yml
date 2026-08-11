@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ecomart-db
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ecomart
+
+  server:
+    build: ./server
+    container_name: ecomart-server
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      CLIENT_URL: ${CLIENT_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PAYOS_CLIENT_ID: ${PAYOS_CLIENT_ID}
+      PAYOS_API_KEY: ${PAYOS_API_KEY}
+      PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY}
+      PAYOS_RETURN_URL: ${PAYOS_RETURN_URL}
+      PAYOS_CANCEL_URL: ${PAYOS_CANCEL_URL}
+      UPLOAD_DIR: /app/uploads
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - ecomart
+
+  client:
+    build: ./client
+    container_name: ecomart-client
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NUXT_PUBLIC_API_BASE: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    networks:
+      - ecomart
+
+volumes:
+  pgdata:
+  uploads:
+
+networks:
+  ecomart:
+    driver: bridge
