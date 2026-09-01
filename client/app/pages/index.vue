@@ -3,6 +3,7 @@ import type { Banner, CategoryResponse, Product } from '~/types'
 
 const { request } = useApi()
 const { formatVND } = useFormat()
+const { isLoggedIn } = useAuth()
 
 const banners = useState<Banner[]>('home_banners', () => [])
 const categories = useState<CategoryResponse[]>('home_categories', () => [])
@@ -49,13 +50,18 @@ const stats = [
           <p class="mt-5 max-w-xl text-lg leading-relaxed text-emerald-50">
             EcoMart mang đến rau củ, trái cây, thực phẩm tươi sạch và đầy đủ cho mọi bữa ăn của gia đình bạn.
           </p>
-          <div class="mt-8 flex flex-wrap gap-3">
+          <div class="mt-8 flex flex-wrap items-center gap-3">
             <UButton to="/products" color="neutral" size="lg" class="bg-white! text-emerald-700!" icon="i-ph-shopping-bag">
               Mua sắm ngay
             </UButton>
-            <UButton to="/chat" color="primary" variant="outline" size="lg" class="border-white/40! bg-transparent! text-white!" icon="i-ph-chats-circle">
-              Tư vấn cùng EcoBot
-            </UButton>
+            <template v-if="!isLoggedIn">
+              <UButton to="/login" color="primary" variant="outline" size="lg" class="border-white/60! bg-transparent! text-white!">
+                Đăng nhập
+              </UButton>
+              <UButton to="/register" color="neutral" size="lg" class="border-white/80! bg-white/20! text-white! backdrop-blur">
+                Đăng ký
+              </UButton>
+            </template>
           </div>
         </div>
       </div>
@@ -80,7 +86,7 @@ const stats = [
           :to="b.linkUrl || '/products'"
           class="group relative h-56 overflow-hidden rounded-2xl"
         >
-          <img :src="b.imageUrl" :alt="b.title" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+          <img :src="b.imageUrl" :alt="b.title" loading="lazy" class="h-full w-full object-cover" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <div class="absolute bottom-0 p-5 text-white">
             <h3 class="text-lg font-bold">{{ b.title }}</h3>

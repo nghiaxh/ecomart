@@ -37,8 +37,6 @@ const userMenu = computed(() => {
         </nav>
 
         <div class="flex items-center gap-1">
-          <UButton icon="i-ph-chats-circle" color="neutral" variant="ghost" :to="'/chat'" square aria-label="Chat trợ giúp" />
-
           <UButton
             color="neutral"
             variant="ghost"
@@ -74,5 +72,6 @@ const userMenu = computed(() => {
     </main>
 
     <FooterGlobal />
+    <ChatWidget />
   </div>
 </template>
