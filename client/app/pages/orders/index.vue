@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Order, PageResponse } from '~/types'
 
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ middleware: 'customer' })
 
 const { request } = useApi()
 const { formatVND, formatDate } = useFormat()
