@@ -40,6 +40,7 @@ async function submit() {
 
 <template>
   <div class="relative flex min-h-screen items-center justify-center overflow-hidden p-4" style="background-image: url('/images/auth-bg.jpg'); background-size: cover; background-position: center; background-color: #065f46;">
+    <div class="absolute inset-0 bg-emerald-900/30 backdrop-blur-md" aria-hidden="true"></div>
     <div class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-emerald-400/30 blur-3xl" aria-hidden="true"></div>
     <div class="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-primary-300/30 blur-3xl" aria-hidden="true"></div>
 
@@ -50,15 +51,15 @@ async function submit() {
       <form class="mt-8 space-y-5" @submit.prevent="submit">
         <div>
           <UInput v-model="form.username" placeholder="Tên đăng nhập" icon="i-ph-user" size="lg" />
-          <p v-if="errors.username" class="mt-1 text-xs text-red-600">{{ errors.username }}</p>
+          <div class="h-5"><p v-if="errors.username" class="text-xs text-red-600">{{ errors.username }}</p></div>
         </div>
         <div>
           <UInput v-model="form.email" type="email" placeholder="Email" icon="i-ph-envelope" size="lg" />
-          <p v-if="errors.email" class="mt-1 text-xs text-red-600">{{ errors.email }}</p>
+          <div class="h-5"><p v-if="errors.email" class="text-xs text-red-600">{{ errors.email }}</p></div>
         </div>
         <div>
           <UInput v-model="form.numberPhone" placeholder="Số điện thoại" icon="i-ph-phone" size="lg" />
-          <p v-if="errors.numberPhone" class="mt-1 text-xs text-red-600">{{ errors.numberPhone }}</p>
+          <div class="h-5"><p v-if="errors.numberPhone" class="text-xs text-red-600">{{ errors.numberPhone }}</p></div>
         </div>
         <div>
           <UInput
@@ -81,7 +82,7 @@ async function submit() {
               />
             </template>
           </UInput>
-          <p v-if="errors.password" class="mt-1 text-xs text-red-600">{{ errors.password }}</p>
+          <div class="h-5"><p v-if="errors.password" class="text-xs text-red-600">{{ errors.password }}</p></div>
         </div>
         <UButton type="submit" color="primary" size="lg" block :loading="loading" label="Đăng ký" class="mt-2" />
       </form>

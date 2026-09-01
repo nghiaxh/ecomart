@@ -68,7 +68,7 @@ function categoryIcon(icon?: string | null) {
   <div>
     <!-- Hero -->
     <section class="relative min-h-[520px] overflow-hidden bg-emerald-900" style="background-image: url('/images/hero-bg.jpg'); background-size: cover; background-position: center;">
-      <div class="absolute inset-0 bg-emerald-900/50"></div>
+      <div class="absolute inset-0 bg-emerald-900/50 backdrop-blur-sm"></div>
       <div class="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
         <div class="max-w-2xl">
           <p class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white">
