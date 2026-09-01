@@ -41,6 +41,7 @@ public class ProductService {
         this.materialRepository = materialRepository;
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<ProductResponse> search(String keyword, Long categoryId, Double minPrice,
                                                 Double maxPrice, boolean onlyActive, Pageable pageable) {
         Specification<Product> spec = (root, query, cb) -> {
@@ -70,18 +71,21 @@ public class ProductService {
         return Mapper.toPage(page, content);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse getBySlug(String slug) {
         Product product = productRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
         return Mapper.toProduct(product);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse getById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
         return Mapper.toProduct(product);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductResponse> latest() {
         return productRepository.findTop8ByIsActiveTrueOrderByCreatedAtDesc().stream()
                 .map(Mapper::toProduct)

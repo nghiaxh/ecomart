@@ -21,12 +21,14 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<CategoryResponse> tree() {
         return categoryRepository.findByParentIsNullOrderByDisplayOrderAsc().stream()
                 .map(Mapper::toCategory)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public CategoryResponse getBySlug(String slug) {
         Category category = categoryRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
