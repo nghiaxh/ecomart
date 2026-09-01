@@ -44,7 +44,7 @@ async function load() {
     if (filters.q) params.set('q', filters.q)
     if (filters.category) {
       const cat = activeCategory.value
-      if (cat && !cat.children.length) {
+      if (cat) {
         params.set('category', String(cat.id))
       } else {
         params.set('category', filters.category)
@@ -84,7 +84,10 @@ function clearFilters() {
 
 const debouncedApply = useDebounceFn(applyFilters, 500)
 
-onMounted(() => loadCats())
+onMounted(() => {
+  loadCats()
+  load()
+})
 watch(() => filters.q, debouncedApply)
 </script>
 

@@ -3,7 +3,7 @@ import type { Product, Review } from '~/types'
 
 const { request } = useApi()
 const { formatVND, formatKg, formatDate } = useFormat()
-const { isLoggedIn } = useAuth()
+const { isLoggedIn, isAdmin } = useAuth()
 const route = useRoute()
 const toast = useToast()
 
@@ -38,6 +38,10 @@ async function loadReviews() {
 async function addToCart() {
   if (!isLoggedIn.value) {
     navigateTo('/login')
+    return
+  }
+  if (isAdmin.value) {
+    navigateTo('/admin')
     return
   }
   adding.value = true
@@ -80,7 +84,7 @@ onMounted(() => {
       <!-- Gallery -->
       <div>
         <div class="aspect-square overflow-hidden rounded-2xl bg-emerald-50">
-          <img v-if="selectedImage" :src="selectedImage" :alt="product.name" class="h-full w-full object-cover" />
+          <img v-if="selectedImage" :src="selectedImage" :alt="product.name" class="h-full w-full object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
           <div v-else class="grid h-full w-full place-items-center text-emerald-200">
             <UIcon name="i-ph-image" class="h-16 w-16" />
           </div>
@@ -93,7 +97,7 @@ onMounted(() => {
             :class="selectedImage === img ? 'border-emerald-600' : 'border-transparent'"
             @click="selectedImage = img"
           >
-            <img :src="img" :alt="product.name" class="h-full w-full object-cover" />
+            <img :src="img" :alt="product.name" class="h-full w-full object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
           </button>
         </div>
       </div>
@@ -126,6 +130,7 @@ onMounted(() => {
             <UButton color="neutral" variant="ghost" icon="i-ph-plus" :disabled="quantity >= product.stock" @click="quantity++" />
           </div>
           <UButton
+            v-if="!isAdmin"
             color="primary"
             size="lg"
             icon="i-ph-shopping-cart"

@@ -10,6 +10,19 @@ const toast = useToast()
 const categories = ref<CategoryResponse[]>([])
 const loading = ref(true)
 
+const categoryIconMap: Record<string, string> = {
+  leaf: 'i-ph-leaf',
+  apple: 'i-ph-apple-logo',
+  box: 'i-ph-package',
+  carrot: 'i-ph-carrot',
+  tag: 'i-ph-tag-simple'
+}
+
+function categoryIcon(icon?: string | null) {
+  if (!icon) return 'i-ph-tag-simple'
+  return categoryIconMap[icon] || `i-ph-${icon}`
+}
+
 const showForm = ref(false)
 const editingId = ref<number | null>(null)
 const saving = ref(false)
@@ -128,7 +141,7 @@ onMounted(load)
             <tr class="border-t border-gray-100">
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
-                  <UIcon v-if="c.icon" :name="`i-ph-${c.icon}`" class="h-4 w-4 text-emerald-600" />
+                  <UIcon v-if="c.icon && categoryIcon(c.icon) !== 'i-ph-tag-simple'" :name="categoryIcon(c.icon)" class="h-4 w-4 text-emerald-600" />
                   <span class="font-medium text-gray-800">{{ c.name }}</span>
                 </div>
               </td>
