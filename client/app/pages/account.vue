@@ -7,7 +7,7 @@ definePageMeta({ middleware: 'auth' })
 const { request } = useApi()
 const { formatVND } = useFormat()
 const toast = useToast()
-const { session, updateSession } = useAuth()
+const { session, updateSession, isAdmin } = useAuth()
 
 const profile = ref<ProfileResponse | null>(null)
 const addresses = ref<Address[]>([])
@@ -121,11 +121,16 @@ onMounted(load)
         <div class="rounded-2xl border border-emerald-100 bg-white p-6">
           <h3 class="font-semibold text-gray-800">Đường dẫn</h3>
           <div class="mt-3 space-y-2">
-            <NuxtLink to="/orders" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
-              <UIcon name="i-ph-receipt" class="h-4 w-4" /> Đơn hàng
-            </NuxtLink>
-            <NuxtLink to="/chat" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
-              <UIcon name="i-ph-chats-circle" class="h-4 w-4" /> Chat hỗ trợ
+            <template v-if="!isAdmin">
+              <NuxtLink to="/orders" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
+                <UIcon name="i-ph-receipt" class="h-4 w-4" /> Đơn hàng
+              </NuxtLink>
+              <NuxtLink to="/chat" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
+                <UIcon name="i-ph-chats-circle" class="h-4 w-4" /> Chat hỗ trợ
+              </NuxtLink>
+            </template>
+            <NuxtLink to="/admin" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
+              <UIcon name="i-ph-squares-four" class="h-4 w-4" /> Quản trị
             </NuxtLink>
           </div>
         </div>

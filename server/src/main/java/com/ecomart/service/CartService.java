@@ -7,10 +7,12 @@ import com.ecomart.domain.entity.CartItem;
 import com.ecomart.domain.entity.CartItemId;
 import com.ecomart.domain.entity.Customer;
 import com.ecomart.domain.entity.Product;
+import com.ecomart.domain.entity.User;
 import com.ecomart.dto.request.AddToCartRequest;
 import com.ecomart.dto.response.CartResponse;
 import com.ecomart.exception.BadRequestException;
 import com.ecomart.exception.ResourceNotFoundException;
+import com.ecomart.exception.UnauthorizedException;
 import com.ecomart.repository.CartItemRepository;
 import com.ecomart.repository.CartRepository;
 import com.ecomart.repository.ProductRepository;
@@ -92,8 +94,11 @@ public class CartService {
     }
 
     public Cart getCart() {
-        Customer customer = (Customer) securityUtils.currentUser();
-        return cartRepository.findByCustomerId(customer.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giỏ hàng"));
+        User user = securityUtils.currentUser();
+        if (user instanceof Customer customer) {
+            return cartRepository.findByCustomerId(customer.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giỏ hàng"));
+        }
+        throw new UnauthorizedException("Chỉ khách hàng mới có giỏ hàng");
     }
 }

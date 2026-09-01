@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ middleware: 'customer' })
 
 const { cart, fetchCart, updateQuantity, remove } = useCart()
 const { formatVND } = useFormat()
@@ -16,7 +16,7 @@ onMounted(() => fetchCart())
       <div class="lg:col-span-2 space-y-4">
         <div v-for="item in cart.items" :key="item.productId" class="flex gap-4 rounded-2xl border border-emerald-100 bg-white p-4">
           <NuxtLink :to="`/products/${item.productSlug}`" class="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-emerald-50">
-            <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.productName" class="h-full w-full object-cover" />
+            <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.productName" class="h-full w-full object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
             <div v-else class="grid h-full w-full place-items-center text-emerald-200"><UIcon name="i-ph-image" class="h-8 w-8" /></div>
           </NuxtLink>
           <div class="flex flex-1 flex-col">

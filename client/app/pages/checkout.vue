@@ -2,10 +2,10 @@
 import type { Address, Cart, CheckoutResult } from '~/types'
 import { addressSchema } from '~/schemas'
 
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ middleware: 'customer' })
 
 const { request } = useApi()
-const cart = useCart()
+const { cart, fetchCart, reset } = useCart()
 const { formatVND } = useFormat()
 const toast = useToast()
 
@@ -29,7 +29,7 @@ async function loadAddresses() {
 }
 
 async function loadCart() {
-  await cart.fetchCart()
+  await fetchCart()
 }
 
 async function createAddress() {
@@ -60,7 +60,7 @@ async function checkout() {
     if (result.payosCheckoutUrl) {
       window.open(result.payosCheckoutUrl, '_blank')
     }
-    await cart.reset()
+    await reset()
     toast.add({ title: result.message || 'Đặt hàng thành công!', color: 'success' })
     navigateTo(`/orders/${result.orderId}`)
   } catch (e: any) {
@@ -171,20 +171,20 @@ onMounted(() => {
       </div>
 
       <!-- Summary -->
-      <div class="h-fit rounded-2xl border border-emerald-100 bg-white p-6 lg:sticky lg:top-20" v-if="cart.cart">
-        <h2 class="text-lg font-bold text-gray-800">Đơn hàng ({{ cart.cart.itemCount }} món)</h2>
+      <div class="h-fit rounded-2xl border border-emerald-100 bg-white p-6 lg:sticky lg:top-20" v-if="cart">
+        <h2 class="text-lg font-bold text-gray-800">Đơn hàng ({{ cart.itemCount }} món)</h2>
         <div class="mt-4 space-y-3 max-h-64 overflow-auto">
-          <div v-for="item in cart.cart.items" :key="item.productId" class="flex justify-between text-sm">
+          <div v-for="item in cart.items" :key="item.productId" class="flex justify-between text-sm">
             <span class="text-gray-600">{{ item.productName }} <span class="text-gray-400">× {{ item.quantity }}</span></span>
             <span class="font-medium text-gray-700">{{ formatVND(item.price * item.quantity) }}</span>
           </div>
         </div>
         <div class="mt-4 space-y-2 border-t border-emerald-50 pt-4 text-sm">
-          <div class="flex justify-between text-gray-500"><span>Tạm tính</span><span>{{ formatVND(cart.cart.subtotal) }}</span></div>
+          <div class="flex justify-between text-gray-500"><span>Tạm tính</span><span>{{ formatVND(cart.subtotal) }}</span></div>
           <div class="flex justify-between text-gray-500"><span>Phí giao hàng</span><span>Miễn phí</span></div>
         </div>
         <div class="mt-4 border-t border-emerald-50 pt-4">
-          <div class="flex justify-between text-lg"><span class="font-semibold text-gray-700">Tổng cộng</span><span class="font-bold text-emerald-700">{{ formatVND(cart.cart.subtotal) }}</span></div>
+          <div class="flex justify-between text-lg"><span class="font-semibold text-gray-700">Tổng cộng</span><span class="font-bold text-emerald-700">{{ formatVND(cart.subtotal) }}</span></div>
         </div>
         <UTextarea v-model="notes" placeholder="Ghi chú cho đơn hàng (tùy chọn)..." class="mt-4" :rows="2" />
         <UButton color="primary" size="lg" block class="mt-4" :loading="loading" label="Đặt hàng" icon="i-ph-check-circle" @click="checkout" />

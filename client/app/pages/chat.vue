@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ChatResponse, ChatSession, ChatMessage } from '~/types'
 
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ middleware: 'customer' })
 
 const { request } = useApi()
 const { formatDate } = useFormat()

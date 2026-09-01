@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const { isLoggedIn, isAdmin, session, logout } = useAuth()
-const cart = useCart()
-const { formatVND } = useFormat()
+const { itemCount } = useCart()
 
 const links = [
   { label: 'Trang chủ', to: '/' },
@@ -10,9 +9,12 @@ const links = [
 ]
 
 const userMenu = computed(() => {
-  const items: { label: string; icon: string; to?: string; onClick?: () => void }[] = [{ label: 'Tài khoản', icon: 'i-ph-user', to: '/account' }]
+  const items: { label: string; icon: string; to?: string; onClick?: () => void }[] = []
   if (isAdmin.value) {
     items.push({ label: 'Quản trị', icon: 'i-ph-squares-four', to: '/admin' })
+  } else {
+    items.push({ label: 'Tài khoản', icon: 'i-ph-user', to: '/account' })
+    items.push({ label: 'Đơn hàng', icon: 'i-ph-receipt', to: '/orders' })
   }
   items.push({ label: 'Đăng xuất', icon: 'i-ph-sign-out', onClick: logout })
   return items
@@ -24,20 +26,19 @@ const userMenu = computed(() => {
     <header class="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/90 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <NuxtLink to="/" class="flex items-center gap-2">
-          <span class="grid h-9 w-9 place-items-center rounded-xl bg-emerald-600 text-white">
-            <UIcon name="i-ph-storefront" class="h-5 w-5" />
-          </span>
+          <img src="/favicon.svg" alt="EcoMart" class="h-9 w-9 rounded-xl" />
           <span class="text-xl font-extrabold tracking-tight text-emerald-800">EcoMart</span>
         </NuxtLink>
 
         <nav class="hidden items-center gap-8 md:flex">
-          <NuxtLink v-for="link in links" :key="link.to" :to="link.to" class="text-sm font-medium text-gray-600 transition hover:text-emerald-700">
+          <NuxtLink v-for="link in links" :key="link.to" :to="link.to" class="text-sm font-medium text-gray-600 hover:text-emerald-700">
             {{ link.label }}
           </NuxtLink>
         </nav>
 
         <div class="flex items-center gap-1">
           <UButton
+            v-if="!isAdmin"
             color="neutral"
             variant="ghost"
             square
@@ -46,8 +47,8 @@ const userMenu = computed(() => {
             class="relative"
           >
             <UIcon name="i-ph-shopping-cart" class="h-5 w-5" />
-            <span v-if="cart.itemCount > 0" class="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold text-white">
-              {{ cart.itemCount }}
+            <span v-if="itemCount > 0" class="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold text-white">
+              {{ itemCount }}
             </span>
           </UButton>
 
@@ -60,8 +61,8 @@ const userMenu = computed(() => {
             </UDropdownMenu>
           </template>
           <template v-else>
-            <UButton :to="'/login'" color="neutral" variant="soft" size="sm">Đăng nhập</UButton>
-            <UButton :to="'/register'" color="primary" size="sm" class="ml-1">Đăng ký</UButton>
+            <UButton :to="'/login'" color="neutral" variant="soft" size="md">Đăng nhập</UButton>
+            <UButton :to="'/register'" color="primary" size="md" class="ml-1">Đăng ký</UButton>
           </template>
         </div>
       </div>
