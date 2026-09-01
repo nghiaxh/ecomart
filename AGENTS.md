@@ -5,7 +5,7 @@ Eco-friendly supermarket (siêu thị xanh). Client-server monorepo — there is
 ## Architecture
 
 - **client/** — Nuxt 3 + Nuxt UI + TS + Zod. App code (not lib); UI text and Zod error messages are Vietnamese.
-- **server/** — Java 21, Spring Boot 3.4, Maven, Lombok, Spring Data JPA, PostgreSQL.
+- **server/** — Java 25, Spring Boot 3.5, Maven, Lombok, Spring Data JPA, PostgreSQL.
 - **Infra** — `docker-compose.yml` runs all three (postgres, server, client). Single `.env` at repo root holds every secret.
 
 ### Key wiring (not obvious from filenames)
@@ -21,7 +21,7 @@ Eco-friendly supermarket (siêu thị xanh). Client-server monorepo — there is
 Must run inside `client/` or `server/` (no workspace root scripts).
 
 **Client** (`./client`):
-- Dev server: `npm run dev` (defaults to `http://localhost:3000`, API base `http://localhost:8080` from `NUXT_PUBLIC_API_BASE`)
+- Dev server: `npm run dev` (defaults to `http://localhost:5173`, API base `http://localhost:8080` from `NUXT_PUBLIC_API_BASE`)
 - Typecheck: `npm run typecheck` (the only verification available; there is **no lint or test suite**)
 
 **Server** (`./server`):
@@ -35,4 +35,4 @@ Must run inside `client/` or `server/` (no workspace root scripts).
 
 - **`.env` is required** and holds all secrets (JWT secret, Gemini, PayOS, Google OAuth). Copy `.env.example` → `.env` to bootstrap. There is **no `.gitignore` yet** — don't let `.env` get committed.
 - UI is Vietnamese (`lang: vi`); keep new UI text and Zod messages in Vietnamese.
-- Lombok is used — build under JDK 21 and ensure annotation processing is enabled in the IDE.
+- Lombok is used — build under JDK 25 and ensure annotation processing is enabled in the IDE.

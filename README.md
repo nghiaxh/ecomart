@@ -3,42 +3,41 @@
 [![Nuxt](https://img.shields.io/badge/Nuxt-3-00dc82?logo=nuxtdotjs&logoColor=white)](https://nuxt.com)
 [![Vue](https://img.shields.io/badge/Vue-3-4fc08d?logo=vuedotjs&logoColor=white)](https://vuejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-6db33f?logo=spring&logoColor=white)](https://spring.io)
-[![Java](https://img.shields.io/badge/Java-21-f89820?logo=openjdk&logoColor=white)](https://www.java.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-6db33f?logo=spring&logoColor=white)](https://spring.io)
+[![Java](https://img.shields.io/badge/Java-25-f89820?logo=openjdk&logoColor=white)](https://www.java.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169e1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Zod](https://img.shields.io/badge/Zod-3-3e67b1?logo=zod&logoColor=white)](https://zod.dev)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white)](https://www.docker.com)
+[![Docker](https://img.shields.io/badge/Docker%20Compose-2496ed?logo=docker&logoColor=white)](https://www.docker.com)
 
-**Siêu thị trực tuyến** với sản phẩm đa dạng, tươi sạch và tiện lợi. Nền tảng mua sắm thực phẩm hàng ngày cho mọi gia đình Việt.
+Nền tảng mua sắm thực phẩm trực tuyến — sản phẩm tươi sạch, giao hàng nhanh, thanh toán tiện lợi cho mọi gia đình Việt.
 
 ## Tính năng
 
 ### Khách hàng
 - Đăng ký / đăng nhập (email + Google OAuth)
-- Danh mục sản phẩm (cây), lọc / tìm kiếm / sắp xếp
-- Chi tiết sản phẩm: vật liệu, đánh giá
-- Giỏ hàng
-- Thanh toán: **PayOS QR** hoặc **COD**
-- Lịch sử đơn hàng, hủy / theo dõi trạng thái
-- **Chat AI** (Google Gemini) hỗ trợ tư vấn
-- Thông báo
+- Danh mục sản phẩm với bộ lọc, tìm kiếm, sắp xếp
+- Chi tiết sản phẩm với đánh giá từ người dùng
+- Giỏ hàng & thanh toán: **PayOS QR** hoặc **COD**
+- Lịch sử đơn hàng, theo dõi & hủy đơn
+- **Chat AI** (Google Gemini) hỗ trợ tư vấn mua sắm
+- Hệ thống thông báo
 
-### Quản trị (ADMIN)
+### Quản trị
 - Dashboard tổng quan
-- Quản lý sản phẩm / danh mục / banner
+- Quản lý sản phẩm, danh mục & banner
 - Quản lý đơn hàng + cập nhật trạng thái
-- Quản lý khách hàng
+- Quản lý tài khoản khách hàng
 
 ## Kiến trúc
 
-Monorepo client-server, không có build tooling ở root, `client/` và `server/` build độc lập.
+Monorepo client-server, mỗi module build độc lập — không có build tooling ở root.
 
 ```
 ecomart/
 ├── client/            # Nuxt 3 + Nuxt UI + TypeScript + Zod
-├── server/            # Spring Boot 3.4 + Java 21 + PostgreSQL
-├── docker-compose.yml # chạy toàn bộ (postgres, server, client)
-├── .env               # một file cấu hình chứa mọi secrets
+├── server/            # Spring Boot 3.5 + Java 25 + PostgreSQL
+├── docker-compose.yml # chạy toàn bộ stack
+├── .env               # cấu hình bí mật
 └── ARCHITECTURE.md    # tài liệu kiến trúc chi tiết
 ```
 
@@ -48,7 +47,7 @@ Xem chi tiết luồng dữ liệu, xác thực JWT, thanh toán,... tại **[AR
 
 ### Yêu cầu
 - Node.js 20+
-- JDK 21 (cho server) / Maven
+- JDK 25 / Maven
 - Docker + Docker Compose (tùy chọn)
 
 ### 1. Cấu hình môi trường
@@ -57,7 +56,7 @@ Xem chi tiết luồng dữ liệu, xác thực JWT, thanh toán,... tại **[AR
 cp .env.example .env
 ```
 
-Điền các giá trị thực vào `.env`: `JWT_SECRET`, `GEMINI_API_KEY`, `PAYOS_*` (bắt buộc cho thanh toán), `GOOGLE_CLIENT_ID`.
+Điền giá trị thực vào `.env`: `JWT_SECRET`, `GEMINI_API_KEY`, `PAYOS_*`, `GOOGLE_CLIENT_ID`.
 
 ### 2. Chạy toàn bộ hệ thống (Docker)
 
@@ -65,29 +64,29 @@ cp .env.example .env
 docker compose up --build
 ```
 
-- **Client**: http://localhost:3000
-- **Server API**: http://localhost:8080/api
-- **Database**: localhost:5432
-
-> `.env` chứa toàn bộ bí mật, **không commit file này** vào git (repo chưa có `.gitignore`).
+| Service | URL |
+|---------|-----|
+| Client | http://localhost:5173 |
+| Server API | http://localhost:8080/api |
+| Database | localhost:5432 |
 
 ### Chạy dev riêng lẻ
 
 **Client** (`./client`):
 ```bash
-npm run dev        # http://localhost:3000
-npm run typecheck  # kiểm tra type (là verification duy nhất; không có lint/test)
+npm run dev        # http://localhost:5173
+npm run typecheck  # kiểm tra type
 ```
 
 **Server** (`./server`) cần Postgres tại `localhost:5432` (hoặc `docker compose up postgres`):
 ```bash
 mvn spring-boot:run
-mvn package        # đóng gói jar
+mvn package
 ```
 
 ## Tài khoản demo
 
-`DataSeeder` tự tạo khi DB trống, chỉ khi khởi động **server không qua Docker hoặc với volume mới**:
+`DataSeeder` tự tạo dữ liệu mẫu khi DB trống, chỉ khi khởi động server không qua Docker hoặc với volume mới.
 
 | Vai trò | Email | Mật khẩu |
 |---------|-------|----------|
@@ -95,12 +94,10 @@ mvn package        # đóng gói jar
 
 ## Công nghệ
 
-- **Client**: Nuxt 3, Nuxt UI, Vue 3, TypeScript, Zod, Tailwind CSS
-- **Server**: Spring Boot 3.4, Spring Security (JWT), Spring Data JPA, Lombok
-- **Dữ liệu**: PostgreSQL 16
-- **Tích hợp**: Google Gemini (chat), PayOS (thanh toán QR), Google OAuth
-- **Hạ tầng**: Docker Compose
-
-## Giấy phép
-
-Chưa xác định.
+| Layer | Stack |
+|-------|-------|
+| Client | Nuxt 3, Nuxt UI, Vue 3, TypeScript, Zod, Tailwind CSS |
+| Server | Spring Boot 3.5, Spring Security (JWT), Spring Data JPA, Lombok |
+| Database | PostgreSQL 18 |
+| Tích hợp | Google Gemini (chat), PayOS (thanh toán QR), Google OAuth |
+| Hạ tầng | Docker Compose |

@@ -9,14 +9,14 @@ EcoMart là ứng dụng **siêu thị trực tuyến** dạng client-server mon
 ```
 ┌──────────────────┐     HTTP/JSON (REST)     ┌──────────────────────┐
 │  Nuxt 3 client   │ ───────────────────────▶ │  Spring Boot server  │
-│  (Vue + Nuxt UI) │ ◀─────────────────────── │  Java 21 + JPA       │
+│  (Vue + Nuxt UI) │ ◀─────────────────────── │  Java 25 + JPA       │
 └──────────────────┘   Authorization: Bearer  └──────────┬───────────┘
                                                          │
                                               PostgreSQL (ddl-auto: update)
 ```
 
 - **client/** - Nuxt 3 + Nuxt UI + TypeScript + Zod. Giao diện tiếng Việt.
-- **server/** - Spring Boot 3.4 + Spring Security (JWT) + Spring Data JPA. 15 controller, mỗi resource một controller → service → repository.
+- **server/** - Spring Boot 3.5 + Spring Security (JWT) + Spring Data JPA. 15 controller, mỗi resource một controller → service → repository.
 - **PostgreSQL** - không có migration; `ddl-auto: update` tự đồng bộ schema khi khởi động.
 
 ## Luồng dữ liệu chính
