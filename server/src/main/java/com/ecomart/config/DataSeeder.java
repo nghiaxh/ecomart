@@ -15,6 +15,8 @@ import java.util.List;
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
+    private final CartRepository cartRepository;
     private final CategoryRepository categoryRepository;
     private final MaterialRepository materialRepository;
     private final ProductRepository productRepository;
@@ -22,12 +24,16 @@ public class DataSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     public DataSeeder(UserRepository userRepository,
+                      CustomerRepository customerRepository,
+                      CartRepository cartRepository,
                       CategoryRepository categoryRepository,
                       MaterialRepository materialRepository,
                       ProductRepository productRepository,
                       BannerRepository bannerRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.customerRepository = customerRepository;
+        this.cartRepository = cartRepository;
         this.categoryRepository = categoryRepository;
         this.materialRepository = materialRepository;
         this.productRepository = productRepository;
@@ -38,17 +44,25 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        seedDemoUsers();
         if (userRepository.count() > 0) {
             return;
         }
-        seedAdmin();
         seedCategories();
         seedMaterials();
         seedBanners();
         seedProducts();
     }
 
+    private void seedDemoUsers() {
+        seedAdmin();
+        seedCustomer();
+    }
+
     private void seedAdmin() {
+        if (userRepository.existsByUsername("admin")) {
+            return;
+        }
         Admin admin = new Admin();
         admin.setUsername("admin");
         admin.setEmail("admin@ecomart.vn");
@@ -58,6 +72,26 @@ public class DataSeeder implements CommandLineRunner {
         admin.setActive(true);
         admin.setHireDate(java.time.LocalDate.now());
         userRepository.save(admin);
+    }
+
+    private void seedCustomer() {
+        if (userRepository.existsByUsername("customer")) {
+            return;
+        }
+        Customer customer = new Customer();
+        customer.setUsername("customer");
+        customer.setEmail("customer@ecomart.vn");
+        customer.setNumberPhone("0901111111");
+        customer.setPasswordHash(passwordEncoder.encode("Customer@123"));
+        customer.setRole(UserRole.CUSTOMER);
+        customer.setActive(true);
+        customer = customerRepository.save(customer);
+
+        Cart cart = new Cart();
+        cart.setCustomer(customer);
+        cart = cartRepository.save(cart);
+        customer.setCart(cart);
+        customerRepository.save(customer);
     }
 
     private void seedCategories() {
@@ -117,6 +151,7 @@ public class DataSeeder implements CommandLineRunner {
     private void seedBanners() {
         banner("Ưu đãi cuối tuần", "Giảm giá nhiều mặt hàng thiết yếu hàng ngày", "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1600", "/products?category=rau-cu-sach", 1);
         banner("Hàng mới về", "Khám phá bộ sưu tập sản phẩm mới nhất", "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1600", "/products", 2);
+        banner("Trái cây tươi mỗi ngày", "Chọn lọc từ những vùng trồng uy tín", "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1600", "/products?category=trai-cay-tuoi", 3);
     }
 
     private void banner(String title, String subtitle, String image, String link, int order) {
@@ -134,9 +169,15 @@ public class DataSeeder implements CommandLineRunner {
         Category rauXanh = categoryRepository.findBySlug("rau-xanh").orElse(null);
         product("Rau muống sạch", "rau-muong-sach", 12000, 100, rauXanh, 200, "Đà Lạt");
         product("Cải bó xôi", "cai-bo-xoi", 18000, 80, rauXanh, 150, "Đà Lạt");
+        Category cuQua = categoryRepository.findBySlug("cu-qua").orElse(null);
+        product("Cà rốt Đà Lạt", "ca-rot-da-lat", 15000, 120, cuQua, 250, "Đà Lạt");
+        product("Khoai tây", "khoai-tay", 16000, 90, cuQua, 300, "Lâm Đồng");
         Category qua = categoryRepository.findBySlug("trai-cay-nhiet-doi").orElse(null);
         product("Cam sành Việt", "cam-sanh-viet", 25000, 60, qua, 300, "Tây Ninh");
         product("Xoài cát Hòa Lộc", "xoai-cat-hoa-loc", 45000, 50, qua, 500, "Tiền Giang");
+        product("Chuối sứ", "chuoi-su", 18000, 150, qua, 400, "Tiền Giang");
+        Category nguCoc = categoryRepository.findBySlug("ngu-coc").orElse(null);
+        product("Gạo lứt hữu cơ", "gao-lut-huu-co", 68000, 70, nguCoc, 1000, "An Giang");
     }
 
     private void product(String name, String slug, double price, int stock,
