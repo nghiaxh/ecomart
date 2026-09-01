@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: ['@nuxt/ui', '@vueuse/nuxt'],
 
@@ -8,11 +9,11 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page', mode: 'out-in' },
     head: {
       htmlAttrs: { lang: 'vi' },
-      title: 'EcoMart — Siêu thị xanh',
+      title: 'EcoMart',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'EcoMart — siêu thị thực phẩm sạch, bền vững. Tiêu dùng xanh mỗi ngày.' },
+        { name: 'description', content: 'EcoMart, siêu thị thực phẩm trực tuyến với sản phẩm đa dạng và tươi sạch.' },
         { name: 'theme-color', content: '#16a34a' }
       ],
       link: [
@@ -31,11 +32,6 @@ export default defineNuxtConfig({
 
   colorMode: {
     preference: 'light'
-  },
-
-  ui: {
-    global: true,
-    icons: ['heroicons', 'ph', 'material-symbols']
   },
 
   typescript: {
