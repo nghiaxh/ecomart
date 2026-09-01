@@ -8,7 +8,7 @@ const { formatVND, formatKg } = useFormat()
 <template>
   <NuxtLink
     :to="`/products/${product.slug}`"
-    class="group overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:-translate-y-1 hover:shadow-lg hover:shadow-gray-100/60"
+    class="group overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:shadow-lg hover:shadow-gray-100/60"
   >
     <div class="relative aspect-[4/3] overflow-hidden bg-gray-50">
       <img
@@ -16,7 +16,7 @@ const { formatVND, formatKg } = useFormat()
         :src="product.images[0]"
         :alt="product.name"
         loading="lazy"
-        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        class="h-full w-full object-cover"
       />
       <div v-else class="grid h-full w-full place-items-center text-gray-200">
         <UIcon name="i-ph-image" class="h-12 w-12" />
