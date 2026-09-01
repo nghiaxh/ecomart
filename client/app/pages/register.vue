@@ -11,6 +11,7 @@ const toast = useToast()
 const form = reactive({ username: '', email: '', numberPhone: '', password: '' })
 const errors = ref<Record<string, string>>({})
 const loading = ref(false)
+const showPassword = ref(false)
 
 async function submit() {
   errors.value = {}
@@ -81,7 +82,26 @@ async function submit() {
               <p v-if="errors.numberPhone" class="mt-1 text-xs text-red-600">{{ errors.numberPhone }}</p>
             </div>
             <div>
-              <UInput v-model="form.password" type="password" placeholder="Mật khẩu" icon="i-ph-lock" size="lg" />
+              <UInput
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Mật khẩu"
+                icon="i-ph-lock"
+                size="lg"
+                :ui="{ trailing: 'pe-1' }"
+              >
+                <template #trailing>
+                  <UButton
+                    color="neutral"
+                    variant="link"
+                    size="sm"
+                    :icon="showPassword ? 'i-ph-eye-slash' : 'i-ph-eye'"
+                    :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+                    :aria-pressed="showPassword"
+                    @click="showPassword = !showPassword"
+                  />
+                </template>
+              </UInput>
               <p v-if="errors.password" class="mt-1 text-xs text-red-600">{{ errors.password }}</p>
             </div>
             <UButton type="submit" color="primary" size="lg" block :loading="loading" label="Đăng ký" />

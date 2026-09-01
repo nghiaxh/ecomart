@@ -8,9 +8,10 @@ definePageMeta({
 const { login } = useAuth()
 const toast = useToast()
 
-const form = reactive({ email: '', password: '' })
+const form = reactive({ identifier: '', password: '' })
 const errors = ref<Record<string, string>>({})
 const loading = ref(false)
+const showPassword = ref(false)
 
 async function submit() {
   errors.value = {}
@@ -23,7 +24,7 @@ async function submit() {
   }
   loading.value = true
   try {
-    const data = await login(form.email, form.password)
+    const data = await login(form.identifier, form.password)
     if (data.role === 'ADMIN') {
       navigateTo('/admin')
     } else {
@@ -69,11 +70,30 @@ async function submit() {
 
           <form class="mt-6 space-y-5" @submit.prevent="submit">
             <div>
-              <UInput v-model="form.email" type="email" placeholder="Email" icon="i-ph-envelope" size="lg" :trailing-icon="errors.email ? 'i-ph-warning-circle' : undefined" />
-              <p v-if="errors.email" class="mt-1 text-xs text-red-600">{{ errors.email }}</p>
+              <UInput v-model="form.identifier" placeholder="Tên đăng nhập hoặc email" icon="i-ph-user" size="lg" :trailing-icon="errors.identifier ? 'i-ph-warning-circle' : undefined" />
+              <p v-if="errors.identifier" class="mt-1 text-xs text-red-600">{{ errors.identifier }}</p>
             </div>
             <div>
-              <UInput v-model="form.password" type="password" placeholder="Mật khẩu" icon="i-ph-lock" size="lg" />
+              <UInput
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Mật khẩu"
+                icon="i-ph-lock"
+                size="lg"
+                :ui="{ trailing: 'pe-1' }"
+              >
+                <template #trailing>
+                  <UButton
+                    color="neutral"
+                    variant="link"
+                    size="sm"
+                    :icon="showPassword ? 'i-ph-eye-slash' : 'i-ph-eye'"
+                    :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+                    :aria-pressed="showPassword"
+                    @click="showPassword = !showPassword"
+                  />
+                </template>
+              </UInput>
               <p v-if="errors.password" class="mt-1 text-xs text-red-600">{{ errors.password }}</p>
             </div>
             <UButton type="submit" color="primary" size="lg" block :loading="loading" label="Đăng nhập" />

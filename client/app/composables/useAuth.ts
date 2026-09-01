@@ -55,10 +55,10 @@ export const useAuth = () => {
     persist(session.value)
   }
 
-  const login = async (email: string, password: string) => {
+  const login = async (identifier: string, password: string) => {
     const data = await request<AuthResponse>('/api/auth/login', {
       method: 'POST',
-      body: { email, password }
+      body: { identifier, password }
     })
     setSession(data)
     return data
