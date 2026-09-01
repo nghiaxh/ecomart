@@ -4,7 +4,6 @@ import com.ecomart.common.Mapper;
 import com.ecomart.common.SecurityUtils;
 import com.ecomart.config.JwtProperties;
 import com.ecomart.config.PayOSProperties;
-import com.ecomart.config.GeminiProperties;
 import com.ecomart.domain.entity.*;
 import com.ecomart.domain.enums.ChatRole;
 import com.ecomart.domain.enums.MaterialType;

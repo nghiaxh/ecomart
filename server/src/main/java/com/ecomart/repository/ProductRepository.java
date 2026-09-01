@@ -13,5 +13,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Optional<Product> findBySlug(String slug);
     boolean existsBySlug(String slug);
     Page<Product> findByIsActiveTrue(Pageable pageable);
+    List<Product> findAllByIsActiveTrue();
     List<Product> findTop8ByIsActiveTrueOrderByCreatedAtDesc();
 }

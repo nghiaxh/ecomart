@@ -7,7 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@EnableConfigurationProperties({JwtProperties.class, PayOSProperties.class, GeminiProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, PayOSProperties.class})
 public class AppConfig {
 
     @Bean

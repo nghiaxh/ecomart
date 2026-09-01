@@ -9,7 +9,6 @@ import com.ecomart.dto.request.ChatRequest;
 import com.ecomart.dto.response.ChatResponse;
 import com.ecomart.dto.response.ChatSessionResponse;
 import com.ecomart.exception.ResourceNotFoundException;
-import com.ecomart.integration.gemini.GeminiClient;
 import com.ecomart.repository.ChatMessageRepository;
 import com.ecomart.repository.ChatSessionRepository;
 import org.springframework.stereotype.Service;
@@ -23,16 +22,16 @@ public class ChatService {
     private final SecurityUtils securityUtils;
     private final ChatSessionRepository sessionRepository;
     private final ChatMessageRepository messageRepository;
-    private final GeminiClient geminiClient;
+    private final ChatBot chatBot;
 
     public ChatService(SecurityUtils securityUtils,
                        ChatSessionRepository sessionRepository,
                        ChatMessageRepository messageRepository,
-                       GeminiClient geminiClient) {
+                       ChatBot chatBot) {
         this.securityUtils = securityUtils;
         this.sessionRepository = sessionRepository;
         this.messageRepository = messageRepository;
-        this.geminiClient = geminiClient;
+        this.chatBot = chatBot;
     }
 
     public List<ChatSessionResponse> mySessions() {
@@ -63,7 +62,7 @@ public class ChatService {
         messageRepository.save(userMsg);
         session.getMessages().add(userMsg);
 
-        String botReply = geminiClient.chat(request.message());
+        String botReply = chatBot.answer(request.message());
 
         ChatMessage botMsg = new ChatMessage();
         botMsg.setSession(session);
