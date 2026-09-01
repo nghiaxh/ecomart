@@ -39,72 +39,49 @@ async function submit() {
 </script>
 
 <template>
-  <div class="relative flex min-h-screen">
-    <div class="relative hidden w-1/2 lg:block" style="background-image: url('/images/auth-bg.jpg'); background-size: cover; background-position: center; background-color: #065f46;">
-      <div class="absolute inset-0 bg-emerald-900/30 backdrop-blur-sm"></div>
-      <div class="relative z-10 flex h-full flex-col items-center justify-center p-12 text-white">
-        <NuxtLink to="/" class="mb-8 flex items-center gap-3">
-          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-white backdrop-blur">
-            <UIcon name="i-ph-storefront" class="h-6 w-6" />
-          </span>
-          <span class="text-3xl font-extrabold">EcoMart</span>
-        </NuxtLink>
-        <p class="max-w-xs text-center text-lg leading-relaxed text-emerald-50/90">
-          Siêu thị xanh — sản phẩm tươi sạch mỗi ngày cho gia đình bạn
-        </p>
-      </div>
-    </div>
+  <div class="relative flex min-h-screen items-center justify-center overflow-hidden p-4" style="background-image: url('/images/auth-bg.jpg'); background-size: cover; background-position: center; background-color: #065f46;">
+    <div class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-emerald-400/30 blur-3xl" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-primary-300/30 blur-3xl" aria-hidden="true"></div>
 
-    <div class="flex w-full items-center justify-center bg-emerald-50/30 p-4 lg:w-1/2 lg:bg-white">
-      <div class="w-full max-w-md">
-        <NuxtLink to="/" class="mb-8 flex items-center justify-center gap-2 lg:hidden">
-          <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-700 text-white">
-            <UIcon name="i-ph-storefront" class="h-5 w-5" />
-          </span>
-          <span class="text-2xl font-extrabold text-emerald-800">EcoMart</span>
-        </NuxtLink>
+    <div class="relative z-10 w-full max-w-md rounded-2xl bg-white/90 p-8 shadow-2xl shadow-emerald-950/40 backdrop-blur-lg sm:p-10">
+      <h1 class="text-2xl font-extrabold text-gray-800">Đăng nhập</h1>
+      <p class="mt-1 text-sm text-gray-500">Chào mừng bạn quay trở lại</p>
 
-        <div class="rounded-2xl border border-emerald-100/60 bg-white/80 p-8 shadow-xl shadow-emerald-900/5 backdrop-blur-sm sm:p-10">
-          <h1 class="text-2xl font-extrabold text-gray-800">Đăng nhập</h1>
-          <p class="mt-1 text-sm text-gray-500">Chào mừng bạn quay trở lại</p>
-
-          <form class="mt-6 space-y-5" @submit.prevent="submit">
-            <div>
-              <UInput v-model="form.identifier" placeholder="Tên đăng nhập hoặc email" icon="i-ph-user" size="lg" :trailing-icon="errors.identifier ? 'i-ph-warning-circle' : undefined" />
-              <p v-if="errors.identifier" class="mt-1 text-xs text-red-600">{{ errors.identifier }}</p>
-            </div>
-            <div>
-              <UInput
-                v-model="form.password"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="Mật khẩu"
-                icon="i-ph-lock"
-                size="lg"
-                :ui="{ trailing: 'pe-1' }"
-              >
-                <template #trailing>
-                  <UButton
-                    color="neutral"
-                    variant="link"
-                    size="sm"
-                    :icon="showPassword ? 'i-ph-eye-slash' : 'i-ph-eye'"
-                    :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-                    :aria-pressed="showPassword"
-                    @click="showPassword = !showPassword"
-                  />
-                </template>
-              </UInput>
-              <p v-if="errors.password" class="mt-1 text-xs text-red-600">{{ errors.password }}</p>
-            </div>
-            <UButton type="submit" color="primary" size="lg" block :loading="loading" label="Đăng nhập" />
-          </form>
-
-          <p class="mt-6 text-center text-sm text-gray-500">
-            Chưa có tài khoản?
-            <NuxtLink to="/register" class="font-semibold text-emerald-700 hover:underline">Đăng ký</NuxtLink>
-          </p>
+      <form class="mt-8 space-y-5" @submit.prevent="submit">
+        <div>
+          <UInput v-model="form.identifier" placeholder="Tên đăng nhập hoặc email" icon="i-ph-user" size="lg" :trailing-icon="errors.identifier ? 'i-ph-warning-circle' : undefined" />
+          <p v-if="errors.identifier" class="mt-1 text-xs text-red-600">{{ errors.identifier }}</p>
         </div>
-      </div>
+        <div>
+          <UInput
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="Mật khẩu"
+            icon="i-ph-lock"
+            size="lg"
+            :ui="{ trailing: 'pe-1' }"
+          >
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="link"
+                size="sm"
+                :icon="showPassword ? 'i-ph-eye-slash' : 'i-ph-eye'"
+                :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+                :aria-pressed="showPassword"
+                @click="showPassword = !showPassword"
+              />
+            </template>
+          </UInput>
+          <p v-if="errors.password" class="mt-1 text-xs text-red-600">{{ errors.password }}</p>
+        </div>
+        <UButton type="submit" color="primary" size="lg" block :loading="loading" label="Đăng nhập" class="mt-2" />
+      </form>
+
+      <p class="mt-6 text-center text-sm text-gray-500">
+        Chưa có tài khoản?
+        <NuxtLink to="/register" class="font-semibold text-emerald-700 hover:underline">Đăng ký</NuxtLink>
+      </p>
     </div>
   </div>
 </template>
