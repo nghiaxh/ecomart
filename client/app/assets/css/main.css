@@ -45,6 +45,11 @@ html {
   opacity: 0;
 }
 
+/* Hide native password reveal button (Edge) since we provide our own toggle */
+::-ms-reveal {
+  display: none;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
