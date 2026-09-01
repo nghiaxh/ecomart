@@ -28,7 +28,7 @@ app:
   jwt:
     secret: ${JWT_SECRET:ecomart-jwt-secret-change-me-in-production}
     expiration-ms: ${JWT_EXPIRATION:86400000}
-  client-url: ${CLIENT_URL:http://localhost:3000}
+  client-url: ${CLIENT_URL:http://localhost:5173}
   upload-dir: ${UPLOAD_DIR:./uploads}
 
 google:
@@ -42,5 +42,5 @@ payos:
   client-id: ${PAYOS_CLIENT_ID:}
   api-key: ${PAYOS_API_KEY:}
   checksum-key: ${PAYOS_CHECKSUM_KEY:}
-  return-url: ${PAYOS_RETURN_URL:http://localhost:3000/orders}
-  cancel-url: ${PAYOS_CANCEL_URL:http://localhost:3000/cart}
+  return-url: ${PAYOS_RETURN_URL:http://localhost:5173/orders}
+  cancel-url: ${PAYOS_CANCEL_URL:http://localhost:5173/cart}
