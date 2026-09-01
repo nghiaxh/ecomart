@@ -31,6 +31,4 @@ public class OrderItem {
 
     @Column(nullable = false)
     private double unitPrice;
-
-    private double unitCo2Saved;
 }

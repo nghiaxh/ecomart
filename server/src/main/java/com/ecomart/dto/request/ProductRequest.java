@@ -13,9 +13,6 @@ public class ProductRequest {
     public String description;
     @NotNull @Positive public Double price;
     @NotNull @PositiveOrZero public Integer stock;
-    public Double carbonIndex;
-    public Double baselineCarbonIndex;
-    public Double ecoPointsPerUnit;
     public Double weight;
     public String origin;
     @NotNull public Long categoryId;

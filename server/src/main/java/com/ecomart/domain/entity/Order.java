@@ -47,8 +47,6 @@ public class Order {
     @Column(nullable = false)
     private double total;
 
-    private int ecoPointsEarned;
-
     private String notes;
 
     @Column(nullable = false, updatable = false)

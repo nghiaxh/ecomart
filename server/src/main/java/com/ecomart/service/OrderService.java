@@ -84,13 +84,9 @@ public class OrderService {
         }
 
         double subtotal = 0;
-        int totalEcoPoints = 0;
-        double totalCo2Saved = 0;
         for (CartItem ci : cart.getItems()) {
             Product p = ci.getProduct();
             subtotal += p.getPrice() * ci.getQuantity();
-            totalEcoPoints += (int) Math.round(p.getEcoPointsPerUnit() * ci.getQuantity());
-            totalCo2Saved += Math.max(0, p.getBaselineCarbonIndex() - p.getCarbonIndex()) * ci.getQuantity();
         }
 
         Order order = new Order();
@@ -102,7 +98,6 @@ public class OrderService {
         order.setSubtotal(subtotal);
         order.setShippingFee(SHIPPING_FEE);
         order.setTotal(subtotal + SHIPPING_FEE);
-        order.setEcoPointsEarned(totalEcoPoints);
         order.setNotes(request.notes());
         order = orderRepository.save(order);
 
@@ -116,7 +111,6 @@ public class OrderService {
             oi.setProductNameSnapshot(p.getName());
             oi.setQuantity(ci.getQuantity());
             oi.setUnitPrice(p.getPrice());
-            oi.setUnitCo2Saved(Math.max(0, p.getBaselineCarbonIndex() - p.getCarbonIndex()));
             orderItemRepository.save(oi);
             items.add(oi);
 
@@ -147,9 +141,6 @@ public class OrderService {
                 orderRepository.save(order);
                 throw new BadRequestException("Không thể tạo thanh toán PayOS, vui lòng thử lại hoặc chọn COD");
             }
-        } else {
-            // COD: award eco points immediately on order placement.
-            awardEcoPoints(customer, order);
         }
 
         cartItemRepository.deleteByCartId(cart.getId());
@@ -180,8 +171,7 @@ public class OrderService {
     public PageResponse<OrderResponse> allOrders(String status, Pageable pageable) {
         Page<Order> page;
         if (status != null && !status.isBlank()) {
-            page = orderRepository.findAll((root, query, cb) ->
-                    cb.equal(root.get("status"), OrderStatus.valueOf(status)), pageable);
+            page = orderRepository.findByStatus(OrderStatus.valueOf(status), pageable);
         } else {
             page = orderRepository.findAll(pageable);
         }
@@ -196,9 +186,6 @@ public class OrderService {
         order.setStatus(newStatus);
         orderRepository.save(order);
 
-        if (newStatus == OrderStatus.COMPLETED && order.getPayment().getStatus() != PaymentStatus.PAID) {
-            awardEcoPoints(order.getCustomer(), order);
-        }
         return Mapper.toOrder(order);
     }
 
@@ -211,23 +198,12 @@ public class OrderService {
             payment.setStatus(PaymentStatus.PAID);
             payment.setPaidAt(java.time.Instant.now());
             paymentRepository.save(payment);
-            awardEcoPoints(order.getCustomer(), order);
             notificationService.send(order.getCustomer(),
                     "Thanh toán đơn hàng #" + order.getId() + " thành công",
                     "Cảm ơn bạn! Thanh toán cho đơn hàng đã được hoàn tất.",
                     NotificationType.ORDER, String.valueOf(order.getId()));
         }
         return Mapper.toOrder(order);
-    }
-
-    private void awardEcoPoints(Customer customer, Order order) {
-        if (order.getEcoPointsEarned() <= 0) {
-            return;
-        }
-        customer.setEcoPoints(customer.getEcoPoints() + order.getEcoPointsEarned());
-        customer.setTotalCo2Saved(customer.getTotalCo2Saved()
-                + order.getItems().stream().mapToDouble(OrderItem::getUnitCo2Saved).sum());
-        customerRepository.save(customer);
     }
 
     private PaymentMethod parseMethod(String value) {

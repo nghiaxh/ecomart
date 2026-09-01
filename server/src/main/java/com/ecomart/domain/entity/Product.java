@@ -39,12 +39,6 @@ public class Product {
     @Column(nullable = false)
     private int stock;
 
-    private double carbonIndex;
-
-    private double baselineCarbonIndex;
-
-    private double ecoPointsPerUnit;
-
     private double weight;
 
     private String origin;

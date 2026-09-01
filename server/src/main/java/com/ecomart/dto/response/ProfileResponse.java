@@ -11,8 +11,6 @@ public record ProfileResponse(
         String numberPhone,
         String avatarUrl,
         UserRole role,
-        Instant createdAt,
-        Integer ecoPoints,
-        Double totalCo2Saved
+        Instant createdAt
 ) {
 }

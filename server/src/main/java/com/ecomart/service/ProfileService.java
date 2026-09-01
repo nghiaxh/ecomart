@@ -2,7 +2,6 @@ package com.ecomart.service;
 
 import com.ecomart.common.Mapper;
 import com.ecomart.common.SecurityUtils;
-import com.ecomart.domain.entity.Customer;
 import com.ecomart.domain.entity.User;
 import com.ecomart.dto.request.ProfileUpdateRequest;
 import com.ecomart.dto.response.ProfileResponse;
@@ -28,14 +27,7 @@ public class ProfileService {
 
     public ProfileResponse getProfile() {
         User user = securityUtils.currentUser();
-        Integer ecoPoints = null;
-        Double totalCo2 = null;
-        if (user.getRole().name().equals("CUSTOMER")) {
-            Customer customer = (Customer) user;
-            ecoPoints = customer.getEcoPoints();
-            totalCo2 = customer.getTotalCo2Saved();
-        }
-        return Mapper.toProfile(user, ecoPoints, totalCo2);
+        return Mapper.toProfile(user);
     }
 
     @Transactional

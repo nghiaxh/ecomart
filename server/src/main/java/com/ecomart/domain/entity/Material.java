@@ -18,8 +18,6 @@ public class Material {
     @Column(nullable = false, unique = true)
     private String name;
 
-    private double emissionIndex;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MaterialType type;

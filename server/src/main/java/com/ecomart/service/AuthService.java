@@ -9,7 +9,6 @@ import com.ecomart.domain.entity.*;
 import com.ecomart.domain.enums.ChatRole;
 import com.ecomart.domain.enums.MaterialType;
 import com.ecomart.domain.enums.NotificationType;
-import com.ecomart.domain.enums.PointTransactionType;
 import com.ecomart.domain.enums.UserRole;
 import com.ecomart.dto.request.*;
 import com.ecomart.dto.response.*;
@@ -42,7 +41,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
     private final CartRepository cartRepository;
-    private final EcoWalletRepository walletRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
@@ -50,14 +48,12 @@ public class AuthService {
     public AuthService(UserRepository userRepository,
                        CustomerRepository customerRepository,
                        CartRepository cartRepository,
-                       EcoWalletRepository walletRepository,
                        PasswordEncoder passwordEncoder,
                        JwtTokenProvider jwtTokenProvider,
                        AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
         this.cartRepository = cartRepository;
-        this.walletRepository = walletRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
@@ -86,10 +82,6 @@ public class AuthService {
         cart = cartRepository.save(cart);
         customer.setCart(cart);
         customerRepository.save(customer);
-
-        EcoWallet wallet = new EcoWallet();
-        wallet.setCustomer(customer);
-        walletRepository.save(wallet);
 
         String token = jwtTokenProvider.generateToken(customer.getId(), customer.getRole().name());
         return Mapper.toAuth(customer, token);

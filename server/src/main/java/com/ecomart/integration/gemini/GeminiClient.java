@@ -34,15 +34,15 @@ public class GeminiClient {
     public String chat(String userMessage) {
         if (properties.apiKey() == null || properties.apiKey().isBlank()) {
             return "Cảm ơn bạn đã hỏi về EcoMart! Hiện tại trợ lý AI chưa được kích hoạt. "
-                    + "Bạn có thể khám phá các sản phẩm xanh trong siêu thị của chúng tôi.";
+                    + "Bạn có thể khám phá các sản phẩm trong siêu thị của chúng tôi.";
         }
         try {
             Map<String, Object> content = Map.of(
                     "contents", List.of(Map.of(
                             "role", "user",
                             "parts", List.of(Map.of("text",
-                                    "Bạn là trợ lý của EcoMart, một siêu thị xanh Việt Nam. "
-                                            + "Trả lời ngắn gọn, thân thiện bằng tiếng Việt về sản phẩm thân thiện môi trường. "
+                                    "Bạn là trợ lý của EcoMart, một siêu thị trực tuyến Việt Nam. "
+                                            + "Trả lời ngắn gọn, thân thiện bằng tiếng Việt về sản phẩm, khuyến mãi và đặt hàng. "
                                             + "Câu hỏi: " + userMessage)))));
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

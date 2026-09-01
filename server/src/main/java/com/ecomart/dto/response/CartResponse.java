@@ -5,7 +5,6 @@ import java.util.List;
 public record CartResponse(
         List<CartItemResponse> items,
         double subtotal,
-        double totalCo2Saved,
         int itemCount
 ) {
     public record CartItemResponse(
@@ -15,7 +14,6 @@ public record CartResponse(
             String imageUrl,
             double price,
             int quantity,
-            double co2SavedPerUnit,
             int stock
     ) {}
 }

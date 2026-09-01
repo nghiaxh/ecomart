@@ -16,9 +16,9 @@ public final class Mapper {
                 user.getNumberPhone(), user.getAvatarUrl(), user.getRole());
     }
 
-    public static ProfileResponse toProfile(User user, Integer ecoPoints, Double totalCo2Saved) {
+    public static ProfileResponse toProfile(User user) {
         return new ProfileResponse(user.getId(), user.getUsername(), user.getEmail(), user.getNumberPhone(),
-                user.getAvatarUrl(), user.getRole(), user.getCreatedAt(), ecoPoints, totalCo2Saved);
+                user.getAvatarUrl(), user.getRole(), user.getCreatedAt());
     }
 
     public static ProductResponse toProduct(Product p) {
@@ -35,11 +35,8 @@ public final class Mapper {
                         pm.getMaterial().getType() == null ? null : pm.getMaterial().getType().name()))
                 .toList();
 
-        double co2Saved = Math.max(0, p.getBaselineCarbonIndex() - p.getCarbonIndex());
-
         return new ProductResponse(p.getId(), p.getName(), p.getSlug(), p.getDescription(), p.getPrice(),
-                p.getStock(), p.getCarbonIndex(), p.getBaselineCarbonIndex(), co2Saved, p.getEcoPointsPerUnit(),
-                p.getWeight(), p.getOrigin(),
+                p.getStock(), p.getWeight(), p.getOrigin(),
                 p.getCategory() == null ? null : p.getCategory().getId(),
                 p.getCategory() == null ? null : p.getCategory().getName(),
                 p.getCategory() == null ? null : p.getCategory().getSlug(),
@@ -61,16 +58,14 @@ public final class Mapper {
                     .findFirst()
                     .map(ProductImage::getUrl)
                     .orElse(p.getImages().stream().findFirst().map(ProductImage::getUrl).orElse(null));
-            double co2Saved = Math.max(0, p.getBaselineCarbonIndex() - p.getCarbonIndex());
             return new CartResponse.CartItemResponse(p.getId(), p.getName(), p.getSlug(), image, p.getPrice(),
-                    ci.getQuantity(), co2Saved, p.getStock());
+                    ci.getQuantity(), p.getStock());
         }).toList();
 
         double subtotal = items.stream().mapToDouble(i -> i.price() * i.quantity()).sum();
-        double totalCo2Saved = items.stream().mapToDouble(i -> i.co2SavedPerUnit() * i.quantity()).sum();
         int itemCount = items.stream().mapToInt(CartResponse.CartItemResponse::quantity).sum();
 
-        return new CartResponse(items, subtotal, totalCo2Saved, itemCount);
+        return new CartResponse(items, subtotal, itemCount);
     }
 
     public static AddressResponse toAddress(Address a) {
@@ -92,11 +87,11 @@ public final class Mapper {
                             .map(ProductImage::getUrl)
                             .orElse(null);
             return new OrderResponse.OrderItemResponse(oi.getProduct() == null ? null : oi.getProduct().getId(),
-                    oi.getProductNameSnapshot(), image, oi.getUnitPrice(), oi.getQuantity(), oi.getUnitCo2Saved());
+                    oi.getProductNameSnapshot(), image, oi.getUnitPrice(), oi.getQuantity());
         }).toList();
 
         return new OrderResponse(o.getId(), o.getReceiverName(), o.getReceiverPhone(), o.getAddress(), o.getStatus(),
-                o.getSubtotal(), o.getShippingFee(), o.getTotal(), o.getEcoPointsEarned(), o.getNotes(),
+                o.getSubtotal(), o.getShippingFee(), o.getTotal(), o.getNotes(),
                 o.getCreatedAt(), payResp, items);
     }
 

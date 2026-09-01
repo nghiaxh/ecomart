@@ -16,7 +16,6 @@ public record OrderResponse(
         double subtotal,
         double shippingFee,
         double total,
-        int ecoPointsEarned,
         String notes,
         Instant createdAt,
         PaymentResponse payment,
@@ -35,7 +34,6 @@ public record OrderResponse(
             String productName,
             String imageUrl,
             double unitPrice,
-            int quantity,
-            double unitCo2Saved
+            int quantity
     ) {}
 }

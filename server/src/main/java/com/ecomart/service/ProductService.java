@@ -130,9 +130,6 @@ public class ProductService {
         product.setDescription(req.description);
         product.setPrice(req.price);
         product.setStock(req.stock);
-        product.setCarbonIndex(req.carbonIndex == null ? 0 : req.carbonIndex);
-        product.setBaselineCarbonIndex(req.baselineCarbonIndex == null ? 0 : req.baselineCarbonIndex);
-        product.setEcoPointsPerUnit(req.ecoPointsPerUnit == null ? 0 : req.ecoPointsPerUnit);
         product.setWeight(req.weight == null ? 0 : req.weight);
         product.setOrigin(req.origin);
         product.setCategory(category);
