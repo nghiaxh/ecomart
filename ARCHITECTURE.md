@@ -67,11 +67,12 @@ Luồng checkout (`pages/checkout.vue`):
 Trạng thái đơn hàng: `PENDING → CONFIRMED → SHIPPING → COMPLETED | CANCELLED`.
 Trạng thái thanh toán: `PENDING | PAID | FAILED | CANCELLED`.
 
-### 5. Chat AI (Gemini)
+### 5. Chat hỗ trợ (từ khóa + RAG đơn giản)
 
 - `GET /api/chat/sessions` - lấy các phiên hội thoại của user.
-- `POST /api/chat/send` - gửi tin nhắn, `GeminiClient` (`integration/gemini/`) gọi Google Generative Language API.
-- Gemini là **non-RAG**: không có retrieval; chỉ truyền prompt hệ thống + câu hỏi. Nếu thiếu `GEMINI_API_KEY`, trả về câu trả lời mặc định tiếng Việt.
+- `POST /api/chat/send` - gửi tin nhắn, `ChatService` xử lý nội bộ (không gọi API ngoài):
+  - Nhận diện **ý định** theo từ khóa chuẩn hóa (giá/khuyến mãi, giao hàng, đổi trả, thanh toán, liên hệ, tài khoản...).
+  - **RAG đơn giản**: nếu câu hỏi khớp từ khóa sản phẩm/danh mục thì truy vấn `ProductRepository` lấy sản phẩm đang bán, liệt kê tên + giá vào câu trả lời.
 - Tin nhắn lưu DB qua `ChatSession` + `ChatMessage`.
 
 ### 6. Thông báo
@@ -95,9 +96,8 @@ dto/
   response/  payloads ra (AuthResponse, ProductResponse, OrderResponse, ...)
 security/    JwtTokenProvider, JwtAuthenticationFilter, SecurityConfig, CorsConfig
 integration/
-  gemini/    GeminiClient - chat AI
   payos/     PayOSClient - thanh toán QR
-config/      AppConfig, DataSeeder, properties (Jwt/Gemini/PayOS), security/filter bean
+config/      AppConfig, DataSeeder, properties (Jwt/PayOS), security/filter bean
 common/      Mapper (entity ↔ DTO), exception handling
 exception/   xử lý lỗi API
 ```
@@ -132,7 +132,6 @@ Mọi bí mật nằm trong **một file `.env` duy nhất ở root** (được 
 |--------------|---------|
 | `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | kết nối Postgres (docker-compose truyền dạng này) |
 | `JWT_SECRET` / `JWT_EXPIRATION` | ký/giới hạn JWT |
-| `GEMINI_API_KEY` | bật chat AI (để trống → fallback) |
 | `PAYOS_CLIENT_ID` / `PAYOS_API_KEY` / `PAYOS_CHECKSUM_KEY` | thanh toán QR |
 | `GOOGLE_CLIENT_ID` | Google OAuth |
 | `UPLOAD_DIR` | thư mục lưu ảnh upload |

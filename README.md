@@ -19,7 +19,7 @@ Nền tảng mua sắm thực phẩm trực tuyến — sản phẩm tươi sạ
 - Chi tiết sản phẩm với đánh giá từ người dùng
 - Giỏ hàng & thanh toán: **PayOS QR** hoặc **COD**
 - Lịch sử đơn hàng, theo dõi & hủy đơn
-- **Chat AI** (Google Gemini) hỗ trợ tư vấn mua sắm
+- **Chat hỗ trợ** (từ khóa + RAG nội bộ) tư vấn mua sắm
 - Hệ thống thông báo
 
 ### Quản trị
@@ -56,7 +56,7 @@ Xem chi tiết luồng dữ liệu, xác thực JWT, thanh toán,... tại **[AR
 cp .env.example .env
 ```
 
-Điền giá trị thực vào `.env`: `JWT_SECRET`, `GEMINI_API_KEY`, `PAYOS_*`, `GOOGLE_CLIENT_ID`.
+Điền giá trị thực vào `.env`: `JWT_SECRET`, `PAYOS_*`, `GOOGLE_CLIENT_ID`.
 
 ### 2. Chạy toàn bộ hệ thống (Docker)
 
@@ -99,5 +99,5 @@ mvn package
 | Client | Nuxt 3, Nuxt UI, Vue 3, TypeScript, Zod, Tailwind CSS |
 | Server | Spring Boot 3.5, Spring Security (JWT), Spring Data JPA, Lombok |
 | Database | PostgreSQL 18 |
-| Tích hợp | Google Gemini (chat), PayOS (thanh toán QR), Google OAuth |
+| Tích hợp | Chat từ khóa + RAG nội bộ, PayOS (thanh toán QR), Google OAuth |
 | Hạ tầng | Docker Compose |

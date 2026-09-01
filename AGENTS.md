@@ -12,7 +12,7 @@ Eco-friendly supermarket (siêu thị xanh). Client-server monorepo — there is
 
 - **Auth is hand-rolled, no Nuxt auth module.** JWT lives in `localStorage` as `ecomart_session` + `ecomart_token`. `useAuth()` persists/restores it; every API call goes through the `useApi()` composable (`client/composables/useApi.ts`) which attaches the `Authorization: Bearer` header. Route guards: `middleware/auth.ts` (any logged-in) and `middleware/admin.ts` (ADMIN only).
 - **Client types live in two places, keep both in sync with backend DTOs**: `client/types/index.ts` (TS interfaces mirroring backend responses) and `client/schemas/index.ts` (Zod validation schemas).
-- **Server package layout**: controller → service per resource, 15 controllers each under `/api/...`. `integration/` holds Gemini and PayOS clients. `security/` is JWT + CORS config.
+- **Server package layout**: controller → service per resource, 15 controllers each under `/api/...`. `integration/` holds PayOS client (chat runs in-process — keyword + simple RAG over `ProductRepository`). `security/` is JWT + CORS config.
 - **No DB migrations.** JPA `ddl-auto: update` in `server/src/main/resources/application.yml` — schema changes apply automatically on boot. Env vars fall back to localhost dev defaults via `${VAR:default}`.
 - **Uploads** go to `UPLOAD_DIR` (server) via `UploadController`; in Docker it's the `uploads` volume.
 
@@ -33,6 +33,6 @@ Must run inside `client/` or `server/` (no workspace root scripts).
 
 ## Gotchas
 
-- **`.env` is required** and holds all secrets (JWT secret, Gemini, PayOS, Google OAuth). Copy `.env.example` → `.env` to bootstrap. There is **no `.gitignore` yet** — don't let `.env` get committed.
+- **`.env` is required** and holds all secrets (JWT secret, PayOS, Google OAuth). Copy `.env.example` → `.env` to bootstrap. There is **no `.gitignore` yet** — don't let `.env` get committed.
 - UI is Vietnamese (`lang: vi`); keep new UI text and Zod messages in Vietnamese.
 - Lombok is used — build under JDK 25 and ensure annotation processing is enabled in the IDE.
