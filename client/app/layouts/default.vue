@@ -21,17 +21,17 @@ const userMenu = computed(() => {
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <header class="sticky top-0 z-40 border-b border-green-100/70 bg-white/90 backdrop-blur">
+    <header class="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/90 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <NuxtLink to="/" class="flex items-center gap-2">
-          <span class="grid h-9 w-9 place-items-center rounded-xl bg-green-600 text-white">
+          <span class="grid h-9 w-9 place-items-center rounded-xl bg-emerald-600 text-white">
             <UIcon name="i-ph-storefront" class="h-5 w-5" />
           </span>
-          <span class="text-xl font-extrabold tracking-tight text-green-800">EcoMart</span>
+          <span class="text-xl font-extrabold tracking-tight text-emerald-800">EcoMart</span>
         </NuxtLink>
 
         <nav class="hidden items-center gap-8 md:flex">
-          <NuxtLink v-for="link in links" :key="link.to" :to="link.to" class="text-sm font-medium text-gray-600 transition hover:text-green-700">
+          <NuxtLink v-for="link in links" :key="link.to" :to="link.to" class="text-sm font-medium text-gray-600 transition hover:text-emerald-700">
             {{ link.label }}
           </NuxtLink>
         </nav>
@@ -48,7 +48,7 @@ const userMenu = computed(() => {
             class="relative"
           >
             <UIcon name="i-ph-shopping-cart" class="h-5 w-5" />
-            <span v-if="cart.itemCount > 0" class="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-green-600 px-1 text-[10px] font-bold text-white">
+            <span v-if="cart.itemCount > 0" class="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold text-white">
               {{ cart.itemCount }}
             </span>
           </UButton>

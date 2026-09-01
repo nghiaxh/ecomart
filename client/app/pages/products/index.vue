@@ -125,7 +125,7 @@ watch(() => filters.q, debouncedApply)
     </div>
 
     <!-- Filters -->
-    <div class="mb-8 grid gap-3 rounded-2xl border border-green-100 bg-white p-4 md:grid-cols-5">
+    <div class="mb-8 grid gap-3 rounded-2xl border border-emerald-100 bg-white p-4 md:grid-cols-5">
       <UInput v-model="filters.q" icon="i-ph-magnifying-glass" placeholder="Tìm sản phẩm..." />
       <UInput v-model="filters.minPrice" type="number" placeholder="Giá tối thiểu (₫)" class="md:col-span-1" />
       <UInput v-model="filters.maxPrice" type="number" placeholder="Giá tối đa (₫)" class="md:col-span-1" />

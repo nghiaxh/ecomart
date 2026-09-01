@@ -19,7 +19,7 @@ onMounted(async () => {
 
 const cards = computed(() => [
   { label: 'Sản phẩm', value: stats.value?.productCount ?? 0, icon: 'i-ph-shopping-bag', color: 'text-blue-600' },
-  { label: 'Khách hàng', value: stats.value?.customerCount ?? 0, icon: 'i-ph-users', color: 'text-green-600' },
+  { label: 'Khách hàng', value: stats.value?.customerCount ?? 0, icon: 'i-ph-users', color: 'text-emerald-600' },
   { label: 'Đơn hàng', value: stats.value?.orderCount ?? 0, icon: 'i-ph-receipt', color: 'text-orange-600' },
   { label: 'Doanh thu', value: stats.value ? formatVND(stats.value.revenue) : '0', icon: 'i-ph-money', color: 'text-purple-600' }
 ])
@@ -41,22 +41,22 @@ const cards = computed(() => [
     </div>
 
     <div class="mt-8 grid gap-4 lg:grid-cols-2">
-      <NuxtLink to="/admin/orders" class="rounded-2xl border border-green-100 bg-gradient-to-br from-green-50 to-white p-6 transition hover:shadow-md">
+      <NuxtLink to="/admin/orders" class="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-6 transition hover:shadow-md">
         <div class="flex items-center justify-between">
           <div>
             <h3 class="font-bold text-gray-800">Quản lý đơn hàng</h3>
             <p class="mt-1 text-sm text-gray-500">Cập nhật trạng thái và xác nhận thanh toán</p>
           </div>
-          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-green-600 text-white"><UIcon name="i-ph-arrow-right" class="h-6 w-6" /></span>
+          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-600 text-white"><UIcon name="i-ph-arrow-right" class="h-6 w-6" /></span>
         </div>
       </NuxtLink>
-      <NuxtLink to="/admin/products" class="rounded-2xl border border-green-100 bg-gradient-to-br from-green-50 to-white p-6 transition hover:shadow-md">
+      <NuxtLink to="/admin/products" class="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-6 transition hover:shadow-md">
         <div class="flex items-center justify-between">
           <div>
             <h3 class="font-bold text-gray-800">Quản lý sản phẩm</h3>
             <p class="mt-1 text-sm text-gray-500">Thêm, sửa sản phẩm và chuyển bật/tắt</p>
           </div>
-          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-green-600 text-white"><UIcon name="i-ph-arrow-right" class="h-6 w-6" /></span>
+          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-600 text-white"><UIcon name="i-ph-arrow-right" class="h-6 w-6" /></span>
         </div>
       </NuxtLink>
     </div>

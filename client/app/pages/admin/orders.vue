@@ -73,7 +73,7 @@ watch(statusFilter, () => { page.value = 0; load() })
             <p class="mt-1 text-xs text-gray-500">{{ o.address }}</p>
           </div>
           <div class="flex flex-col items-end gap-2">
-            <span class="text-lg font-bold text-green-700">{{ formatVND(o.total) }}</span>
+            <span class="text-lg font-bold text-emerald-700">{{ formatVND(o.total) }}</span>
             <div class="flex gap-2">
               <USelect
                 :model-value="o.status"

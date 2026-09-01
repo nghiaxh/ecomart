@@ -1,6 +1,10 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: {
+    enabled: true,
+    componentInspector: true,
+    launchEditor: 'code'
+  },
   modules: ['@nuxt/ui', '@vueuse/nuxt'],
 
   css: ['~/assets/css/main.css'],
@@ -14,7 +18,7 @@ export default defineNuxtConfig({
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'EcoMart, siêu thị thực phẩm trực tuyến với sản phẩm đa dạng và tươi sạch.' },
-        { name: 'theme-color', content: '#16a34a' }
+        { name: 'theme-color', content: '#059669' }
       ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

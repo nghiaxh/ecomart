@@ -117,7 +117,7 @@ watch(search, debouncedLoad)
       <UButton color="primary" icon="i-ph-plus" label="Thêm sản phẩm" @click="openCreate" />
     </div>
 
-    <div v-if="showForm" class="mb-6 rounded-2xl border border-green-100 bg-white p-6">
+    <div v-if="showForm" class="mb-6 rounded-2xl border border-emerald-100 bg-white p-6">
       <h2 class="mb-4 font-bold text-gray-800">{{ editingId ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h2>
       <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
         <div class="md:col-span-1">

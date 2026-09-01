@@ -34,9 +34,10 @@ const stats = [
 <template>
   <div>
     <!-- Hero -->
-    <section class="relative overflow-hidden bg-gradient-to-br from-green-700 via-green-600 to-green-500">
+    <section class="relative min-h-[520px] overflow-hidden" style="background-image: url('/images/hero-bg.jpg'); background-size: cover; background-position: center; background-color: #065f46;">
+      <div class="absolute inset-0 bg-emerald-900/40 backdrop-blur-sm"></div>
       <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 30%, white 1px, transparent 1px); background-size: 24px 24px"></div>
-      <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
+      <div class="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
         <div class="max-w-2xl">
           <p class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white backdrop-blur">
             <UIcon name="i-ph-storefront" class="h-4 w-4" />
@@ -45,11 +46,11 @@ const stats = [
           <h1 class="text-balance text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
             Mua sắm tiện lợi mỗi ngày
           </h1>
-          <p class="mt-5 max-w-xl text-lg leading-relaxed text-green-50">
+          <p class="mt-5 max-w-xl text-lg leading-relaxed text-emerald-50">
             EcoMart mang đến rau củ, trái cây, thực phẩm tươi sạch và đầy đủ cho mọi bữa ăn của gia đình bạn.
           </p>
           <div class="mt-8 flex flex-wrap gap-3">
-            <UButton to="/products" color="neutral" size="lg" class="bg-white! text-green-700!" icon="i-ph-shopping-bag">
+            <UButton to="/products" color="neutral" size="lg" class="bg-white! text-emerald-700!" icon="i-ph-shopping-bag">
               Mua sắm ngay
             </UButton>
             <UButton to="/chat" color="primary" variant="outline" size="lg" class="border-white/40! bg-transparent! text-white!" icon="i-ph-chats-circle">
@@ -61,10 +62,10 @@ const stats = [
     </section>
 
     <!-- Stats -->
-    <section class="border-b border-green-100 bg-white">
-      <div class="mx-auto grid max-w-7xl grid-cols-3 divide-x divide-green-50 px-4 py-8 sm:px-6">
+    <section class="border-b border-emerald-100 bg-white">
+      <div class="mx-auto grid max-w-7xl grid-cols-3 divide-x divide-emerald-50 px-4 py-8 sm:px-6">
         <div v-for="s in stats" :key="s.label" class="px-4 text-center sm:px-8">
-          <p class="text-2xl font-extrabold text-green-700 sm:text-3xl">{{ s.value }}</p>
+          <p class="text-2xl font-extrabold text-emerald-700 sm:text-3xl">{{ s.value }}</p>
           <p class="mt-1 text-xs text-gray-500 sm:text-sm">{{ s.label }}</p>
         </div>
       </div>
@@ -100,19 +101,19 @@ const stats = [
           v-for="c in categories"
           :key="c.id"
           :to="`/products?category=${c.slug}`"
-          class="group rounded-2xl border border-green-100 bg-white p-5 transition hover:border-green-300 hover:shadow-md"
+          class="group rounded-2xl border border-emerald-100 bg-white p-5 transition hover:border-emerald-300 hover:shadow-md"
         >
-          <span class="grid h-11 w-11 place-items-center rounded-xl bg-green-50 text-green-600 transition group-hover:bg-green-600 group-hover:text-white">
+          <span class="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-600 transition group-hover:bg-emerald-600 group-hover:text-white">
             <UIcon :name="c.icon ? `i-ph-${c.icon}` : 'i-ph-tag-simple'" class="h-5 w-5" />
           </span>
-          <h3 class="mt-3 font-semibold text-gray-800 group-hover:text-green-700">{{ c.name }}</h3>
+          <h3 class="mt-3 font-semibold text-gray-800 group-hover:text-emerald-700">{{ c.name }}</h3>
           <p v-if="c.children.length" class="text-xs text-gray-400">{{ c.children.length }} mục</p>
         </NuxtLink>
       </div>
     </section>
 
     <!-- Latest products -->
-    <section class="bg-green-50/40 py-12">
+    <section class="bg-emerald-50/40 py-12">
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
         <div class="mb-6 flex items-center justify-between">
           <h2 class="text-2xl font-extrabold text-gray-800">Sản phẩm mới</h2>
@@ -133,7 +134,7 @@ const stats = [
     <section id="about" class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <div class="grid items-center gap-10 md:grid-cols-2">
         <div>
-          <p class="text-sm font-semibold uppercase tracking-wide text-green-600">Về EcoMart</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">Về EcoMart</p>
           <h2 class="mt-2 text-3xl font-extrabold text-gray-800">Tươi sạch mỗi ngày, giá cả hợp lý</h2>
           <p class="mt-4 leading-relaxed text-gray-500">
             EcoMart cam kết mang đến sản phẩm có nguồn gốc rõ ràng, chất lượng đảm bảo với mức giá phù hợp.
@@ -141,19 +142,19 @@ const stats = [
           </p>
           <ul class="mt-6 space-y-3">
             <li v-for="item in ['Sản phẩm đa dạng, nguồn gốc rõ ràng', 'Giao hàng nhanh, thanh toán linh hoạt', 'Chăm sóc khách hàng tận tâm']" :key="item" class="flex items-center gap-3 text-gray-700">
-              <span class="grid h-6 w-6 place-items-center rounded-full bg-green-100 text-green-700">
+              <span class="grid h-6 w-6 place-items-center rounded-full bg-emerald-100 text-emerald-700">
                 <UIcon name="i-ph-check" class="h-4 w-4" />
               </span>
               <span class="text-sm">{{ item }}</span>
             </li>
           </ul>
         </div>
-        <div class="rounded-2xl bg-green-50 p-8">
+        <div class="rounded-2xl bg-emerald-50 p-8">
           <div class="text-center">
-            <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-green-600 text-white">
+            <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-emerald-600 text-white">
               <UIcon name="i-ph-storefront" class="h-8 w-8" />
             </span>
-            <h3 class="mt-4 text-2xl font-extrabold text-green-700">Mua sắm dễ dàng</h3>
+            <h3 class="mt-4 text-2xl font-extrabold text-emerald-700">Mua sắm dễ dàng</h3>
             <p class="mt-2 text-sm text-gray-500">Chọn sản phẩm, đặt hàng nhanh chóng và nhận tận nơi trên toàn quốc.</p>
             <UButton to="/products" color="primary" label="Bắt đầu mua sắm" class="mt-5" icon="i-ph-shopping-bag" />
           </div>

@@ -81,7 +81,7 @@ onMounted(load)
       <UButton color="primary" icon="i-ph-plus" label="Thêm danh mục" @click="openCreate" />
     </div>
 
-    <div v-if="showForm" class="mb-6 rounded-2xl border border-green-100 bg-white p-6">
+    <div v-if="showForm" class="mb-6 rounded-2xl border border-emerald-100 bg-white p-6">
       <h2 class="mb-4 font-bold text-gray-800">{{ editingId ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}</h2>
       <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
         <div>
@@ -128,7 +128,7 @@ onMounted(load)
             <tr class="border-t border-gray-100">
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
-                  <UIcon v-if="c.icon" :name="`i-ph-${c.icon}`" class="h-4 w-4 text-green-600" />
+                  <UIcon v-if="c.icon" :name="`i-ph-${c.icon}`" class="h-4 w-4 text-emerald-600" />
                   <span class="font-medium text-gray-800">{{ c.name }}</span>
                 </div>
               </td>
@@ -145,7 +145,7 @@ onMounted(load)
             <tr v-for="child in c.children" :key="child.id" class="border-t border-gray-50 bg-gray-50/50">
               <td class="px-4 py-3 pl-8">
                 <span class="flex items-center gap-2 text-gray-700">
-                  <UIcon name="i-ph-corner-down-right" class="h-4 w-4 text-green-500" />
+                  <UIcon name="i-ph-corner-down-right" class="h-4 w-4 text-emerald-500" />
                   {{ child.name }}
                 </span>
               </td>

@@ -39,7 +39,7 @@ onMounted(load)
         v-for="o in orders"
         :key="o.id"
         :to="`/orders/${o.id}`"
-        class="block rounded-2xl border border-green-100 bg-white p-5 transition hover:border-green-300 hover:shadow-md"
+        class="block rounded-2xl border border-emerald-100 bg-white p-5 transition hover:border-emerald-300 hover:shadow-md"
       >
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -47,7 +47,7 @@ onMounted(load)
             <p class="text-sm text-gray-400">{{ formatDate(o.createdAt) }}</p>
           </div>
           <div class="text-right">
-            <p class="font-bold text-green-700">{{ formatVND(o.total) }}</p>
+            <p class="font-bold text-emerald-700">{{ formatVND(o.total) }}</p>
             <div class="mt-1 flex items-center gap-2">
               <UBadge :color="orderStatus[o.status].color" :label="orderStatus[o.status].label" size="sm" />
               <span class="text-xs text-gray-400">{{ paymentStatus[o.payment.status].label }}</span>
@@ -56,13 +56,13 @@ onMounted(load)
         </div>
         <div class="mt-3 flex gap-2 overflow-hidden">
           <img v-for="item in o.items.slice(0, 4)" :key="item.productId" :src="item.imageUrl" :alt="item.productName" class="h-12 w-12 rounded-lg object-cover" />
-          <span v-if="o.items.length > 4" class="grid h-12 w-12 place-items-center rounded-lg bg-green-50 text-xs font-semibold text-green-700">+{{ o.items.length - 4 }}</span>
+          <span v-if="o.items.length > 4" class="grid h-12 w-12 place-items-center rounded-lg bg-emerald-50 text-xs font-semibold text-emerald-700">+{{ o.items.length - 4 }}</span>
         </div>
       </NuxtLink>
     </div>
 
     <div v-else class="py-24 text-center">
-      <UIcon name="i-ph-receipt" class="mx-auto mb-4 h-16 w-16 text-green-200" />
+      <UIcon name="i-ph-receipt" class="mx-auto mb-4 h-16 w-16 text-emerald-200" />
       <p class="text-gray-500">Bạn chưa có đơn hàng nào.</p>
       <UButton to="/products" color="primary" class="mt-4" label="Mua sắm ngay" />
     </div>

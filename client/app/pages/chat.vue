@@ -48,14 +48,14 @@ onMounted(loadSessions)
 
     <div class="grid gap-6 lg:grid-cols-4">
       <!-- Sessions sidebar -->
-      <div class="rounded-2xl border border-green-100 bg-white p-4 lg:col-span-1">
+      <div class="rounded-2xl border border-emerald-100 bg-white p-4 lg:col-span-1">
         <UButton color="primary" size="sm" block icon="i-ph-plus" label="Cuộc trò chuyện mới" @click="newSession" class="mb-3" />
         <div class="space-y-2">
           <button
             v-for="s in sessions"
             :key="s.id"
             class="w-full rounded-xl p-3 text-left transition"
-            :class="currentSessionId === s.id ? 'bg-green-50 ring-1 ring-green-300' : 'hover:bg-gray-50'"
+            :class="currentSessionId === s.id ? 'bg-emerald-50 ring-1 ring-emerald-300' : 'hover:bg-gray-50'"
             @click="currentSessionId = s.id; messages = s.messages"
           >
             <p class="line-clamp-1 text-sm font-medium text-gray-800">{{ s.title }}</p>
@@ -66,7 +66,7 @@ onMounted(loadSessions)
       </div>
 
       <!-- Chat area -->
-      <div class="flex h-[600px] flex-col rounded-2xl border border-green-100 bg-white lg:col-span-3">
+      <div class="flex h-[600px] flex-col rounded-2xl border border-emerald-100 bg-white lg:col-span-3">
         <div class="flex-1 overflow-y-auto p-6 space-y-4">
           <div v-if="!messages.length" class="grid h-full place-items-center text-gray-300">
             <div class="text-center">
@@ -82,14 +82,14 @@ onMounted(loadSessions)
           >
             <div
               class="max-w-[70%] rounded-2xl px-4 py-3"
-              :class="m.role === 'USER' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-800'"
+              :class="m.role === 'USER' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-800'"
             >
               <p class="whitespace-pre-wrap text-sm leading-relaxed">{{ m.content }}</p>
             </div>
           </div>
         </div>
 
-        <div class="border-t border-green-100 p-4">
+        <div class="border-t border-emerald-100 p-4">
           <form class="flex gap-2" @submit.prevent="send">
             <UInput v-model="input" placeholder="Nhập tin nhắn..." class="flex-1" size="lg" />
             <UButton type="submit" color="primary" icon="i-ph-paper-plane-tilt" :disabled="!input.trim()" :loading="sending" />

@@ -18,11 +18,11 @@ const nav = [
   <div class="flex min-h-screen bg-gray-50">
     <aside class="sticky top-0 hidden h-screen w-64 flex-col border-r border-gray-200 bg-white lg:flex">
       <NuxtLink to="/" class="flex h-16 items-center gap-2 border-b border-gray-100 px-6">
-        <span class="grid h-8 w-8 place-items-center rounded-lg bg-green-600 text-white">
+        <span class="grid h-8 w-8 place-items-center rounded-lg bg-emerald-600 text-white">
           <UIcon name="i-ph-storefront" class="h-4 w-4" />
         </span>
         <div class="leading-tight">
-          <p class="text-sm font-extrabold text-green-800">EcoMart</p>
+          <p class="text-sm font-extrabold text-emerald-800">EcoMart</p>
           <p class="text-xs text-gray-400">Quản trị</p>
         </div>
       </NuxtLink>
@@ -32,8 +32,8 @@ const nav = [
           v-for="item in nav"
           :key="item.to"
           :to="item.to"
-          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-green-50 hover:text-green-700"
-          active-class="bg-green-600! text-white!"
+          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-emerald-50 hover:text-emerald-700"
+          active-class="bg-emerald-600! text-white!"
         >
           <UIcon :name="item.icon" class="h-5 w-5" />
           {{ item.label }}

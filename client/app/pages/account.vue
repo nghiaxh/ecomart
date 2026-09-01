@@ -73,7 +73,7 @@ onMounted(load)
     <div class="mt-8 grid gap-8 lg:grid-cols-3">
       <!-- Profile -->
       <div class="lg:col-span-2">
-        <div class="rounded-2xl border border-green-100 bg-white p-6">
+        <div class="rounded-2xl border border-emerald-100 bg-white p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold text-gray-800">Thông tin cá nhân</h2>
             <UButton v-if="!editMode" color="primary" variant="soft" size="sm" label="Chỉnh sửa" icon="i-ph-pencil-simple" @click="startEdit" />
@@ -118,25 +118,25 @@ onMounted(load)
 
       <!-- Sidebar -->
       <div class="space-y-6">
-        <div class="rounded-2xl border border-green-100 bg-white p-6">
+        <div class="rounded-2xl border border-emerald-100 bg-white p-6">
           <h3 class="font-semibold text-gray-800">Đường dẫn</h3>
           <div class="mt-3 space-y-2">
-            <NuxtLink to="/orders" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-green-50 hover:text-green-700">
+            <NuxtLink to="/orders" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
               <UIcon name="i-ph-receipt" class="h-4 w-4" /> Đơn hàng
             </NuxtLink>
-            <NuxtLink to="/chat" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-green-50 hover:text-green-700">
+            <NuxtLink to="/chat" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
               <UIcon name="i-ph-chats-circle" class="h-4 w-4" /> Chat hỗ trợ
             </NuxtLink>
           </div>
         </div>
 
-        <div class="rounded-2xl border border-green-100 bg-white p-6">
+        <div class="rounded-2xl border border-emerald-100 bg-white p-6">
           <h3 class="font-semibold text-gray-800">Địa chỉ của tôi</h3>
           <div v-if="addresses.length" class="mt-3 space-y-2">
             <div v-for="a in addresses" :key="a.id" class="rounded-lg border border-gray-100 p-3 text-sm">
               <div class="flex items-center gap-2">
                 <span class="font-medium text-gray-700">{{ a.label }}</span>
-                <span v-if="a.isDefault" class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">Mặc định</span>
+                <span v-if="a.isDefault" class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">Mặc định</span>
               </div>
               <p class="mt-1 text-xs text-gray-400">{{ a.receiverName }} · {{ a.receiverPhone }}</p>
               <p class="mt-0.5 text-xs text-gray-500">{{ a.street }}, {{ a.ward }}, {{ a.district }}, {{ a.city }}</p>
