@@ -70,3 +70,17 @@ html {
 .text-balance {
   text-wrap: balance;
 }
+
+/* Interactive controls show pointer */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+a[href],
+label,
+input[type="radio"],
+input[type="checkbox"] {
+  cursor: pointer;
+}
+button:disabled,
+[role="button"]:disabled {
+  cursor: not-allowed;
+}

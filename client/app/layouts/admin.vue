@@ -18,9 +18,7 @@ const nav = [
   <div class="flex min-h-screen bg-gray-50">
     <aside class="sticky top-0 hidden h-screen w-64 flex-col border-r border-gray-200 bg-white lg:flex">
       <NuxtLink to="/" class="flex h-16 items-center gap-2 border-b border-gray-100 px-6">
-        <span class="grid h-8 w-8 place-items-center rounded-lg bg-emerald-600 text-white">
-          <UIcon name="i-ph-storefront" class="h-4 w-4" />
-        </span>
+        <img src="/favicon.svg" alt="EcoMart" class="h-8 w-8 rounded-lg" />
         <div class="leading-tight">
           <p class="text-sm font-extrabold text-emerald-800">EcoMart</p>
           <p class="text-xs text-gray-400">Quản trị</p>
@@ -49,7 +47,6 @@ const nav = [
     <div class="flex min-h-screen flex-1 flex-col">
       <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
         <h1 class="text-lg font-bold text-gray-800">Bảng điều khiển</h1>
-        <UButton icon="i-ph-shopping-cart" color="neutral" variant="ghost" :to="'/' " square />
       </header>
 
       <main class="flex-1 p-6">

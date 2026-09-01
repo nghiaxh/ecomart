@@ -20,6 +20,7 @@ export const useApi = () => {
     }
     return $fetch<T>(`${config.public.apiBase}${url}`, {
       ...opts,
+      method: opts.method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
       headers
     })
   }

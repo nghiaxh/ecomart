@@ -95,7 +95,7 @@ function goLogin() {
 
       <button
         type="button"
-        class="grid h-14 w-14 place-items-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-900/25 transition-transform hover:scale-105 active:scale-95"
+        class="grid h-14 w-14 place-items-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-900/25"
         :aria-label="open ? 'Đóng chat' : 'Mở chat'"
         @click="toggle"
       >

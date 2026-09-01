@@ -1,12 +1,10 @@
 <template>
-  <footer class="border-t border-emerald-100 bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+  <footer class="mt-12 border-t border-emerald-100 bg-emerald-50/40">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div class="grid gap-8 md:grid-cols-4">
         <div>
           <div class="flex items-center gap-2">
-            <span class="grid h-8 w-8 place-items-center rounded-lg bg-emerald-600 text-white">
-              <UIcon name="i-ph-storefront" class="h-4 w-4" />
-            </span>
+            <img src="/favicon.svg" alt="EcoMart" class="h-8 w-8 rounded-lg" />
             <span class="text-lg font-extrabold text-emerald-800">EcoMart</span>
           </div>
           <p class="mt-3 text-sm leading-relaxed text-gray-500">
@@ -41,7 +39,7 @@
         </div>
       </div>
 
-      <div class="mt-10 border-t border-emerald-50 pt-6 text-center text-xs text-gray-400">
+      <div class="mt-8 border-t border-emerald-100 pt-6 text-center text-xs text-gray-400">
         © 2026 EcoMart. Phục vụ tận tâm mỗi ngày.
       </div>
     </div>
