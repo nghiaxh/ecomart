@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { isLoggedIn, isAdmin, session, logout } = useAuth()
+const { isLoggedIn, isAdmin, session } = useAuth()
 const { itemCount } = useCart()
 
 const links = [
@@ -7,24 +7,12 @@ const links = [
   { label: 'Sản phẩm', to: '/products' },
   { label: 'Về chúng tôi', to: '/#about' }
 ]
-
-const userMenu = computed(() => {
-  const items: { label: string; icon: string; to?: string; onSelect?: () => void }[] = []
-  if (isAdmin.value) {
-    items.push({ label: 'Quản trị', icon: 'i-ph-squares-four', to: '/admin' })
-  } else {
-    items.push({ label: 'Tài khoản', icon: 'i-ph-user', to: '/account' })
-    items.push({ label: 'Đơn hàng', icon: 'i-ph-receipt', to: '/orders' })
-  }
-  items.push({ label: 'Đăng xuất', icon: 'i-ph-sign-out', onSelect: logout })
-  return items
-})
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col">
     <header class="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/90 backdrop-blur">
-      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <div class="mx-auto flex h-16 max-w-8xl items-center justify-between px-4 sm:px-6">
         <NuxtLink to="/" class="flex items-center gap-2">
           <img src="/favicon.svg" alt="EcoMart" class="h-9 w-9 rounded-xl" />
           <span class="text-xl font-extrabold tracking-tight text-emerald-800">EcoMart</span>
@@ -38,7 +26,7 @@ const userMenu = computed(() => {
 
         <div class="flex items-center gap-1">
           <UButton
-            v-if="!isAdmin"
+            v-if="isLoggedIn && !isAdmin"
             color="neutral"
             variant="ghost"
             square
@@ -53,16 +41,14 @@ const userMenu = computed(() => {
           </UButton>
 
           <template v-if="isLoggedIn">
-            <UDropdownMenu :items="userMenu" :content="{ side: 'bottom', align: 'end' }">
-              <UButton color="neutral" variant="ghost" class="gap-2">
-                <UAvatar :src="session?.avatarUrl || undefined" :alt="session?.username" size="sm" />
-                <span class="hidden text-sm font-medium sm:inline">{{ session?.username }}</span>
-              </UButton>
-            </UDropdownMenu>
+            <NuxtLink to="/account" class="flex items-center gap-2 rounded-lg p-1 hover:bg-emerald-50">
+              <UAvatar :src="session?.avatarUrl || undefined" :alt="session?.username" size="sm" />
+              <span class="hidden text-sm font-medium sm:inline">{{ session?.username }}</span>
+            </NuxtLink>
           </template>
           <template v-else>
-            <UButton :to="'/login'" color="neutral" variant="soft" size="md">Đăng nhập</UButton>
-            <UButton :to="'/register'" color="primary" size="md" class="ml-1">Đăng ký</UButton>
+            <UButton :to="'/login'" color="neutral" variant="soft" size="lg">Đăng nhập</UButton>
+            <UButton :to="'/register'" color="primary" size="lg" class="ml-1">Đăng ký</UButton>
           </template>
         </div>
       </div>
@@ -72,7 +58,6 @@ const userMenu = computed(() => {
       <slot />
     </main>
 
-    <FooterGlobal />
     <ChatWidget />
   </div>
 </template>
