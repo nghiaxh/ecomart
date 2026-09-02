@@ -37,6 +37,7 @@ public class CartService {
         this.productRepository = productRepository;
     }
 
+    @Transactional(readOnly = true)
     public CartResponse getMyCart() {
         return Mapper.toCart(getCart());
     }
