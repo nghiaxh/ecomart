@@ -1,8 +1,7 @@
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
   devtools: {
     enabled: true,
-    componentInspector: true
+    componentInspector: false
   },
   modules: ['@nuxt/ui', '@vueuse/nuxt'],
 
@@ -13,6 +12,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   vite: {
+    plugins: [],
     server: {
       hmr: {
         protocol: 'http',
