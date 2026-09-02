@@ -35,18 +35,26 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Page transition */
-.page-enter-active,
-.page-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.page-enter-from {
+/* Scroll reveal */
+.reveal {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
+.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* Hide native password reveal button (Edge) since we provide our own toggle */
@@ -87,4 +95,13 @@ input[type="checkbox"] {
 button:disabled,
 [role="button"]:disabled {
   cursor: not-allowed;
+}
+
+/* Category card hover */
+.cat-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -6px rgba(5, 150, 105, 0.18);
 }

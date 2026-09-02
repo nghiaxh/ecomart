@@ -76,7 +76,7 @@ onMounted(load)
         <div class="rounded-2xl border border-emerald-100 bg-white p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold text-gray-800">Thông tin cá nhân</h2>
-            <UButton v-if="!editMode" color="primary" variant="soft" size="sm" label="Chỉnh sửa" icon="i-ph-pencil-simple" @click="startEdit" />
+            <UButton v-if="!editMode" color="primary" variant="soft" size="md" label="Chỉnh sửa" icon="i-ph-pencil-simple" @click="startEdit" />
           </div>
 
           <form v-if="editMode" class="mt-4 space-y-3" @submit.prevent="saveProfile">

@@ -93,17 +93,12 @@ watch(() => filters.q, debouncedApply)
 
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-    <div class="mb-8">
-      <h1 class="text-3xl font-extrabold text-gray-800">Sản phẩm</h1>
-      <p class="mt-1 text-gray-500">{{ total }} sản phẩm thân thiện với môi trường</p>
-    </div>
-
     <!-- Category chips -->
     <div class="mb-6 flex flex-wrap gap-2">
       <UButton
         :color="!filters.category ? 'primary' : 'neutral'"
         :variant="!filters.category ? 'solid' : 'soft'"
-        size="sm"
+        size="md"
         label="Tất cả"
         @click="setCategory()"
       />
@@ -111,7 +106,7 @@ watch(() => filters.q, debouncedApply)
         <UButton
           :color="filters.category === c.slug ? 'primary' : 'neutral'"
           :variant="filters.category === c.slug ? 'solid' : 'soft'"
-          size="sm"
+          size="md"
           :label="c.name"
           @click="setCategory(c.slug)"
         />
@@ -120,7 +115,7 @@ watch(() => filters.q, debouncedApply)
           :key="child.id"
           :color="filters.category === child.slug ? 'primary' : 'neutral'"
           :variant="filters.category === child.slug ? 'solid' : 'soft'"
-          size="sm"
+          size="md"
           :label="child.name"
           @click="setCategory(child.slug)"
         />

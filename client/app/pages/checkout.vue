@@ -86,7 +86,7 @@ onMounted(() => {
         <section class="rounded-2xl border border-emerald-100 bg-white p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold text-gray-800">Địa chỉ giao hàng</h2>
-            <UButton color="primary" variant="soft" size="sm" icon="i-ph-plus" label="Thêm mới" @click="showAddressForm = !showAddressForm" />
+            <UButton color="primary" variant="soft" size="md" icon="i-ph-plus" label="Thêm mới" @click="showAddressForm = !showAddressForm" />
           </div>
 
           <form v-if="showAddressForm" class="mt-4 grid gap-3 sm:grid-cols-2" @submit.prevent="createAddress">

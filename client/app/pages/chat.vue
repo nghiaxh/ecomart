@@ -49,7 +49,7 @@ onMounted(loadSessions)
     <div class="grid gap-6 lg:grid-cols-4">
       <!-- Sessions sidebar -->
       <div class="rounded-2xl border border-emerald-100 bg-white p-4 lg:col-span-1">
-        <UButton color="primary" size="sm" block icon="i-ph-plus" label="Cuộc trò chuyện mới" @click="newSession" class="mb-3" />
+        <UButton color="primary" size="md" block icon="i-ph-plus" label="Cuộc trò chuyện mới" @click="newSession" class="mb-3" />
         <div class="space-y-2">
           <button
             v-for="s in sessions"

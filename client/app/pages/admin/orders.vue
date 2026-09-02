@@ -84,7 +84,7 @@ watch(statusFilter, () => { page.value = 0; load() })
                 class="w-40"
                 @update:model-value="(v) => updateStatus(o, v as string)"
               />
-              <UButton v-if="o.payment.status === 'PENDING'" color="primary" variant="soft" size="sm" label="Xác nhận thanh toán" @click="confirmPayment(o)" />
+              <UButton v-if="o.payment.status === 'PENDING'" color="primary" variant="soft" size="md" label="Xác nhận thanh toán" @click="confirmPayment(o)" />
             </div>
           </div>
         </div>

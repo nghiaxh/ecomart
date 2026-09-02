@@ -30,9 +30,9 @@ onMounted(() => fetchCart())
             </div>
             <div class="mt-auto flex items-center justify-between pt-3">
               <div class="flex items-center rounded-lg border border-emerald-200">
-                <UButton color="neutral" variant="ghost" icon="i-ph-minus" size="sm" :disabled="item.quantity <= 1" @click="updateQuantity(item.productId, item.quantity - 1)" />
+                <UButton color="neutral" variant="ghost" icon="i-ph-minus" size="md" :disabled="item.quantity <= 1" @click="updateQuantity(item.productId, item.quantity - 1)" />
                 <span class="w-8 text-center text-sm font-semibold">{{ item.quantity }}</span>
-                <UButton color="neutral" variant="ghost" icon="i-ph-plus" size="sm" :disabled="item.quantity >= item.stock" @click="updateQuantity(item.productId, item.quantity + 1)" />
+                <UButton color="neutral" variant="ghost" icon="i-ph-plus" size="md" :disabled="item.quantity >= item.stock" @click="updateQuantity(item.productId, item.quantity + 1)" />
               </div>
               <span class="font-bold text-emerald-700">{{ formatVND(item.price * item.quantity) }}</span>
             </div>
