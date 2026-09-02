@@ -132,7 +132,7 @@ watch(search, debouncedLoad)
         </div>
         <div class="md:col-span-1">
           <label class="mb-1 block text-sm text-gray-500">Danh mục</label>
-          <USelect v-model="form.categoryId" :options="categories.map(c => ({ label: c.name, value: c.id }))" value-key="value" option-attribute="label" />
+          <USelect v-model="form.categoryId" :items="categories.map(c => ({ label: c.name, value: c.id }))" label-key="label" value-key="value" />
           <p v-if="errors.categoryId" class="text-xs text-red-600">{{ errors.categoryId }}</p>
         </div>
         <div class="md:col-span-1">

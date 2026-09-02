@@ -9,14 +9,14 @@ const links = [
 ]
 
 const userMenu = computed(() => {
-  const items: { label: string; icon: string; to?: string; onClick?: () => void }[] = []
+  const items: { label: string; icon: string; to?: string; onSelect?: () => void }[] = []
   if (isAdmin.value) {
     items.push({ label: 'Quản trị', icon: 'i-ph-squares-four', to: '/admin' })
   } else {
     items.push({ label: 'Tài khoản', icon: 'i-ph-user', to: '/account' })
     items.push({ label: 'Đơn hàng', icon: 'i-ph-receipt', to: '/orders' })
   }
-  items.push({ label: 'Đăng xuất', icon: 'i-ph-sign-out', onClick: logout })
+  items.push({ label: 'Đăng xuất', icon: 'i-ph-sign-out', onSelect: logout })
   return items
 })
 </script>

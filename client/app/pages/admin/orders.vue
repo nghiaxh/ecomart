@@ -52,9 +52,9 @@ watch(statusFilter, () => { page.value = 0; load() })
       <div class="flex items-center gap-2">
         <USelect
           v-model="statusFilter"
-          :options="[{ label: 'Tất cả trạng thái', value: '' }, ...Object.entries(orderStatus).map(([k, v]) => ({ label: v.label, value: k }))]"
+          :items="[{ label: 'Tất cả trạng thái', value: '' }, ...Object.entries(orderStatus).map(([k, v]) => ({ label: v.label, value: k }))]"
+          label-key="label"
           value-key="value"
-          option-attribute="label"
           class="w-48"
         />
       </div>
@@ -77,9 +77,9 @@ watch(statusFilter, () => { page.value = 0; load() })
             <div class="flex gap-2">
               <USelect
                 :model-value="o.status"
-                :options="Object.entries(orderStatus).map(([k, v]) => ({ label: v.label, value: k }))"
+                :items="Object.entries(orderStatus).map(([k, v]) => ({ label: v.label, value: k }))"
+                label-key="label"
                 value-key="value"
-                option-attribute="label"
                 size="sm"
                 class="w-40"
                 @update:model-value="(v) => updateStatus(o, v as string)"
