@@ -5,6 +5,7 @@ const { request } = useApi()
 const { formatVND, formatKg, formatDate } = useFormat()
 const { isLoggedIn, isAdmin } = useAuth()
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const product = ref<Product | null>(null)
@@ -14,11 +15,27 @@ const loading = ref(true)
 const adding = ref(false)
 
 const selectedImage = ref('')
+const reviewFormOpen = ref(false)
+const reviewForm = reactive({ rating: 5, content: '' })
 
-const reviewForm = reactive({
-  rating: 5,
-  content: ''
-})
+const liveTotal = computed(() => (product.value?.price || 0) * quantity.value)
+const avgRating = computed(() => reviews.value.length ? reviews.value.reduce((s, r) => s + r.rating, 0) / reviews.value.length : 0)
+const reviewCount = computed(() => reviews.value.length)
+
+function goBack() {
+  if (typeof window !== 'undefined' && window.history.length > 1) router.back()
+  else navigateTo('/products')
+}
+
+function materialIcon(type: string) {
+  const map: Record<string, string> = { ORGANIC: 'i-ph-leaf', RECYCLED: 'i-ph-recycle', NATURAL: 'i-ph-flower', SYNTHETIC: 'i-ph-flask' }
+  return map[type] || 'i-ph-package'
+}
+
+function materialColor(type: string) {
+  const map: Record<string, string> = { ORGANIC: 'bg-emerald-50 text-emerald-700 border-emerald-200', RECYCLED: 'bg-teal-50 text-teal-700 border-teal-200', NATURAL: 'bg-sky-50 text-sky-700 border-sky-200', SYNTHETIC: 'bg-slate-100 text-slate-700 border-slate-200' }
+  return map[type] || 'bg-gray-100 text-gray-600 border-gray-200'
+}
 
 async function load() {
   loading.value = true
@@ -71,7 +88,10 @@ onMounted(() => {
 
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6" v-if="product">
-    <!-- Breadcrumb -->
+    <button @click="goBack" class="mb-4 inline-flex items-center gap-1 text-sm text-gray-400 transition hover:text-emerald-700">
+      <UIcon name="i-ph-caret-left" class="h-4 w-4" /> Quay lại
+    </button>
+
     <nav class="mb-6 text-sm text-gray-400">
       <NuxtLink to="/" class="hover:text-emerald-700">Trang chủ</NuxtLink>
       <span class="mx-2">/</span>
@@ -80,11 +100,17 @@ onMounted(() => {
       <span class="text-gray-600">{{ product.name }}</span>
     </nav>
 
-    <div class="grid gap-8 lg:grid-cols-2">
+    <div class="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
       <!-- Gallery -->
-      <div>
-        <div class="aspect-square overflow-hidden rounded-2xl bg-emerald-50">
-          <img v-if="selectedImage" :src="selectedImage" :alt="product.name" class="h-full w-full object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
+      <div class="lg:sticky lg:top-24 lg:self-start">
+        <div class="group aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl bg-emerald-50">
+          <img
+            v-if="selectedImage"
+            :src="selectedImage"
+            :alt="product.name"
+            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'"
+          />
           <div v-else class="grid h-full w-full place-items-center text-emerald-200">
             <UIcon name="i-ph-image" class="h-16 w-16" />
           </div>
@@ -93,8 +119,8 @@ onMounted(() => {
           <button
             v-for="img in product.images"
             :key="img"
-            class="h-20 w-20 overflow-hidden rounded-lg border-2 transition"
-            :class="selectedImage === img ? 'border-emerald-600' : 'border-transparent'"
+            class="h-14 w-14 overflow-hidden rounded-lg border-2 transition"
+            :class="selectedImage === img ? 'border-emerald-600 ring-2 ring-emerald-600/20' : 'border-transparent hover:border-emerald-200'"
             @click="selectedImage = img"
           >
             <img :src="img" :alt="product.name" class="h-full w-full object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
@@ -104,16 +130,39 @@ onMounted(() => {
 
       <!-- Info -->
       <div>
-        <h1 class="mt-3 text-3xl font-extrabold text-gray-800">{{ product.name }}</h1>
+        <h1 class="text-2xl font-extrabold text-gray-800 sm:text-3xl">{{ product.name }}</h1>
         <p class="mt-2 text-sm text-gray-400">{{ formatKg(product.weight) }} · Nguồn gốc: {{ product.origin || 'Việt Nam' }}</p>
 
-        <p class="mt-4 text-3xl font-extrabold text-emerald-700">{{ formatVND(product.price) }}</p>
+        <!-- Price & stock highlight -->
+        <div class="mt-5 rounded-xl bg-emerald-50 px-5 py-4">
+          <p class="text-2xl font-extrabold text-emerald-700 sm:text-3xl">{{ formatVND(product.price) }}</p>
+          <div class="mt-2">
+            <span
+              v-if="product.stock <= 0"
+              class="inline-block rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700"
+            >Hết hàng</span>
+            <span
+              v-else-if="product.stock <= 10"
+              class="inline-block rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700"
+            >Chỉ còn {{ product.stock }} sản phẩm</span>
+            <span
+              v-else
+              class="inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700"
+            >Còn {{ product.stock }} sản phẩm</span>
+          </div>
+        </div>
 
         <!-- Materials -->
-        <div v-if="product.materials && product.materials.length" class="mt-6">
+        <div v-if="product.materials?.length" class="mt-6">
           <h3 class="text-sm font-semibold text-gray-700">Chất liệu / Bao bì</h3>
           <div class="mt-2 flex flex-wrap gap-2">
-            <span v-for="m in product.materials" :key="m.id" class="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs text-gray-600">
+            <span
+              v-for="m in product.materials"
+              :key="m.id"
+              class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
+              :class="materialColor(m.type)"
+            >
+              <UIcon :name="materialIcon(m.type)" class="h-3.5 w-3.5" />
               {{ m.name }} · {{ m.percentage }}%
             </span>
           </div>
@@ -122,12 +171,12 @@ onMounted(() => {
         <!-- Description -->
         <p v-if="product.description" class="mt-6 leading-relaxed text-gray-600">{{ product.description }}</p>
 
-        <!-- Quantity + add -->
+        <!-- Quantity + add + live total -->
         <div class="mt-8 flex flex-wrap items-center gap-4">
           <div class="flex items-center rounded-xl border border-emerald-200">
-            <UButton color="neutral" variant="ghost" icon="i-ph-minus" :disabled="quantity <= 1" @click="quantity--" />
+            <UButton color="neutral" variant="ghost" icon="i-ph-minus" :disabled="quantity <= 1" class="min-h-11 min-w-11 justify-center" @click="quantity--" />
             <span class="w-10 text-center font-semibold">{{ quantity }}</span>
-            <UButton color="neutral" variant="ghost" icon="i-ph-plus" :disabled="quantity >= product.stock" @click="quantity++" />
+            <UButton color="neutral" variant="ghost" icon="i-ph-plus" :disabled="quantity >= product.stock" class="min-h-11 min-w-11 justify-center" @click="quantity++" />
           </div>
           <UButton
             v-if="!isAdmin"
@@ -139,19 +188,39 @@ onMounted(() => {
             :loading="adding"
             @click="addToCart"
           />
+          <span class="text-sm text-gray-500">
+            Tổng: <strong class="text-emerald-700">{{ formatVND(liveTotal) }}</strong>
+          </span>
         </div>
-        <p v-if="product.stock > 0 && product.stock <= 10" class="mt-2 text-xs text-orange-600">Chỉ còn {{ product.stock }} sản phẩm</p>
-        <p v-else-if="product.stock > 0" class="mt-2 text-xs text-gray-400">Còn {{ product.stock }} sản phẩm trong kho</p>
       </div>
     </div>
 
     <!-- Reviews -->
     <div class="mt-12 border-t border-emerald-100 pt-8">
-      <h2 class="text-2xl font-extrabold text-gray-800">Đánh giá</h2>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <h2 class="text-2xl font-extrabold text-gray-800">Đánh giá</h2>
+          <template v-if="reviewCount > 0">
+            <div class="flex items-center gap-1.5 rounded-full bg-yellow-50 px-3 py-1">
+              <UIcon name="i-ph-star-fill" class="h-4 w-4 text-yellow-400" />
+              <span class="text-sm font-bold text-gray-800">{{ avgRating.toFixed(1) }}</span>
+            </div>
+            <span class="text-sm text-gray-400">{{ reviewCount }} đánh giá</span>
+          </template>
+        </div>
+        <UButton
+          v-if="isLoggedIn"
+          color="primary"
+          variant="soft"
+          size="sm"
+          :icon="reviewFormOpen ? 'i-ph-x' : 'i-ph-pencil-simple'"
+          :label="reviewFormOpen ? 'Đóng' : 'Viết đánh giá'"
+          @click="reviewFormOpen = !reviewFormOpen"
+        />
+      </div>
 
-      <div v-if="isLoggedIn" class="mt-6 rounded-2xl border border-emerald-100 bg-white p-4">
-        <h3 class="font-semibold text-gray-700">Viết đánh giá</h3>
-        <div class="mt-2 flex items-center gap-1">
+      <div v-if="isLoggedIn && reviewFormOpen" class="mt-6 rounded-2xl border border-emerald-100 bg-white p-4">
+        <div class="flex items-center gap-1">
           <button v-for="s in 5" :key="s" :class="s <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'" @click="reviewForm.rating = s">
             <UIcon name="i-ph-star-fill" class="h-6 w-6" />
           </button>
@@ -181,10 +250,44 @@ onMounted(() => {
         <p v-if="!reviews.length" class="py-8 text-center text-gray-400">Chưa có đánh giá nào.</p>
       </div>
     </div>
+
+    <!-- Sticky mobile CTA -->
+    <div
+      v-if="!isAdmin"
+      class="fixed bottom-0 inset-x-0 z-50 border-t border-emerald-100 bg-white px-4 py-3 shadow-lg lg:hidden"
+    >
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-lg font-extrabold text-emerald-700">{{ formatVND(product.price) }}</p>
+          <p class="text-xs text-gray-400">x{{ quantity }}</p>
+        </div>
+        <UButton
+          color="primary"
+          size="lg"
+          icon="i-ph-shopping-cart"
+          :label="product.stock > 0 ? 'Thêm vào giỏ' : 'Hết hàng'"
+          :disabled="product.stock <= 0"
+          :loading="adding"
+          @click="addToCart"
+        />
+      </div>
+    </div>
   </div>
 
   <div v-else-if="loading" class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-    <USkeleton class="h-96 rounded-2xl" />
+    <USkeleton class="mb-4 h-4 w-20 rounded" />
+    <div class="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
+      <USkeleton class="aspect-[4/3] rounded-2xl" />
+      <div class="space-y-4">
+        <USkeleton class="h-8 w-3/4 rounded" />
+        <USkeleton class="h-4 w-1/2 rounded" />
+        <USkeleton class="h-20 rounded-xl" />
+        <USkeleton class="h-10 w-40 rounded-xl" />
+      </div>
+    </div>
   </div>
   <div v-else class="py-24 text-center text-gray-400">Không tìm thấy sản phẩm.</div>
+
+  <!-- Pad bottom for sticky mobile CTA -->
+  <div v-if="!isAdmin && product" class="h-20 lg:hidden" />
 </template>
