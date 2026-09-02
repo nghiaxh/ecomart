@@ -57,7 +57,7 @@ function goLogin() {
                 <p class="text-[11px] text-emerald-100">Hỗ trợ tư vấn</p>
               </div>
             </div>
-            <UButton color="neutral" variant="ghost" square icon="i-ph-x" class="text-white!" @click="open = false" aria-label="Đóng chat" />
+            <UButton color="neutral" variant="ghost" square icon="i-ph-x" class="text-white! hover:text-black!" @click="open = false" aria-label="Đóng chat" />
           </div>
 
           <div v-if="!isLoggedIn" class="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
