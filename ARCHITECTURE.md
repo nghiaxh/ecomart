@@ -8,54 +8,55 @@ EcoMart là ứng dụng **siêu thị trực tuyến** dạng client-server mon
 
 ```
 ┌──────────────────┐     HTTP/JSON (REST)     ┌──────────────────────┐
-│  Nuxt 3 client   │ ───────────────────────▶ │  Spring Boot server  │
+│  Nuxt 4 client   │ ───────────────────────▶ │  Spring Boot server  │
 │  (Vue + Nuxt UI) │ ◀─────────────────────── │  Java 25 + JPA       │
 └──────────────────┘   Authorization: Bearer  └──────────┬───────────┘
                                                          │
                                               PostgreSQL (ddl-auto: update)
 ```
 
-- **client/** - Nuxt 3 + Nuxt UI + TypeScript + Zod. Giao diện tiếng Việt.
-- **server/** - Spring Boot 3.5 + Spring Security (JWT) + Spring Data JPA. 15 controller, mỗi resource một controller → service → repository.
-- **PostgreSQL** - không có migration; `ddl-auto: update` tự đồng bộ schema khi khởi động.
+- **client/** — Nuxt 4 + Nuxt UI 4 + TypeScript + Zod 4. Giao diện tiếng Việt.
+- **server/** — Spring Boot 3.5 + Spring Security (JWT) + Spring Data JPA. 14 controller, mỗi resource một controller → service → repository.
+- **PostgreSQL** — không có migration; `ddl-auto: update` tự đồng bộ schema khi khởi động.
 
 ## Luồng dữ liệu chính
 
-### 1. Xác thực - JWT tự viết (không dùng module auth của Nuxt)
+### 1. Xác thực (JWT tự viết)
 
 Toàn bộ luồng login/đăng ký được làm thủ công:
 
 1. Client gọi `POST /api/auth/login` (hoặc `/register`) qua composable `useAuth()`.
-2. Server trả về `AuthResponse` gồm `token` (JWT) + thông tin user/role.
+2. Server trả về `AuthResponse` gồm `token` (JWT) và thông tin user/role.
 3. Client lưu token vào `localStorage` dưới hai khóa: `ecomart_session` (payload JSON) và `ecomart_token` (raw JWT).
 4. Plugin `plugins/auth.client.ts` gọi `useAuth().restore()` khi khởi động để nạp lại phiên.
-5. **Mọi** request API đều đi qua `useApi()` (`client/composables/useApi.ts`), tự đính header `Authorization: Bearer <token>`.
-6. Server: `JwtAuthenticationFilter` đọc/verify token, dựng `Authentication`; `JwtTokenProvider` sinh/kiểm tra JWT; `SecurityConfig` tắt session (stateless) và hiện đang **cho phép tất cả** `/api/**` (`permitAll`) - quyền hạn được kiểm soát ở tầng service, không phải security filter.
+5. **Mọi** request API đều đi qua `useApi()` (`client/app/composables/useApi.ts`), tự đính header `Authorization: Bearer <token>`.
+6. Server: `JwtAuthenticationFilter` đọc/verify token, dựng `Authentication`; `JwtTokenProvider` sinh/kiểm tra JWT; `SecurityConfig` tắt session (stateless) và hiện đang **cho phép tất cả** `/api/**` (`permitAll`) — quyền hạn được kiểm soát ở tầng service, không phải security filter.
 
 **Bảo vệ route trên client** bằng middleware:
-- `middleware/auth.ts` - yêu cầu đã đăng nhập.
-- `middleware/admin.ts` - yêu cầu role `ADMIN`.
+- `middleware/auth.ts` — yêu cầu đã đăng nhập.
+- `middleware/admin.ts` — yêu cầu role `ADMIN`.
+- `middleware/customer.ts` — yêu cầu đã đăng nhập và không phải admin.
 
-### 2. Duyệt & tìm sản phẩm
+### 2. Duyệt và tìm sản phẩm
 
 - `pages/index.vue` (trang chủ) gọi song song `GET /api/banners/active`, `GET /api/categories`, `GET /api/products/latest`.
-- Trang danh mục/sản phẩm gọi `GET /api/products` với query params (filter theo `category` slug, tìm kiếm, sort) - phân trang dạng `PageResponse<T>`.
-- Danh mục có cấu trúc **cây** (parent/children) - `children` dùng để hiển thị danh mục con.
+- Trang danh mục/sản phẩm gọi `GET /api/products` với query params (filter theo `category` slug, tìm kiếm, sort) — phân trang dạng `PageResponse<T>`.
+- Danh mục có cấu trúc **cây** (parent/children) — `children` dùng để hiển thị danh mục con.
 - Sản phẩm mang `materials` (vật liệu + % thành phần) và `images`.
 
-### 3. Giỏ hàng - state phía server
+### 3. Giỏ hàng (state phía server)
 
 Giỏ hàng **không** lưu trong localStorage của trình duyệt; nó lưu trên server theo user (`Cart` + `CartItem` entities).
 
-- `useCart()` (`client/composables/useCart.ts`) điều khiển giỏ qua `GET/POST/PUT/DELETE /api/cart`.
+- `useCart()` (`client/app/composables/useCart.ts`) điều khiển giỏ qua `GET/POST/PUT/DELETE /api/cart`.
 - Trạng thái giỏ được giữ bằng Nuxt `useState`, nạp lại mỗi khi đăng nhập.
 - Chỉ hoạt động khi đã đăng nhập (`fetchCart` trả `null` nếu chưa login).
 
-### 4. Đặt hàng & thanh toán
+### 4. Đặt hàng và thanh toán
 
 Luồng checkout (`pages/checkout.vue`):
 
-1. Nạp danh sách địa chỉ (`GET /api/addresses`) + giỏ hàng (`useCart().fetchCart()`).
+1. Nạp danh sách địa chỉ (`GET /api/addresses`) và giỏ hàng (`useCart().fetchCart()`).
 2. Người dùng chọn địa chỉ (có thể thêm mới, validate bằng `addressSchema` từ Zod) và phương thức thanh toán: **COD** hoặc **PayOS QR**.
 3. `POST /api/orders/checkout` với `{ addressId, paymentMethod, notes }`.
 4. Server dựng đơn hàng:
@@ -69,62 +70,63 @@ Trạng thái thanh toán: `PENDING | PAID | FAILED | CANCELLED`.
 
 ### 5. Chat hỗ trợ (từ khóa + RAG đơn giản)
 
-- `GET /api/chat/sessions` - lấy các phiên hội thoại của user.
-- `POST /api/chat/send` - gửi tin nhắn, `ChatService` xử lý nội bộ (không gọi API ngoài):
+- `GET /api/chat/sessions` — lấy các phiên hội thoại của user.
+- `POST /api/chat/send` — gửi tin nhắn, `ChatService` xử lý nội bộ (không gọi API ngoài):
   - Nhận diện **ý định** theo từ khóa chuẩn hóa (giá/khuyến mãi, giao hàng, đổi trả, thanh toán, liên hệ, tài khoản...).
   - **RAG đơn giản**: nếu câu hỏi khớp từ khóa sản phẩm/danh mục thì truy vấn `ProductRepository` lấy sản phẩm đang bán, liệt kê tên + giá vào câu trả lời.
 - Tin nhắn lưu DB qua `ChatSession` + `ChatMessage`.
+- `ChatWidget.vue` là widget nổi hiển thị trên tất cả các trang dùng layout mặc định, cung cấp truy cập nhanh vào chat ngoài trang `/chat` chuyên biệt.
 
 ### 6. Thông báo
 
 - **Server** có `NotificationController` (`GET /api/notifications`, `GET /api/notifications/unread-count`) và entity `Notification` lưu DB, gắn với user.
-- Giao diện người dùng hiện chưa hiển thị danh sách thông báo (README mô tả "DB-based, poll" nhưng code client hiện chưa có component poll).
+- Giao diện người dùng hiện chưa hiển thị danh sách thông báo (chưa có component poll).
 
 ## Cấu trúc mã nguồn
 
 ### Server (`server/src/main/java/com/ecomart/`)
 
 ```
-controller/  15 controller, mỗi resource một controller, mapping dưới /api/...
-service/     nghiệp vụ chính - nơi kiểm soát quyền & logic
+controller/  14 controller, mỗi resource một controller, mapping dưới /api/...
+service/     nghiệp vụ chính, nơi kiểm soát quyền và logic
 domain/
-  entity/    JPA entities (User, Product, Order, Cart, Payment, ...)
-  enums/     UserRole, OrderStatus, PaymentMethod, ...
+  entity/    JPA entities (User, Customer, Admin, Product, Order, Cart, Payment, ...)
+  enums/     UserRole, OrderStatus, PaymentMethod, PaymentStatus, MaterialType, ...
 repository/  Spring Data JPA repositories
 dto/
   request/   payloads vào (LoginRequest, CheckoutRequest, ...)
   response/  payloads ra (AuthResponse, ProductResponse, OrderResponse, ...)
 security/    JwtTokenProvider, JwtAuthenticationFilter, SecurityConfig, CorsConfig
 integration/
-  payos/     PayOSClient - thanh toán QR
+  payos/     PayOSClient — thanh toán QR
 config/      AppConfig, DataSeeder, properties (Jwt/PayOS), security/filter bean
 common/      Mapper (entity ↔ DTO), exception handling
 exception/   xử lý lỗi API
 ```
 
-### Client (`client/`)
+### Client (`client/app/`)
 
 ```
 pages/       các route (index, products, cart, checkout, orders, chat, account, admin/...)
-components/  UI tái dùng (ProductCard, FooterGlobal)
+components/  UI tái dùng (ProductCard, FooterGlobal, ChatWidget, AuthShell, ...)
 composables/ useApi (mọi request), useAuth (phiên/JWT), useCart, useFormat, useStatusLabels
 layouts/     default (public), auth, admin
-middleware/  auth.ts (đã login), admin.ts (role ADMIN)
-schemas/     Zod validation - thông báo lỗi tiếng Việt
+middleware/  auth.ts (đã login), admin.ts (role ADMIN), customer.ts (đã login, không phải admin)
+schemas/     Zod validation — thông báo lỗi tiếng Việt
 types/       TS interfaces phản ánh DTO của backend
-plugins/     auth.client.ts - khôi phục phiên khi load
+plugins/     auth.client.ts — khôi phục phiên khi load
 ```
 
 ## Điểm quan trọng khi làm việc
 
-- **Đồng bộ types**: `client/types/index.ts` (TS) và `client/schemas/index.ts` (Zod) phải giữ song song với DTO backend. Thêm/sửa trường ở server → cập nhật cả hai.
+- **Đồng bộ types**: `client/app/types/index.ts` (TS) và `client/app/schemas/index.ts` (Zod) phải giữ song song với DTO backend. Thêm/sửa trường ở server → cập nhật cả hai.
 - **Không có migration**: đổi entity JPA là đổi schema tự động khi khởi động. Với DB có sẵn dữ liệu, tránh xoá cột/đổi tên cột cũ đang được dùng.
-- **Mọi request qua `useApi()`**: không gọi `$fetch` trực tiếp trong page - để đảm bảo header JWT luôn được đính.
+- **Mọi request qua `useApi()`**: không gọi `$fetch` trực tiếp trong page để đảm bảo header JWT luôn được đính.
 - **Quyền ADMIN**: kiểm soát bằng middleware `admin.ts` ở client + logic ở service (backend chưa giới hạn theo role ở tầng HTTP).
-- **DataSeeder** (`config/DataSeeder.java`) tự chạy khi DB trống: tạo admin `admin@ecomart.vn` / `Admin@123`, danh mục, vật liệu, banner, vài sản phẩm mẫu. Để reset dữ liệu demo, xoá volume `pgdata`.
+- **DataSeeder** (`config/DataSeeder.java`) tự chạy khi DB trống: tạo admin `admin@ecomart.vn` / `Admin@123`, customer `customer@ecomart.vn` / `Customer@123`, danh mục, vật liệu, banner, vài sản phẩm mẫu. Để reset dữ liệu demo, xoá volume `pgdata`.
 - **Upload** đi qua `UploadController` lưu vào `UPLOAD_DIR`; trong Docker nằm trong volume `uploads`. Client quản lý ảnh qua URL (nhiều ảnh thực tế đang dùng URL Unsplash trong seeder).
 
-## Môi trường & cấu hình
+## Môi trường và cấu hình
 
 Mọi bí mật nằm trong **một file `.env` duy nhất ở root** (được `docker-compose.yml` và server đọc). Server đọc env với fallback mặc định dev (`${VAR:default}` trong `application.yml`).
 
@@ -133,7 +135,6 @@ Mọi bí mật nằm trong **một file `.env` duy nhất ở root** (được 
 | `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | kết nối Postgres (docker-compose truyền dạng này) |
 | `JWT_SECRET` / `JWT_EXPIRATION` | ký/giới hạn JWT |
 | `PAYOS_CLIENT_ID` / `PAYOS_API_KEY` / `PAYOS_CHECKSUM_KEY` | thanh toán QR |
-| `GOOGLE_CLIENT_ID` | Google OAuth |
 | `UPLOAD_DIR` | thư mục lưu ảnh upload |
 | `CLIENT_URL` | nguồn CORS hợp lệ |
 

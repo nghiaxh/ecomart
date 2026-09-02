@@ -1,47 +1,48 @@
 # EcoMart
 
-[![Nuxt](https://img.shields.io/badge/Nuxt-3-00dc82?logo=nuxtdotjs&logoColor=white)](https://nuxt.com)
-[![Vue](https://img.shields.io/badge/Vue-3-4fc08d?logo=vuedotjs&logoColor=white)](https://vuejs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Nuxt](https://img.shields.io/badge/Nuxt-4-00dc82?logo=nuxtdotjs&logoColor=white)](https://nuxt.com)
+[![Vue](https://img.shields.io/badge/Vue-3.5-4fc08d?logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-6db33f?logo=spring&logoColor=white)](https://spring.io)
 [![Java](https://img.shields.io/badge/Java-25-f89820?logo=openjdk&logoColor=white)](https://www.java.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169e1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
-[![Zod](https://img.shields.io/badge/Zod-3-3e67b1?logo=zod&logoColor=white)](https://zod.dev)
+[![Zod](https://img.shields.io/badge/Zod-4-3e67b1?logo=zod&logoColor=white)](https://zod.dev)
 [![Docker](https://img.shields.io/badge/Docker%20Compose-2496ed?logo=docker&logoColor=white)](https://www.docker.com)
 
-Nền tảng mua sắm thực phẩm trực tuyến — sản phẩm tươi sạch, giao hàng nhanh, thanh toán tiện lợi cho mọi gia đình Việt.
+Nền tảng mua sắm thực phẩm trực tuyến với sản phẩm tươi sạch, giao hàng nhanh và thanh toán tiện lợi cho mọi gia đình Việt.
 
 ## Tính năng
 
 ### Khách hàng
-- Đăng ký / đăng nhập (email + Google OAuth)
+- Đăng ký / đăng nhập (email)
 - Danh mục sản phẩm với bộ lọc, tìm kiếm, sắp xếp
 - Chi tiết sản phẩm với đánh giá từ người dùng
-- Giỏ hàng & thanh toán: **PayOS QR** hoặc **COD**
-- Lịch sử đơn hàng, theo dõi & hủy đơn
+- Giỏ hàng và thanh toán: **PayOS QR** hoặc **COD**
+- Lịch sử đơn hàng, theo dõi và hủy đơn
 - **Chat hỗ trợ** (từ khóa + RAG nội bộ) tư vấn mua sắm
 - Hệ thống thông báo
 
 ### Quản trị
 - Dashboard tổng quan
-- Quản lý sản phẩm, danh mục & banner
-- Quản lý đơn hàng + cập nhật trạng thái
+- Quản lý sản phẩm, danh mục và banner
+- Quản lý đơn hàng và cập nhật trạng thái
 - Quản lý tài khoản khách hàng
 
 ## Kiến trúc
 
-Monorepo client-server, mỗi module build độc lập — không có build tooling ở root.
+Monorepo client-server, mỗi module build độc lập, không có build tooling ở root.
 
 ```
 ecomart/
-├── client/            # Nuxt 3 + Nuxt UI + TypeScript + Zod
+├── client/            # Nuxt 4 + Nuxt UI 4 + TypeScript + Zod 4
 ├── server/            # Spring Boot 3.5 + Java 25 + PostgreSQL
 ├── docker-compose.yml # chạy toàn bộ stack
 ├── .env               # cấu hình bí mật
+├── .gitignore
 └── ARCHITECTURE.md    # tài liệu kiến trúc chi tiết
 ```
 
-Xem chi tiết luồng dữ liệu, xác thực JWT, thanh toán,... tại **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+Xem chi tiết luồng dữ liệu, xác thực JWT, thanh toán tại **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 
 ## Bắt đầu nhanh
 
@@ -56,7 +57,7 @@ Xem chi tiết luồng dữ liệu, xác thực JWT, thanh toán,... tại **[AR
 cp .env.example .env
 ```
 
-Điền giá trị thực vào `.env`: `JWT_SECRET`, `PAYOS_*`, `GOOGLE_CLIENT_ID`.
+Điền giá trị thực vào `.env`: `JWT_SECRET`, `PAYOS_*`.
 
 ### 2. Chạy toàn bộ hệ thống (Docker)
 
@@ -91,13 +92,14 @@ mvn package
 | Vai trò | Email | Mật khẩu |
 |---------|-------|----------|
 | ADMIN | `admin@ecomart.vn` | `Admin@123` |
+| Customer | `customer@ecomart.vn` | `Customer@123` |
 
 ## Công nghệ
 
 | Layer | Stack |
 |-------|-------|
-| Client | Nuxt 3, Nuxt UI, Vue 3, TypeScript, Zod, Tailwind CSS |
+| Client | Nuxt 4, Nuxt UI 4, Vue 3.5, TypeScript, Zod 4, Tailwind CSS |
 | Server | Spring Boot 3.5, Spring Security (JWT), Spring Data JPA, Lombok |
 | Database | PostgreSQL 18 |
-| Tích hợp | Chat từ khóa + RAG nội bộ, PayOS (thanh toán QR), Google OAuth |
+| Tích hợp | Chat từ khóa + RAG nội bộ, PayOS (thanh toán QR) |
 | Hạ tầng | Docker Compose |
