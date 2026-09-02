@@ -34,7 +34,7 @@
           <ul class="mt-2 space-y-1.5 text-sm text-gray-500">
             <li><NuxtLink to="/chat" class="hover:text-emerald-700">Chat trợ giúp</NuxtLink></li>
             <li><span>Hotline: 0900 000 000</span></li>
-            <li><span>Email: hi@ecomart.vn</span></li>
+            <li><span>Email: contact@ecomart.vn</span></li>
           </ul>
         </div>
       </div>
