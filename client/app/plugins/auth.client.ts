@@ -1,4 +1,9 @@
 export default defineNuxtPlugin(() => {
-  const { restore } = useAuth()
-  restore()
+  const { forceLogout } = useAuth()
+
+  if (import.meta.client) {
+    document.addEventListener('ecomart:unauthorized', () => {
+      forceLogout()
+    })
+  }
 })

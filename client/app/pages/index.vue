@@ -2,6 +2,8 @@
 import type { Banner, CategoryResponse, Product } from '~/types'
 
 const { request } = useApi()
+const config = useRuntimeConfig()
+const supportPhone = config.public.supportPhone
 
 const banners = useState<Banner[]>('home_banners', () => [])
 const categories = useState<CategoryResponse[]>('home_categories', () => [])
@@ -33,7 +35,7 @@ const features = [
   { icon: 'i-ph-leaf', title: 'Sạch & an toàn', desc: 'Sản phẩm có nguồn gốc rõ ràng, đảm bảo vệ sinh thực phẩm.', photo: '/images/feature-safe.jpg' },
   { icon: 'i-ph-truck', title: 'Giao hàng nhanh', desc: 'Nội thành nhận hàng trong ngày, toàn quốc 2-4 ngày.', photo: '/images/feature-truck.jpg' },
   { icon: 'i-ph-wallet', title: 'Thanh toán linh hoạt', desc: 'COD hoặc quét mã QR qua PayOS tiện lợi.', photo: '/images/feature-pay.jpg' },
-  { icon: 'i-ph-headset', title: 'Hỗ trợ tận tâm', desc: 'Hotline 0900 000 000 hỗ trợ 8h-20h mỗi ngày.', photo: '/images/feature-support.jpg' },
+  { icon: 'i-ph-headset', title: 'Hỗ trợ tận tâm', desc: `Hotline ${supportPhone} hỗ trợ 8h-20h mỗi ngày.`, photo: '/images/feature-support.jpg' },
 ]
 
 const steps = [

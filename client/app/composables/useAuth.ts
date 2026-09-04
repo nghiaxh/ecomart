@@ -79,6 +79,11 @@ export const useAuth = () => {
     navigateTo('/')
   }
 
+  const forceLogout = () => {
+    session.value = null
+    persist(null)
+  }
+
   const updateSession = (partial: Partial<Session>) => {
     if (session.value) {
       session.value = { ...session.value, ...partial }
@@ -96,6 +101,7 @@ export const useAuth = () => {
     login,
     register,
     logout,
+    forceLogout,
     updateSession
   }
 }

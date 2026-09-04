@@ -4,15 +4,54 @@ definePageMeta({ middleware: 'customer' })
 const { cart, fetchCart, updateQuantity, remove } = useCart()
 const { formatVND } = useFormat()
 const toast = useToast()
+const loading = ref(true)
+const busyProductIds = ref<Set<number>>(new Set())
 
-onMounted(() => fetchCart())
+onMounted(async () => {
+  try {
+    await fetchCart()
+  } finally {
+    loading.value = false
+  }
+})
+
+async function changeQuantity(productId: number, quantity: number) {
+  if (busyProductIds.value.has(productId)) return
+  busyProductIds.value.add(productId)
+  try {
+    await updateQuantity(productId, quantity)
+  } catch {
+    await fetchCart()
+  } finally {
+    busyProductIds.value.delete(productId)
+  }
+}
+
+async function deleteItem(productId: number) {
+  if (busyProductIds.value.has(productId)) return
+  busyProductIds.value.add(productId)
+  try {
+    await remove(productId)
+  } catch {
+    await fetchCart()
+  } finally {
+    busyProductIds.value.delete(productId)
+  }
+}
 </script>
 
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <h1 class="text-3xl font-extrabold text-gray-800">Giỏ hàng</h1>
 
-    <div v-if="cart && cart.items.length" class="mt-8 grid gap-8 lg:grid-cols-3">
+    <div v-if="loading" class="mt-8 grid gap-6 lg:grid-cols-3">
+      <div class="space-y-4 lg:col-span-2">
+        <USkeleton v-for="i in 2" :key="i" class="h-28 rounded-2xl" />
+      </div>
+      <USkeleton class="h-64 rounded-2xl" />
+    </div>
+
+    <div v-else-if="cart && cart.items.length" class="mt-8 grid gap-8 lg:grid-cols-3">
       <div class="lg:col-span-2 space-y-4">
         <div v-for="item in cart.items" :key="item.productId" class="flex gap-4 rounded-2xl border border-emerald-100 bg-white p-4">
           <NuxtLink :to="`/products/${item.productSlug}`" class="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-emerald-50">
@@ -24,15 +63,15 @@ onMounted(() => fetchCart())
               <div>
                 <NuxtLink :to="`/products/${item.productSlug}`" class="font-semibold text-gray-800 hover:text-emerald-700">{{ item.productName }}</NuxtLink>
               </div>
-              <button class="text-gray-300 hover:text-red-500" @click="remove(item.productId)">
+              <button class="text-gray-300 hover:text-red-500" :aria-label="`Xóa ${item.productName}`" @click="deleteItem(item.productId)">
                 <UIcon name="i-ph-trash" class="h-5 w-5" />
               </button>
             </div>
             <div class="mt-auto flex items-center justify-between pt-3">
               <div class="flex items-center rounded-lg border border-emerald-200">
-                <UButton color="neutral" variant="ghost" icon="i-ph-minus" size="md" :disabled="item.quantity <= 1" @click="updateQuantity(item.productId, item.quantity - 1)" />
+                <UButton color="neutral" variant="ghost" icon="i-ph-minus" size="md" :disabled="item.quantity <= 1 || busyProductIds.has(item.productId)" :loading="busyProductIds.has(item.productId)" @click="changeQuantity(item.productId, item.quantity - 1)" />
                 <span class="w-8 text-center text-sm font-semibold">{{ item.quantity }}</span>
-                <UButton color="neutral" variant="ghost" icon="i-ph-plus" size="md" :disabled="item.quantity >= item.stock" @click="updateQuantity(item.productId, item.quantity + 1)" />
+                <UButton color="neutral" variant="ghost" icon="i-ph-plus" size="md" :disabled="item.quantity >= item.stock || busyProductIds.has(item.productId)" :loading="busyProductIds.has(item.productId)" @click="changeQuantity(item.productId, item.quantity + 1)" />
               </div>
               <span class="font-bold text-emerald-700">{{ formatVND(item.price * item.quantity) }}</span>
             </div>

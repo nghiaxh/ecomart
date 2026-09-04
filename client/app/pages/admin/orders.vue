@@ -13,6 +13,7 @@ const page = ref(0)
 const totalPages = ref(0)
 const statusFilter = ref('')
 const loading = ref(false)
+const busyIds = ref<Set<number>>(new Set())
 
 async function load() {
   loading.value = true
@@ -24,21 +25,40 @@ async function load() {
     const data = await request<PageResponse<Order>>(`/api/orders?${params.toString()}`)
     orders.value = data.content
     totalPages.value = data.totalPages
+  } catch (e: any) {
+    toast.add({ title: e?.data?.message || 'Không thể tải đơn hàng', color: 'error' })
   } finally {
     loading.value = false
   }
 }
 
 async function updateStatus(o: Order, status: string) {
-  await request(`/api/orders/${o.id}/status`, { method: 'PATCH', body: { status } })
-  toast.add({ title: 'Đã cập nhật trạng thái', color: 'success' })
-  await load()
+  if (busyIds.value.has(o.id)) return
+  if (status === o.status) return
+  busyIds.value.add(o.id)
+  try {
+    await request(`/api/orders/${o.id}/status`, { method: 'PATCH', body: { status } })
+    toast.add({ title: 'Đã cập nhật trạng thái', color: 'success' })
+    await load()
+  } catch (e: any) {
+    toast.add({ title: e?.data?.message || 'Không thể cập nhật trạng thái', color: 'error' })
+  } finally {
+    busyIds.value.delete(o.id)
+  }
 }
 
 async function confirmPayment(o: Order) {
-  await request(`/api/orders/${o.id}/confirm-payment`, { method: 'POST' })
-  toast.add({ title: 'Đã xác nhận thanh toán', color: 'success' })
-  await load()
+  if (busyIds.value.has(o.id)) return
+  busyIds.value.add(o.id)
+  try {
+    await request(`/api/orders/${o.id}/confirm-payment`, { method: 'POST' })
+    toast.add({ title: 'Đã xác nhận thanh toán', color: 'success' })
+    await load()
+  } catch (e: any) {
+    toast.add({ title: e?.data?.message || 'Không thể xác nhận thanh toán', color: 'error' })
+  } finally {
+    busyIds.value.delete(o.id)
+  }
 }
 
 onMounted(load)
@@ -82,9 +102,10 @@ watch(statusFilter, () => { page.value = 0; load() })
                 value-key="value"
                 size="sm"
                 class="w-40"
+                :disabled="busyIds.has(o.id)"
                 @update:model-value="(v) => updateStatus(o, v as string)"
               />
-              <UButton v-if="o.payment.status === 'PENDING'" color="primary" variant="soft" size="md" label="Xác nhận thanh toán" @click="confirmPayment(o)" />
+              <UButton v-if="o.payment.status === 'PENDING'" color="primary" variant="soft" size="md" label="Xác nhận thanh toán" :loading="busyIds.has(o.id)" @click="confirmPayment(o)" />
             </div>
           </div>
         </div>

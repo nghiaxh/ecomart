@@ -12,18 +12,6 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  vite: {
-    plugins: [],
-    server: {
-      hmr: {
-        protocol: 'http',
-        host: 'localhost',
-        clientPort: 5173,
-        port: 5173
-      }
-    }
-  },
-
   app: {
     head: {
       htmlAttrs: { lang: 'vi' },
@@ -49,8 +37,11 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    apiTarget: process.env.API_PROXY_TARGET || 'http://localhost:8080',
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8080'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
+      supportPhone: process.env.NUXT_PUBLIC_SUPPORT_PHONE || '0900 000 000',
+      supportEmail: process.env.NUXT_PUBLIC_SUPPORT_EMAIL || 'contact@ecomart.vn'
     }
   },
 

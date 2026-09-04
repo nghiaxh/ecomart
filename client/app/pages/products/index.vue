@@ -12,6 +12,7 @@ const totalPages = ref(0)
 const page = ref(0)
 const loading = ref(false)
 const size = 12
+let loadSeq = 0
 
 const filters = reactive({
   q: (route.query.q as string) || '',
@@ -38,6 +39,7 @@ async function loadCats() {
 }
 
 async function load() {
+  const seq = ++loadSeq
   loading.value = true
   try {
     const params = new URLSearchParams()
@@ -56,11 +58,16 @@ async function load() {
     params.set('size', String(size))
 
     const data = await request<PageResponse<Product>>(`/api/products?${params.toString()}`)
+    if (seq !== loadSeq) return
     products.value = data.content
     total.value = data.totalElements
     totalPages.value = data.totalPages
+  } catch (error: any) {
+    if (seq !== loadSeq) return
+    const toast = useToast()
+    toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
   } finally {
-    loading.value = false
+    if (seq === loadSeq) loading.value = false
   }
 }
 

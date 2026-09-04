@@ -9,6 +9,7 @@ const toast = useToast()
 
 const banners = ref<Banner[]>([])
 const loading = ref(true)
+const busyIds = ref<Set<number>>(new Set())
 
 const showForm = ref(false)
 const editingId = ref<number | null>(null)
@@ -65,10 +66,18 @@ async function submit() {
 }
 
 async function remove(b: Banner) {
+  if (busyIds.value.has(b.id)) return
   if (!confirm(`Xóa banner "${b.title}"?`)) return
-  await request(`/api/banners/${b.id}`, { method: 'DELETE' })
-  toast.add({ title: 'Đã xóa banner', color: 'success' })
-  await load()
+  busyIds.value.add(b.id)
+  try {
+    await request(`/api/banners/${b.id}`, { method: 'DELETE' })
+    toast.add({ title: 'Đã xóa banner', color: 'success' })
+    await load()
+  } catch (e: any) {
+    toast.add({ title: e?.data?.message || 'Không thể xóa banner', color: 'error' })
+  } finally {
+    busyIds.value.delete(b.id)
+  }
 }
 
 onMounted(load)
@@ -121,7 +130,7 @@ onMounted(load)
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <div v-for="b in banners" :key="b.id" class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-        <img :src="b.imageUrl" :alt="b.title" class="h-40 w-full object-cover" />
+        <img :src="b.imageUrl" :alt="b.title" class="h-40 w-full object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
         <div class="p-4">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-gray-800">{{ b.title }}</h3>
@@ -130,7 +139,7 @@ onMounted(load)
           <p v-if="b.subtitle" class="mt-1 text-sm text-gray-400">{{ b.subtitle }}</p>
           <div class="mt-3 flex justify-end gap-1">
             <UButton color="neutral" variant="ghost" icon="i-ph-pencil-simple" @click="openEdit(b)" />
-            <UButton color="neutral" variant="ghost" icon="i-ph-trash" @click="remove(b)" />
+            <UButton color="neutral" variant="ghost" icon="i-ph-trash" :loading="busyIds.has(b.id)" @click="remove(b)" />
           </div>
         </div>
       </div>

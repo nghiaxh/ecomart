@@ -8,7 +8,9 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@nuxt/ui": "^4.11.0",
@@ -21,8 +23,13 @@
   },
   "devDependencies": {
     "@iconify-json/ph": "^1.2.2",
+    "@nuxt/test-utils": "^4.2.0",
     "@types/node": "^22.15.0",
+    "@vitest/ui": "^4.1.11",
+    "@vue/test-utils": "^2.5.0",
+    "happy-dom": "^20.13.2",
     "typescript": "^5.8.3",
+    "vitest": "^4.1.11",
     "vue-tsc": "^3.3.11"
   },
   "allowScripts": {

@@ -14,6 +14,7 @@ const page = ref(0)
 const totalPages = ref(0)
 const search = ref('')
 const loading = ref(false)
+const busyIds = ref<Set<number>>(new Set())
 
 const showForm = ref(false)
 const editingId = ref<number | null>(null)
@@ -93,15 +94,31 @@ async function submit() {
 }
 
 async function toggle(p: Product) {
-  await request(`/api/products/${p.id}/toggle`, { method: 'PATCH' })
-  await load()
+  if (busyIds.value.has(p.id)) return
+  busyIds.value.add(p.id)
+  try {
+    await request(`/api/products/${p.id}/toggle`, { method: 'PATCH' })
+    await load()
+  } catch (e: any) {
+    toast.add({ title: e?.data?.message || 'Không thể cập nhật trạng thái', color: 'error' })
+  } finally {
+    busyIds.value.delete(p.id)
+  }
 }
 
 async function remove(p: Product) {
+  if (busyIds.value.has(p.id)) return
   if (!confirm(`Xóa sản phẩm "${p.name}"?`)) return
-  await request(`/api/products/${p.id}`, { method: 'DELETE' })
-  toast.add({ title: 'Đã xóa sản phẩm', color: 'success' })
-  await load()
+  busyIds.value.add(p.id)
+  try {
+    await request(`/api/products/${p.id}`, { method: 'DELETE' })
+    toast.add({ title: 'Đã xóa sản phẩm', color: 'success' })
+    await load()
+  } catch (e: any) {
+    toast.add({ title: e?.data?.message || 'Không thể xóa sản phẩm', color: 'error' })
+  } finally {
+    busyIds.value.delete(p.id)
+  }
 }
 
 const debouncedLoad = useDebounceFn(load, 400)
@@ -190,7 +207,7 @@ watch(search, debouncedLoad)
           <tr v-for="p in products" :key="p.id" class="border-t border-gray-100">
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
-                <img :src="p.images?.[0]" :alt="p.name" class="h-10 w-10 rounded-lg object-cover" />
+                <img :src="p.images?.[0]" :alt="p.name" class="h-10 w-10 rounded-lg object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
                 <span class="font-medium text-gray-800">{{ p.name }}</span>
               </div>
             </td>
@@ -202,8 +219,8 @@ watch(search, debouncedLoad)
             <td class="px-4 py-3">
               <div class="flex justify-end gap-1">
                 <UButton color="neutral" variant="ghost" icon="i-ph-pencil-simple" @click="openEdit(p)" />
-                <UButton color="neutral" variant="ghost" :icon="p.active ? 'i-ph-eye-slash' : 'i-ph-eye'" @click="toggle(p)" />
-                <UButton color="neutral" variant="ghost" icon="i-ph-trash" @click="remove(p)" />
+                <UButton color="neutral" variant="ghost" :icon="p.active ? 'i-ph-eye-slash' : 'i-ph-eye'" :loading="busyIds.has(p.id)" @click="toggle(p)" />
+                <UButton color="neutral" variant="ghost" icon="i-ph-trash" :loading="busyIds.has(p.id)" @click="remove(p)" />
               </div>
             </td>
           </tr>

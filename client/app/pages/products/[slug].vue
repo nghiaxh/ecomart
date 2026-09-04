@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Product, Review } from '~/types'
+import { reviewSchema } from '~/schemas'
 
 const { request } = useApi()
 const { formatVND, formatKg, formatDate } = useFormat()
@@ -13,6 +14,8 @@ const reviews = ref<Review[]>([])
 const quantity = ref(1)
 const loading = ref(true)
 const adding = ref(false)
+const submittingReview = ref(false)
+const reviewLoadError = ref(false)
 
 const selectedImage = ref('')
 const reviewFormOpen = ref(false)
@@ -43,13 +46,20 @@ async function load() {
     const p = await request<Product>(`/api/products/slug/${route.params.slug}`)
     product.value = p
     selectedImage.value = p.images?.[0] || ''
+  } catch (error: any) {
+    toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
   } finally {
     loading.value = false
   }
 }
 
 async function loadReviews() {
-  reviews.value = await request<Review[]>(`/api/reviews?productId=${product.value?.id}&includeHidden=false`)
+  reviewLoadError.value = false
+  try {
+    reviews.value = await request<Review[]>(`/api/reviews?productId=${product.value?.id}&includeHidden=false`)
+  } catch {
+    reviewLoadError.value = true
+  }
 }
 
 async function addToCart() {
@@ -71,14 +81,27 @@ async function addToCart() {
 }
 
 async function submitReview() {
-  if (!product.value) return
-  await request('/api/reviews', {
-    method: 'POST',
-    body: { productId: product.value.id, rating: reviewForm.rating, content: reviewForm.content }
-  })
-  toast.add({ title: 'Cảm ơn bạn đã đánh giá!', icon: 'i-ph-check-circle', color: 'success' })
-  reviewForm.content = ''
-  await loadReviews()
+  if (!product.value || submittingReview.value) return
+  const parsed = reviewSchema.safeParse(reviewForm)
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]
+    toast.add({ title: first?.message || 'Đánh giá không hợp lệ', color: 'error' })
+    return
+  }
+  submittingReview.value = true
+  try {
+    await request('/api/reviews', {
+      method: 'POST',
+      body: { productId: product.value.id, rating: reviewForm.rating, content: reviewForm.content }
+    })
+    toast.add({ title: 'Cảm ơn bạn đã đánh giá!', icon: 'i-ph-check-circle', color: 'success' })
+    reviewForm.content = ''
+    await loadReviews()
+  } catch (error: any) {
+    toast.add({ title: error?.data?.message || 'Không thể gửi đánh giá', color: 'error' })
+  } finally {
+    submittingReview.value = false
+  }
 }
 
 onMounted(() => {
@@ -221,13 +244,13 @@ onMounted(() => {
 
       <div v-if="isLoggedIn && reviewFormOpen" class="mt-6 rounded-2xl border border-emerald-100 bg-white p-4">
         <div class="flex items-center gap-1">
-          <button v-for="s in 5" :key="s" :class="s <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'" @click="reviewForm.rating = s">
+          <button v-for="s in 5" :key="s" type="button" :aria-label="`Đánh giá ${s} sao`" :class="s <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'" @click="reviewForm.rating = s">
             <UIcon name="i-ph-star-fill" class="h-6 w-6" />
           </button>
         </div>
         <div class="mt-3 flex items-end gap-3">
           <UTextarea v-model="reviewForm.content" placeholder="Chia sẻ trải nghiệm của bạn..." class="flex-1" :rows="2" />
-          <UButton color="primary" label="Gửi" icon="i-ph-paper-plane-tilt" @click="submitReview" />
+          <UButton color="primary" label="Gửi" icon="i-ph-paper-plane-tilt" :loading="submittingReview" @click="submitReview" />
         </div>
       </div>
 
@@ -247,7 +270,8 @@ onMounted(() => {
           </div>
           <p v-if="r.content" class="mt-2 text-sm text-gray-600">{{ r.content }}</p>
         </div>
-        <p v-if="!reviews.length" class="py-8 text-center text-gray-400">Chưa có đánh giá nào.</p>
+        <p v-if="!reviews.length && !reviewLoadError" class="py-8 text-center text-gray-400">Chưa có đánh giá nào.</p>
+        <p v-if="reviewLoadError" class="py-8 text-center text-red-400">Không thể tải đánh giá.</p>
       </div>
     </div>
 

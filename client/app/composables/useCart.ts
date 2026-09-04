@@ -4,9 +4,18 @@ export const useCart = () => {
   const cart = useState<Cart | null>('ecomart_cart', () => null)
   const { request } = useApi()
   const { isLoggedIn } = useAuth()
+  const toast = useToast()
 
   const itemCount = computed(() => cart.value?.itemCount ?? 0)
   const subtotal = computed(() => cart.value?.subtotal ?? 0)
+
+  watch(isLoggedIn, (loggedIn) => {
+    if (loggedIn) {
+      fetchCart()
+    } else {
+      cart.value = null
+    }
+  }, { immediate: true })
 
   const fetchCart = async () => {
     if (!isLoggedIn.value) return null
@@ -20,25 +29,49 @@ export const useCart = () => {
   }
 
   const add = async (productId: number, quantity = 1) => {
-    cart.value = await request<Cart>('/api/cart', {
-      method: 'POST',
-      body: { productId, quantity }
-    })
-    return cart.value
+    try {
+      cart.value = await request<Cart>('/api/cart', {
+        method: 'POST',
+        body: { productId, quantity }
+      })
+      return cart.value
+    } catch (error: any) {
+      toast.add({
+        title: error?.data?.message || 'Không thể thêm sản phẩm vào giỏ hàng',
+        color: 'error'
+      })
+      throw error
+    }
   }
 
   const updateQuantity = async (productId: number, quantity: number) => {
-    cart.value = await request<Cart>(`/api/cart/${productId}?quantity=${quantity}`, {
-      method: 'PUT'
-    })
-    return cart.value
+    try {
+      cart.value = await request<Cart>(`/api/cart/${productId}?quantity=${quantity}`, {
+        method: 'PUT'
+      })
+      return cart.value
+    } catch (error: any) {
+      toast.add({
+        title: error?.data?.message || 'Không thể cập nhật giỏ hàng',
+        color: 'error'
+      })
+      throw error
+    }
   }
 
   const remove = async (productId: number) => {
-    cart.value = await request<Cart>(`/api/cart/${productId}`, {
-      method: 'DELETE'
-    })
-    return cart.value
+    try {
+      cart.value = await request<Cart>(`/api/cart/${productId}`, {
+        method: 'DELETE'
+      })
+      return cart.value
+    } catch (error: any) {
+      toast.add({
+        title: error?.data?.message || 'Không thể xóa sản phẩm khỏi giỏ hàng',
+        color: 'error'
+      })
+      throw error
+    }
   }
 
   const reset = () => {

@@ -15,6 +15,7 @@ const paymentMethod = ref<'PAYOS' | 'COD'>('COD')
 const notes = ref('')
 const loading = ref(false)
 const showAddressForm = ref(false)
+const savingAddress = ref(false)
 
 const addressForm = reactive({
   label: '', street: '', ward: '', district: '', city: '', receiverName: '', receiverPhone: '', isDefault: false
@@ -22,14 +23,22 @@ const addressForm = reactive({
 const addressErrors = ref<Record<string, string>>({})
 
 async function loadAddresses() {
-  addresses.value = await request<Address[]>('/api/addresses')
-  const def = addresses.value.find(a => a.isDefault)
-  const first = addresses.value[0]
-  selectedAddressId.value = def?.id ?? first?.id ?? null
+  try {
+    addresses.value = await request<Address[]>('/api/addresses')
+    const def = addresses.value.find(a => a.isDefault)
+    const first = addresses.value[0]
+    selectedAddressId.value = def?.id ?? first?.id ?? null
+  } catch (error: any) {
+    toast.add({ title: error?.data?.message || 'Không thể tải địa chỉ', color: 'error' })
+  }
 }
 
 async function loadCart() {
-  await fetchCart()
+  try {
+    await fetchCart()
+  } catch {
+    toast.add({ title: 'Không thể tải giỏ hàng', color: 'error' })
+  }
 }
 
 async function createAddress() {
@@ -39,11 +48,18 @@ async function createAddress() {
     for (const issue of result.error.issues) addressErrors.value[String(issue.path[0])] = issue.message
     return
   }
-  const created = await request<Address>('/api/addresses', { method: 'POST', body: addressForm })
-  await loadAddresses()
-  if (created.isDefault) await loadCart()
-  showAddressForm.value = false
-  Object.assign(addressForm, { label: '', street: '', ward: '', district: '', city: '', receiverName: '', receiverPhone: '', isDefault: false })
+  savingAddress.value = true
+  try {
+    const created = await request<Address>('/api/addresses', { method: 'POST', body: addressForm })
+    await loadAddresses()
+    if (created.isDefault) await loadCart()
+    showAddressForm.value = false
+    Object.assign(addressForm, { label: '', street: '', ward: '', district: '', city: '', receiverName: '', receiverPhone: '', isDefault: false })
+  } catch (error: any) {
+    toast.add({ title: error?.data?.message || 'Không thể lưu địa chỉ', color: 'error' })
+  } finally {
+    savingAddress.value = false
+  }
 }
 
 async function checkout() {
@@ -121,7 +137,7 @@ onMounted(() => {
             <UCheckbox v-model="addressForm.isDefault" label="Đặt làm địa chỉ mặc định" />
             <div class="sm:col-span-2 flex justify-end gap-2">
               <UButton color="neutral" variant="ghost" label="Hủy" @click="showAddressForm = false" />
-              <UButton type="submit" color="primary" label="Lưu địa chỉ" />
+              <UButton type="submit" color="primary" label="Lưu địa chỉ" :loading="savingAddress" />
             </div>
           </form>
 

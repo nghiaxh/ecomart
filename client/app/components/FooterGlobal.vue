@@ -1,3 +1,9 @@
+<script setup lang="ts">
+const config = useRuntimeConfig()
+const supportPhone = config.public.supportPhone
+const supportEmail = config.public.supportEmail
+</script>
+
 <template>
   <footer class="mt-8 border-t border-emerald-100 bg-emerald-50/40">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6">
@@ -33,8 +39,8 @@
           <h4 class="text-sm font-semibold text-gray-800">Hỗ trợ</h4>
           <ul class="mt-2 space-y-1.5 text-sm text-gray-500">
             <li><NuxtLink to="/chat" class="hover:text-emerald-700">Chat trợ giúp</NuxtLink></li>
-            <li><span>Hotline: 0900 000 000</span></li>
-            <li><span>Email: contact@ecomart.vn</span></li>
+            <li><span>Hotline: {{ supportPhone }}</span></li>
+            <li><span>Email: {{ supportEmail }}</span></li>
           </ul>
         </div>
       </div>

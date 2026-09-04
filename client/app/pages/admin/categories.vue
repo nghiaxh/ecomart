@@ -9,6 +9,7 @@ const toast = useToast()
 
 const categories = ref<CategoryResponse[]>([])
 const loading = ref(true)
+const busyIds = ref<Set<number>>(new Set())
 
 const categoryIconMap: Record<string, string> = {
   leaf: 'i-ph-leaf',
@@ -78,10 +79,18 @@ async function submit() {
 }
 
 async function remove(c: CategoryResponse) {
+  if (busyIds.value.has(c.id)) return
   if (!confirm(`Xóa danh mục "${c.name}"?`)) return
-  await request(`/api/categories/${c.id}`, { method: 'DELETE' })
-  toast.add({ title: 'Đã xóa danh mục', color: 'success' })
-  await load()
+  busyIds.value.add(c.id)
+  try {
+    await request(`/api/categories/${c.id}`, { method: 'DELETE' })
+    toast.add({ title: 'Đã xóa danh mục', color: 'success' })
+    await load()
+  } catch (e: any) {
+    toast.add({ title: e?.data?.message || 'Không thể xóa danh mục', color: 'error' })
+  } finally {
+    busyIds.value.delete(c.id)
+  }
 }
 
 onMounted(load)
@@ -151,7 +160,7 @@ onMounted(load)
               <td class="px-4 py-3">
                 <div class="flex justify-end gap-1">
                   <UButton color="neutral" variant="ghost" icon="i-ph-pencil-simple" @click="openEdit(c)" />
-                  <UButton color="neutral" variant="ghost" icon="i-ph-trash" @click="remove(c)" />
+                  <UButton color="neutral" variant="ghost" icon="i-ph-trash" :loading="busyIds.has(c.id)" @click="remove(c)" />
                 </div>
               </td>
             </tr>

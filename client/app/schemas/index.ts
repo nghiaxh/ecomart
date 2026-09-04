@@ -8,7 +8,7 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   username: z.string().min(3, 'Tên đăng nhập tối thiểu 3 ký tự').max(50),
   email: z.string().email('Email không hợp lệ'),
-  numberPhone: z.string().min(10, 'Số điện thoại không hợp lệ').max(15),
+  numberPhone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ'),
   password: z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(100)
 })
 
@@ -30,22 +30,27 @@ export const reviewSchema = z.object({
 
 export const profileSchema = z.object({
   username: z.string().min(3).max(50),
-  numberPhone: z.string().min(10).max(15),
+  numberPhone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ'),
   avatarUrl: z.string().optional(),
   currentPassword: z.string().optional(),
-  newPassword: z.string().min(6).max(100).optional().or(z.literal(''))
-})
+  newPassword: z.string().min(6, 'Mật khẩu mới tối thiểu 6 ký tự').max(100).optional().or(z.literal(''))
+}).refine((v) => {
+  const change = Boolean(v.currentPassword && v.currentPassword.length)
+  const newP = Boolean(v.newPassword && v.newPassword.length)
+  return change === newP
+}, { message: 'Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới', path: ['newPassword'] })
 
 export const productSchema = z.object({
   name: z.string().min(1, 'Vui lòng nhập tên sản phẩm'),
   slug: z.string().min(1, 'Vui lòng nhập slug'),
   price: z.coerce.number().positive('Giá phải lớn hơn 0'),
   stock: z.coerce.number().min(0, 'Tồn kho không âm'),
-  weight: z.coerce.number().optional(),
+  weight: z.coerce.number().min(0, 'Khối lượng không âm').optional(),
   origin: z.string().optional(),
   categoryId: z.coerce.number().positive('Chọn danh mục'),
   active: z.boolean().optional(),
-  description: z.string().optional()
+  description: z.string().optional(),
+  imageUrl: z.string().regex(/^(https?:\/\/|\/|#).*/, 'Hình ảnh phải là URL hợp lệ').optional().or(z.literal(''))
 })
 
 export const categorySchema = z.object({
