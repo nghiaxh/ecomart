@@ -1,5 +1,6 @@
 package com.ecomart.controller;
 
+import com.ecomart.common.SecurityUtils;
 import com.ecomart.dto.request.ProductRequest;
 import com.ecomart.dto.response.MessageResponse;
 import com.ecomart.dto.response.PageResponse;
@@ -28,20 +29,23 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final SecurityUtils securityUtils;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, SecurityUtils securityUtils) {
         this.productService = productService;
+        this.securityUtils = securityUtils;
     }
 
     @GetMapping
     public PageResponse<ProductResponse> search(@RequestParam(required = false) String q,
-                                                @RequestParam(required = false) Long category,
-                                                @RequestParam(required = false) Double minPrice,
-                                                @RequestParam(required = false) Double maxPrice,
-                                                @RequestParam(defaultValue = "false") boolean showAll,
-                                                @RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "12") int size) {
-        return productService.search(q, category, minPrice, maxPrice, !showAll, PageRequest.of(page, size));
+                                                 @RequestParam(required = false) Long category,
+                                                 @RequestParam(required = false) Double minPrice,
+                                                 @RequestParam(required = false) Double maxPrice,
+                                                 @RequestParam(defaultValue = "false") boolean showAll,
+                                                 @RequestParam(defaultValue = "0") int page,
+                                                 @RequestParam(defaultValue = "12") int size) {
+        boolean onlyActive = !showAll || !securityUtils.currentUserHasRole("ADMIN");
+        return productService.search(q, category, minPrice, maxPrice, onlyActive, PageRequest.of(page, size));
     }
 
     @GetMapping("/latest")

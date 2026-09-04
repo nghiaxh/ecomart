@@ -10,6 +10,7 @@ import com.ecomart.exception.BadRequestException;
 import com.ecomart.exception.ResourceNotFoundException;
 import com.ecomart.repository.ProductRepository;
 import com.ecomart.repository.ReviewRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,9 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewResponse> listForProduct(Long productId, boolean includeHidden) {
+        if (includeHidden && !securityUtils.currentUserHasRole("ADMIN")) {
+            throw new AccessDeniedException("Bạn không có quyền xem đánh giá đã ẩn");
+        }
         List<Review> reviews = includeHidden
                 ? reviewRepository.findByProductIdOrderByCreatedAtDesc(productId)
                 : reviewRepository.findByProductIdAndIsHiddenFalseOrderByCreatedAtDesc(productId);

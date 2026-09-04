@@ -35,6 +35,7 @@ public class BannerController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<BannerResponse> all() {
         return bannerService.all();
     }
