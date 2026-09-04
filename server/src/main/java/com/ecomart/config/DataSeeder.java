@@ -4,6 +4,7 @@ import com.ecomart.domain.entity.*;
 import com.ecomart.domain.enums.MaterialType;
 import com.ecomart.domain.enums.UserRole;
 import com.ecomart.repository.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,15 @@ public class DataSeeder implements CommandLineRunner {
     private final ProductRepository productRepository;
     private final BannerRepository bannerRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.seed.enabled:true}")
+    private boolean seedEnabled;
+
+    @Value("${app.seed.admin-password:}")
+    private String seedAdminPassword;
+
+    @Value("${app.seed.customer-password:}")
+    private String seedCustomerPassword;
 
     public DataSeeder(UserRepository userRepository,
                       CustomerRepository customerRepository,
@@ -57,14 +67,16 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedAdmin() {
-        if (userRepository.existsByUsername("admin")) {
+        if (!seedEnabled || userRepository.existsByUsername("admin")) {
             return;
         }
+        String password = seedAdminPassword != null && !seedAdminPassword.isBlank()
+                ? seedAdminPassword : "Admin@123";
         Admin admin = new Admin();
         admin.setUsername("admin");
         admin.setEmail("admin@ecomart.vn");
         admin.setNumberPhone("0900000000");
-        admin.setPasswordHash(passwordEncoder.encode("Admin@123"));
+        admin.setPasswordHash(passwordEncoder.encode(password));
         admin.setRole(UserRole.ADMIN);
         admin.setActive(true);
         admin.setHireDate(java.time.LocalDate.now());
@@ -72,14 +84,16 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedCustomer() {
-        if (userRepository.existsByUsername("customer")) {
+        if (!seedEnabled || userRepository.existsByUsername("customer")) {
             return;
         }
+        String password = seedCustomerPassword != null && !seedCustomerPassword.isBlank()
+                ? seedCustomerPassword : "Customer@123";
         Customer customer = new Customer();
         customer.setUsername("customer");
         customer.setEmail("customer@ecomart.vn");
         customer.setNumberPhone("0901111111");
-        customer.setPasswordHash(passwordEncoder.encode("Customer@123"));
+        customer.setPasswordHash(passwordEncoder.encode(password));
         customer.setRole(UserRole.CUSTOMER);
         customer.setActive(true);
         customer = customerRepository.save(customer);

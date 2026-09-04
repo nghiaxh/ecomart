@@ -13,7 +13,7 @@ import java.util.List;
 @Table(name = "orders", indexes = {
         @Index(name = "idx_orders_user", columnList = "customer_id"),
         @Index(name = "idx_orders_status", columnList = "status"),
-        @Index(name = "idx_orders_created", columnList = "createdAt")
+        @Index(name = "idx_orders_created", columnList = "created_at")
 })
 @Getter
 @Setter

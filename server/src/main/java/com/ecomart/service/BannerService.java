@@ -20,12 +20,14 @@ public class BannerService {
         this.bannerRepository = bannerRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<BannerResponse> active() {
         return bannerRepository.findByIsActiveTrueOrderByDisplayOrderAsc().stream()
                 .map(Mapper::toBanner)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<BannerResponse> all() {
         return bannerRepository.findAll().stream()
                 .sorted((a, b) -> Integer.compare(a.getDisplayOrder(), b.getDisplayOrder()))

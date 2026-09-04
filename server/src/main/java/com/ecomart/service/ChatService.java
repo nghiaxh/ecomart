@@ -34,6 +34,7 @@ public class ChatService {
         this.chatBot = chatBot;
     }
 
+    @Transactional(readOnly = true)
     public List<ChatSessionResponse> mySessions() {
         return sessionRepository.findByUserIdOrderByCreatedAtDesc(securityUtils.currentUserId()).stream()
                 .map(this::toSession)
@@ -78,8 +79,9 @@ public class ChatService {
     }
 
     private ChatSessionResponse toSession(ChatSession s) {
-        List<ChatResponse.MessageResponse> messages = messageRepository.findBySessionIdOrderByCreatedAtAsc(s.getId())
-                .stream().map(com.ecomart.common.Mapper::toChatMessage).toList();
+        List<ChatResponse.MessageResponse> messages = s.getMessages().stream()
+                .map(com.ecomart.common.Mapper::toChatMessage)
+                .toList();
         return new ChatSessionResponse(s.getId(), s.getTitle(), s.getCreatedAt(), messages);
     }
 

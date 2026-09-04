@@ -7,6 +7,7 @@ import com.ecomart.dto.response.CategoryResponse;
 import com.ecomart.exception.BadRequestException;
 import com.ecomart.exception.ResourceNotFoundException;
 import com.ecomart.repository.CategoryRepository;
+import com.ecomart.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,9 +17,11 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
     }
 
     @Transactional(readOnly = true)
@@ -57,6 +60,12 @@ public class CategoryService {
     public void delete(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new ResourceNotFoundException("Không tìm thấy danh mục");
+        }
+        if (!categoryRepository.findByParentId(id).isEmpty()) {
+            throw new BadRequestException("Không thể xóa danh mục có danh mục con");
+        }
+        if (productRepository.existsByCategoryId(id)) {
+            throw new BadRequestException("Không thể xóa danh mục đang chứa sản phẩm");
         }
         categoryRepository.deleteById(id);
     }

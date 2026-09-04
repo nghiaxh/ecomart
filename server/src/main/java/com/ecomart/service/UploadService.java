@@ -18,6 +18,8 @@ import java.util.UUID;
 public class UploadService {
 
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp", "gif");
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg", "image/png", "image/webp", "image/gif");
 
     @Value("${app.upload-dir}")
     private String uploadDir;
@@ -35,6 +37,10 @@ public class UploadService {
                 : "";
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
             throw new BadRequestException("Định dạng file không được hỗ trợ");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new BadRequestException("Loại file không được hỗ trợ");
         }
         try {
             String safeFolder = folder == null || folder.isBlank() ? "misc" : folder.replaceAll("[^a-zA-Z0-9_-]", "");

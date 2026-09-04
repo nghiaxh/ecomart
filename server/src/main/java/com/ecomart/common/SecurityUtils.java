@@ -30,4 +30,13 @@ public class SecurityUtils {
     public Long currentUserId() {
         return currentUser().getId();
     }
+
+    public boolean currentUserHasRole(String role) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return false;
+        }
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+    }
 }

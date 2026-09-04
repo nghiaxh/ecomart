@@ -122,10 +122,10 @@ public class ProductService {
 
     @Transactional
     public void delete(Long id) {
-        if (!productRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Không tìm thấy sản phẩm");
-        }
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+        product.setActive(false);
+        productRepository.save(product);
     }
 
     private Product apply(Product product, ProductRequest req, Category category) {

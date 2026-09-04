@@ -47,6 +47,7 @@ public class ReviewService {
         return Mapper.toReview(reviewRepository.save(review));
     }
 
+    @Transactional(readOnly = true)
     public List<ReviewResponse> listForProduct(Long productId, boolean includeHidden) {
         List<Review> reviews = includeHidden
                 ? reviewRepository.findByProductIdOrderByCreatedAtDesc(productId)

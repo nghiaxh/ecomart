@@ -5,6 +5,7 @@ import com.ecomart.dto.response.ChatResponse;
 import com.ecomart.dto.response.ChatSessionResponse;
 import com.ecomart.service.ChatService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
+@PreAuthorize("isAuthenticated()")
 public class ChatController {
 
     private final ChatService chatService;

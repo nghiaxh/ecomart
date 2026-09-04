@@ -6,6 +6,7 @@ import com.ecomart.domain.entity.User;
 import com.ecomart.domain.enums.NotificationType;
 import com.ecomart.dto.response.NotificationResponse;
 import com.ecomart.dto.response.PageResponse;
+import com.ecomart.exception.ResourceNotFoundException;
 import com.ecomart.repository.NotificationRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,11 +28,13 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<NotificationResponse> listForUser(Long userId, Pageable pageable) {
         Page<Notification> page = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
         return Mapper.toPage(page, page.getContent().stream().map(Mapper::toNotification).toList());
     }
 
+    @Transactional(readOnly = true)
     public long unreadCount(Long userId) {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
@@ -40,17 +43,13 @@ public class NotificationService {
     public void markRead(Long userId, Long notificationId) {
         Notification n = notificationRepository.findById(notificationId)
                 .filter(notif -> notif.getUser().getId().equals(userId))
-                .orElseThrow();
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông báo"));
         n.setRead(true);
         notificationRepository.save(n);
     }
 
     @Transactional
     public void markAllRead(Long userId) {
-        notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, Pageable.unpaged()).getContent()
-                .forEach(n -> {
-                    n.setRead(true);
-                    notificationRepository.save(n);
-                });
+        notificationRepository.markAllReadByUserId(userId);
     }
 }

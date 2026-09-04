@@ -143,6 +143,7 @@ public class OrderService {
             }
         }
 
+        cart.getItems().clear();
         cartItemRepository.deleteByCartId(cart.getId());
         notificationService.send(customer, "Đơn hàng #" + order.getId() + " đã được tạo",
                 "Đơn hàng của bạn với tổng giá trị " + Math.round(order.getTotal()) + "đ đã được ghi nhận.",
@@ -152,12 +153,14 @@ public class OrderService {
                 method == PaymentMethod.COD ? "Đặt hàng thành công, thanh toán khi nhận hàng" : "Vui lòng hoàn tất thanh toán");
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<OrderResponse> myOrders(Pageable pageable) {
         Customer customer = (Customer) securityUtils.currentUser();
         Page<Order> page = orderRepository.findByCustomerId(customer.getId(), pageable);
         return Mapper.toPage(page, page.getContent().stream().map(Mapper::toOrder).toList());
     }
 
+    @Transactional(readOnly = true)
     public OrderResponse getMyOrder(Long orderId) {
         Customer customer = (Customer) securityUtils.currentUser();
         Order order = orderRepository.findById(orderId)
@@ -168,10 +171,17 @@ public class OrderService {
         return Mapper.toOrder(order);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<OrderResponse> allOrders(String status, Pageable pageable) {
         Page<Order> page;
         if (status != null && !status.isBlank()) {
-            page = orderRepository.findByStatus(OrderStatus.valueOf(status), pageable);
+            OrderStatus orderStatus;
+            try {
+                orderStatus = OrderStatus.valueOf(status);
+            } catch (IllegalArgumentException ex) {
+                throw new BadRequestException("Trạng thái đơn hàng không hợp lệ: " + status);
+            }
+            page = orderRepository.findByStatus(orderStatus, pageable);
         } else {
             page = orderRepository.findAll(pageable);
         }
@@ -182,7 +192,12 @@ public class OrderService {
     public OrderResponse updateStatus(Long orderId, String status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
-        OrderStatus newStatus = OrderStatus.valueOf(status);
+        OrderStatus newStatus;
+        try {
+            newStatus = OrderStatus.valueOf(status);
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Trạng thái đơn hàng không hợp lệ: " + status);
+        }
         order.setStatus(newStatus);
         orderRepository.save(order);
 
@@ -193,6 +208,24 @@ public class OrderService {
     public OrderResponse confirmPayment(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+        markPaid(order);
+        return Mapper.toOrder(order);
+    }
+
+    @Transactional
+    public OrderResponse confirmPaymentByCurrentUser(Long orderId) {
+        Customer customer = (Customer) securityUtils.currentUser();
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+        if (!order.getCustomer().getId().equals(customer.getId())
+                && !securityUtils.currentUserHasRole("ADMIN")) {
+            throw new com.ecomart.exception.UnauthorizedException("Không thể thanh toán đơn hàng này");
+        }
+        markPaid(order);
+        return Mapper.toOrder(order);
+    }
+
+    private void markPaid(Order order) {
         Payment payment = order.getPayment();
         if (payment != null && payment.getMethod() == PaymentMethod.PAYOS && payment.getStatus() != PaymentStatus.PAID) {
             payment.setStatus(PaymentStatus.PAID);
@@ -203,7 +236,6 @@ public class OrderService {
                     "Cảm ơn bạn! Thanh toán cho đơn hàng đã được hoàn tất.",
                     NotificationType.ORDER, String.valueOf(order.getId()));
         }
-        return Mapper.toOrder(order);
     }
 
     private PaymentMethod parseMethod(String value) {

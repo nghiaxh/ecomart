@@ -5,6 +5,7 @@ import com.ecomart.dto.response.ReviewResponse;
 import com.ecomart.service.ReviewService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,11 +36,13 @@ public class ReviewController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated()")
     public ReviewResponse create(@Valid @RequestBody ReviewRequest request) {
         return reviewService.create(request);
     }
 
     @PatchMapping("/{id}/toggle")
+    @PreAuthorize("hasRole('ADMIN')")
     public void toggleHidden(@PathVariable Long id) {
         reviewService.toggleHidden(id);
     }

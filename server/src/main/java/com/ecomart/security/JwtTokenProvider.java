@@ -18,7 +18,14 @@ public class JwtTokenProvider {
     private final long expirationMs;
 
     public JwtTokenProvider(JwtProperties properties) {
-        this.secretKey = Keys.hmacShaKeyFor(properties.secret().getBytes(StandardCharsets.UTF_8));
+        if (properties.secret() == null || properties.secret().isBlank()) {
+            throw new IllegalStateException("JWT_SECRET chưa được cấu hình. Vui lòng đặt biến môi trường JWT_SECRET.");
+        }
+        byte[] secretBytes = properties.secret().getBytes(StandardCharsets.UTF_8);
+        if (secretBytes.length < 32) {
+            throw new IllegalStateException("JWT_SECRET phải dài tối thiểu 32 ký tự.");
+        }
+        this.secretKey = Keys.hmacShaKeyFor(secretBytes);
         this.expirationMs = properties.expirationMs();
     }
 

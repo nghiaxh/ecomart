@@ -2,6 +2,7 @@ package com.ecomart.controller;
 
 import com.ecomart.dto.response.MessageResponse;
 import com.ecomart.service.UploadService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +20,7 @@ public class UploadController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public MessageResponse upload(@RequestParam("file") MultipartFile file,
                                   @RequestParam(defaultValue = "misc") String folder) {
         return uploadService.upload(file, folder);

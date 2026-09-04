@@ -3,6 +3,7 @@ package com.ecomart.domain.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +50,13 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
 
+    @BatchSize(size = 20)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductMaterial> materials = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private java.time.Instant createdAt = java.time.Instant.now();
+
+    @Version
+    private long version;
 }
