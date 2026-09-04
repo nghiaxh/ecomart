@@ -11,6 +11,7 @@ const toast = useToast()
 const form = reactive({ identifier: '', password: '' })
 const loading = ref(false)
 const showPassword = ref(false)
+const remember = ref(false)
 
 async function submit() {
   const result = loginSchema.safeParse(form)
@@ -22,7 +23,7 @@ async function submit() {
   }
   loading.value = true
   try {
-    const data = await login(form.identifier, form.password)
+    const data = await login(form.identifier, form.password, { remember: remember.value })
     if (data.role === 'ADMIN') {
       navigateTo('/admin')
     } else {
@@ -78,6 +79,9 @@ async function submit() {
             />
           </template>
         </UInput>
+      </div>
+      <div class="flex items-center justify-between">
+        <UCheckbox v-model="remember" label="Ghi nhớ đăng nhập" />
       </div>
       <UButton type="submit" color="primary" size="xl" block :loading="loading" label="Đăng nhập" class="mt-2" />
     </form>

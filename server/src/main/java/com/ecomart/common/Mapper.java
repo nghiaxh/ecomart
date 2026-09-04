@@ -11,9 +11,9 @@ public final class Mapper {
     private Mapper() {
     }
 
-    public static AuthResponse toAuth(User user, String token) {
-        return new AuthResponse(token, user.getId(), user.getUsername(), user.getEmail(),
-                user.getNumberPhone(), user.getAvatarUrl(), user.getRole());
+    public static AuthResponse toAuth(User user, String accessToken, String refreshToken, long expiresIn) {
+        return new AuthResponse(accessToken, refreshToken, expiresIn, user.getId(), user.getUsername(),
+                user.getEmail(), user.getNumberPhone(), user.getAvatarUrl(), user.getRole());
     }
 
     public static ProfileResponse toProfile(User user) {

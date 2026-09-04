@@ -4,6 +4,8 @@ import com.ecomart.domain.enums.UserRole;
 
 public record AuthResponse(
         String token,
+        String refreshToken,
+        long expiresIn,
         Long id,
         String username,
         String email,

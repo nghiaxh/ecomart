@@ -8,6 +8,8 @@ export type MaterialType = 'ORGANIC' | 'RECYCLED' | 'NATURAL' | 'SYNTHETIC'
 
 export interface AuthResponse {
   token: string
+  refreshToken: string
+  expiresIn: number
   id: number
   username: string
   email: string

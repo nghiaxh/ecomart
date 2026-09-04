@@ -1,6 +1,7 @@
 package com.ecomart.controller;
 
 import com.ecomart.dto.request.LoginRequest;
+import com.ecomart.dto.request.RefreshTokenRequest;
 import com.ecomart.dto.request.RegisterRequest;
 import com.ecomart.dto.response.AuthResponse;
 import com.ecomart.service.AuthService;
@@ -31,5 +32,16 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public AuthResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return authService.refresh(request);
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request);
     }
 }

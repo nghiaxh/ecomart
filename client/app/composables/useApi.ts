@@ -1,12 +1,16 @@
 import type { FetchOptions } from 'ofetch'
 
+const AUTH_URL_PREFIX = '/api/auth'
+
+let refreshInflight: Promise<unknown> | null = null
+
 export const useApi = () => {
   const config = useRuntimeConfig()
   const router = useRouter()
 
   const getToken = () => {
     if (import.meta.client) {
-      return localStorage.getItem('ecomart_token')
+      return localStorage.getItem('ecomart_token') ?? sessionStorage.getItem('ecomart_token')
     }
     return null
   }
@@ -15,9 +19,25 @@ export const useApi = () => {
     if (!import.meta.client) return
     localStorage.removeItem('ecomart_session')
     localStorage.removeItem('ecomart_token')
+    sessionStorage.removeItem('ecomart_session')
+    sessionStorage.removeItem('ecomart_token')
   }
 
-  const request = async <T>(url: string, opts: FetchOptions = {}) => {
+  const tryRefreshOnce = async () => {
+    try {
+      if (!refreshInflight) {
+        refreshInflight = useAuth().refresh().finally(() => {
+          refreshInflight = null
+        })
+      }
+      await refreshInflight
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const rawRequest = async <T>(url: string, opts: FetchOptions = {}) => {
     const headers: Record<string, string> = {
       ...(opts.headers as Record<string, string> || {})
     }
@@ -25,13 +45,31 @@ export const useApi = () => {
     if (token) {
       headers.Authorization = `Bearer ${token}`
     }
+    return await $fetch<T>(`${config.public.apiBase}${url}`, {
+      ...opts,
+      method: opts.method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+      headers
+    })
+  }
+
+  const request = async <T>(url: string, opts: FetchOptions = {}) => {
     try {
-      return await $fetch<T>(`${config.public.apiBase}${url}`, {
-        ...opts,
-        method: opts.method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-        headers
-      })
+      return await rawRequest<T>(url, opts)
     } catch (error: any) {
+      const status = error?.response?.status
+      if (import.meta.client && status === 401 && !url.startsWith(AUTH_URL_PREFIX)) {
+        const refreshed = await tryRefreshOnce()
+        if (refreshed) {
+          try {
+            return await rawRequest<T>(url, opts)
+          } catch (retryError: any) {
+            if (retryError?.response?.status !== 401) {
+              throw retryError
+            }
+            error = retryError
+          }
+        }
+      }
       if (import.meta.client && error?.response?.status === 401) {
         clearSession()
         document.dispatchEvent(new Event('ecomart:unauthorized'))
