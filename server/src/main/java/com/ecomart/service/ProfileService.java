@@ -41,12 +41,18 @@ public class ProfileService {
             user.setUsername(request.username());
         }
         if (request.numberPhone() != null && !request.numberPhone().isBlank()) {
+            if (!request.numberPhone().matches("^[0-9+ ]{10,15}$")) {
+                throw new BadRequestException("Số điện thoại không hợp lệ");
+            }
             user.setNumberPhone(request.numberPhone());
         }
         if (request.avatarUrl() != null) {
             user.setAvatarUrl(request.avatarUrl());
         }
         if (request.newPassword() != null && !request.newPassword().isBlank()) {
+            if (request.newPassword().length() < 6) {
+                throw new BadRequestException("Mật khẩu mới phải có ít nhất 6 ký tự");
+            }
             if (request.currentPassword() == null || !passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
                 throw new BadRequestException("Mật khẩu hiện tại không đúng");
             }
