@@ -39,7 +39,7 @@ async function submit() {
 
 <template>
   <AuthShell title="Đăng nhập" subtitle="Chào mừng bạn quay trở lại">
-    <form class="w-full space-y-4" @submit.prevent="submit">
+    <form class="w-full space-y-4" novalidate @submit.prevent="submit">
       <div>
         <label for="login-identifier" class="mb-1.5 block text-sm font-medium text-gray-700">Tên đăng nhập hoặc email</label>
         <UInput
@@ -50,7 +50,6 @@ async function submit() {
           icon="i-ph-user"
           size="lg"
           class="w-full"
-          required
         />
       </div>
       <div class="mb-6">
@@ -64,7 +63,6 @@ async function submit() {
           icon="i-ph-lock"
           size="lg"
           class="w-full"
-          required
           :ui="{ trailing: 'pe-1' }"
         >
           <template #trailing>

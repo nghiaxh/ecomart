@@ -11,15 +11,17 @@ const toast = useToast()
 const orders = ref<Order[]>([])
 const page = ref(0)
 const totalPages = ref(0)
-const statusFilter = ref('')
+const statusFilter = ref('ALL')
 const loading = ref(false)
+const loadError = ref(false)
 const busyIds = ref<Set<number>>(new Set())
 
 async function load() {
   loading.value = true
+  loadError.value = false
   try {
     const params = new URLSearchParams()
-    if (statusFilter.value) params.set('status', statusFilter.value)
+    if (statusFilter.value && statusFilter.value !== 'ALL') params.set('status', statusFilter.value)
     params.set('page', String(page.value))
     params.set('size', '10')
     const data = await request<PageResponse<Order>>(`/api/orders?${params.toString()}`)
@@ -27,6 +29,7 @@ async function load() {
     totalPages.value = data.totalPages
   } catch (e: any) {
     toast.add({ title: e?.data?.message || 'Không thể tải đơn hàng', color: 'error' })
+    loadError.value = true
   } finally {
     loading.value = false
   }
@@ -72,7 +75,7 @@ watch(statusFilter, () => { page.value = 0; load() })
       <div class="flex items-center gap-2">
         <USelect
           v-model="statusFilter"
-          :items="[{ label: 'Tất cả trạng thái', value: '' }, ...Object.entries(orderStatus).map(([k, v]) => ({ label: v.label, value: k }))]"
+          :items="[{ label: 'Tất cả trạng thái', value: 'ALL' }, ...Object.entries(orderStatus).map(([k, v]) => ({ label: v.label, value: k }))]"
           label-key="label"
           value-key="value"
           class="w-48"
@@ -110,7 +113,7 @@ watch(statusFilter, () => { page.value = 0; load() })
           </div>
         </div>
       </div>
-      <p v-if="!loading && !orders.length" class="py-16 text-center text-gray-400">Không có đơn hàng.</p>
+      <p v-if="(!loading && !orders.length) || loadError" class="py-16 text-center text-gray-400">Không có đơn hàng.</p>
     </div>
 
     <div v-if="totalPages > 1" class="mt-4 flex items-center justify-center gap-2">

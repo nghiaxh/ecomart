@@ -1,9 +1,8 @@
 <script setup lang="ts">
-definePageMeta({
-  layout: 'admin'
-})
+import { onMounted } from 'vue'
+import { useAuth } from '~/composables/useAuth'
 
-const { logout } = useAuth()
+const { logout, restore } = useAuth()
 
 const nav = [
   { label: 'Tổng quan', icon: 'i-ph-squares-four', to: '/admin' },
@@ -12,6 +11,14 @@ const nav = [
   { label: 'Đơn hàng', icon: 'i-ph-receipt', to: '/admin/orders' },
   { label: 'Banner', icon: 'i-ph-image', to: '/admin/banners' },
 ]
+
+let restored = false
+onMounted(() => {
+  if (!restored) {
+    restore()
+    restored = true
+  }
+})
 </script>
 
 <template>

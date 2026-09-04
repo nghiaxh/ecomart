@@ -8,6 +8,6 @@ import jakarta.validation.constraints.Size;
 public record ReviewRequest(
         @NotNull Long productId,
         @Min(1) @Max(5) int rating,
-        @Size(max = 2000) String content
+        @NotNull @Size(max = 1000) String content
 ) {
 }

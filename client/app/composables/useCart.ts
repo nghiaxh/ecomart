@@ -9,14 +9,6 @@ export const useCart = () => {
   const itemCount = computed(() => cart.value?.itemCount ?? 0)
   const subtotal = computed(() => cart.value?.subtotal ?? 0)
 
-  watch(isLoggedIn, (loggedIn) => {
-    if (loggedIn) {
-      fetchCart()
-    } else {
-      cart.value = null
-    }
-  }, { immediate: true })
-
   const fetchCart = async () => {
     if (!isLoggedIn.value) return null
     try {
@@ -27,6 +19,14 @@ export const useCart = () => {
       return null
     }
   }
+
+  watch(isLoggedIn, (loggedIn) => {
+    if (loggedIn) {
+      fetchCart()
+    } else {
+      cart.value = null
+    }
+  }, { immediate: true })
 
   const add = async (productId: number, quantity = 1) => {
     try {

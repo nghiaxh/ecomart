@@ -4,6 +4,7 @@ import type { CategoryResponse, PageResponse, Product } from '~/types'
 const { request } = useApi()
 const { formatVND } = useFormat()
 const route = useRoute()
+const toast = useToast()
 
 const products = ref<Product[]>([])
 const categories = ref<CategoryResponse[]>([])
@@ -64,7 +65,6 @@ async function load() {
     totalPages.value = data.totalPages
   } catch (error: any) {
     if (seq !== loadSeq) return
-    const toast = useToast()
     toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
   } finally {
     if (seq === loadSeq) loading.value = false
