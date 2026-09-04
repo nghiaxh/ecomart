@@ -15,7 +15,7 @@ class JwtTokenProviderTest {
     private static final String VALID_SECRET = "0123456789abcdef0123456789abcdef"; // 32 bytes
 
     private JwtTokenProvider provider(String secret) {
-        return new JwtTokenProvider(new JwtProperties(secret, 3600000L));
+        return new JwtTokenProvider(new JwtProperties(secret, 3600000L, 10800000L));
     }
 
     @Test
@@ -37,7 +37,7 @@ class JwtTokenProviderTest {
     @Test
     void generateAndValidateRoundTrip() {
         JwtTokenProvider p = provider(VALID_SECRET);
-        String token = p.generateToken(42L, "CUSTOMER");
+        String token = p.generateAccessToken(42L, "CUSTOMER");
         assertNotNull(token);
         assertTrue(p.validate(token));
         assertEquals(42L, p.getUserId(token));
@@ -54,7 +54,7 @@ class JwtTokenProviderTest {
     void rejectsTokenSignedWithDifferentKey() {
         JwtTokenProvider p1 = provider(VALID_SECRET);
         JwtTokenProvider p2 = provider("fedcba9876543210fedcba9876543210");
-        String token = p1.generateToken(1L, "ADMIN");
+        String token = p1.generateAccessToken(1L, "ADMIN");
         assertFalse(p2.validate(token));
     }
 }

@@ -1,9 +1,11 @@
 package com.ecomart.service;
 
+import com.ecomart.config.JwtProperties;
 import com.ecomart.dto.request.RegisterRequest;
 import com.ecomart.exception.BadRequestException;
 import com.ecomart.repository.CartRepository;
 import com.ecomart.repository.CustomerRepository;
+import com.ecomart.repository.RefreshTokenRepository;
 import com.ecomart.repository.UserRepository;
 import com.ecomart.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,8 +25,10 @@ class AuthServiceTest {
     @Mock UserRepository userRepository;
     @Mock CustomerRepository customerRepository;
     @Mock CartRepository cartRepository;
+    @Mock RefreshTokenRepository refreshTokenRepository;
     @Mock PasswordEncoder passwordEncoder;
     @Mock JwtTokenProvider jwtTokenProvider;
+    @Mock JwtProperties jwtProperties;
     @Mock AuthenticationManager authenticationManager;
 
     private AuthService service;
@@ -32,7 +36,8 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         service = new AuthService(userRepository, customerRepository, cartRepository,
-                passwordEncoder, jwtTokenProvider, authenticationManager);
+                refreshTokenRepository, passwordEncoder, jwtTokenProvider, jwtProperties,
+                authenticationManager);
     }
 
     private RegisterRequest request() {
