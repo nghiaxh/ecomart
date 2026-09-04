@@ -1,16 +1,24 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const baseURL = process.env.E2E_BASE_URL || 'http://localhost:5173'
+
 export default defineConfig({
   testDir: './tests',
   timeout: 60_000,
+  expect: {
+    timeout: 10_000
+  },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0,
-  reporter: [['list']],
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 2 : undefined,
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
-    // Point at the running stack (docker compose up in repo root), or override.
-    baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:5173',
-    trace: 'on-first-retry',
+    baseURL,
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
     screenshot: 'only-on-failure'
   },
   projects: [
