@@ -1,0 +1,21 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    # Test-only secret; must be >= 32 chars for the token provider.
+    secret: this-is-a-test-only-jwt-secret-1234567890
+    expiration-ms: 3600000
+  client-url: http://localhost:5173
+  upload-dir: ${java.io.tmpdir}/ecomart-uploads
+  seed:
+    enabled: false
