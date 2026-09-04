@@ -37,6 +37,9 @@ services:
       PAYOS_RETURN_URL: ${PAYOS_RETURN_URL}
       PAYOS_CANCEL_URL: ${PAYOS_CANCEL_URL}
       UPLOAD_DIR: /app/uploads
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_CUSTOMER_PASSWORD: ${SEED_CUSTOMER_PASSWORD:-}
     ports:
       - "8080:8080"
     depends_on:
@@ -52,7 +55,7 @@ services:
     container_name: ecomart-client
     env_file: .env
     environment:
-      NUXT_PUBLIC_API_BASE: http://localhost:8080
+      NUXT_API_TARGET: http://server:8080
       PORT: 5173
     ports:
       - "5173:5173"

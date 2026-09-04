@@ -103,3 +103,26 @@ mvn package
 | Database | PostgreSQL 18 |
 | Tích hợp | Chat từ khóa + RAG nội bộ, PayOS (thanh toán QR) |
 | Hạ tầng | Docker Compose |
+
+## Kiểm thử
+
+Mỗi tầng test chạy từ thư mục riêng, không có script ở root.
+
+**Client** (`./client`):
+```bash
+npm run typecheck  # kiểm tra type
+npm test           # test đơn vị (Vitest)
+```
+
+**Server** (`./server`):
+```bash
+mvn test # test đơn vị (JUnit + Mockito) và integration (Testcontainers, cần Docker)
+```
+
+**End to end** (`./e2e`): Playwright, nhắm vào stack đang chạy tại `http://127.0.0.1:5173`.
+```bash
+npx playwright install chromium
+npm test
+```
+
+Bài viết [ARCHITECTURE.md](ARCHITECTURE.md) có chi tiết về Flyway và hạ tầng.
