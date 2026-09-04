@@ -20,6 +20,7 @@ services:
       - ecomart
 
   server:
+    profiles: ["prod"]
     build: ./server
     container_name: ecomart-server
     env_file: .env
@@ -28,7 +29,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
       CLIENT_URL: ${CLIENT_URL}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       PAYOS_CLIENT_ID: ${PAYOS_CLIENT_ID}
@@ -51,6 +53,7 @@ services:
       - ecomart
 
   client:
+    profiles: ["prod"]
     build: ./client
     container_name: ecomart-client
     env_file: .env
@@ -64,9 +67,70 @@ services:
     networks:
       - ecomart
 
+  server-dev:
+    profiles: ["dev"]
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: ecomart-server-dev
+    env_file: .env
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      CLIENT_URL: ${CLIENT_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      PAYOS_CLIENT_ID: ${PAYOS_CLIENT_ID}
+      PAYOS_API_KEY: ${PAYOS_API_KEY}
+      PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY}
+      PAYOS_RETURN_URL: ${PAYOS_RETURN_URL}
+      PAYOS_CANCEL_URL: ${PAYOS_CANCEL_URL}
+      UPLOAD_DIR: /app/uploads
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_CUSTOMER_PASSWORD: ${SEED_CUSTOMER_PASSWORD:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/target
+      - m2-cache:/root/.m2
+      - uploads:/app/uploads
+    networks:
+      - ecomart
+
+  client-dev:
+    profiles: ["dev"]
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: ecomart-client-dev
+    env_file: .env
+    environment:
+      NUXT_PUBLIC_API_BASE: http://localhost:8080
+      HOST: 0.0.0.0
+      PORT: 5173
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server-dev
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - ecomart
+
 volumes:
   pgdata:
   uploads:
+  m2-cache:
 
 networks:
   ecomart:
