@@ -22,7 +22,7 @@ async function submit() {
   }
   loading.value = true
   try {
-    const data = await register(form)
+    const data = await register(form, { remember: true })
     if (data.role === 'ADMIN') {
       navigateTo('/admin')
     } else {
@@ -38,7 +38,7 @@ async function submit() {
 
 <template>
   <AuthShell title="Tạo tài khoản" subtitle="Bắt đầu mua sắm tiện lợi cùng EcoMart">
-    <form class="w-full space-y-4" @submit.prevent="submit">
+    <form class="w-full space-y-4" novalidate @submit.prevent="submit">
       <div>
         <label for="register-username" class="mb-1.5 block text-sm font-medium text-gray-700">Tên đăng nhập</label>
         <UInput
@@ -49,7 +49,6 @@ async function submit() {
           icon="i-ph-user"
           size="lg"
           class="w-full"
-          required
         />
       </div>
       <div>
@@ -63,7 +62,6 @@ async function submit() {
           icon="i-ph-envelope"
           size="lg"
           class="w-full"
-          required
         />
       </div>
       <div>
@@ -77,7 +75,6 @@ async function submit() {
           icon="i-ph-phone"
           size="lg"
           class="w-full"
-          required
         />
       </div>
       <div>
@@ -91,7 +88,6 @@ async function submit() {
           icon="i-ph-lock"
           size="lg"
           class="w-full"
-          required
           :ui="{ trailing: 'pe-1' }"
         >
           <template #trailing>
