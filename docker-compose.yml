@@ -38,7 +38,6 @@ services:
       PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY}
       PAYOS_RETURN_URL: ${PAYOS_RETURN_URL}
       PAYOS_CANCEL_URL: ${PAYOS_CANCEL_URL}
-      UPLOAD_DIR: /app/uploads
       SEED_ENABLED: ${SEED_ENABLED:-true}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       SEED_CUSTOMER_PASSWORD: ${SEED_CUSTOMER_PASSWORD:-}
@@ -47,8 +46,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - uploads:/app/uploads
     networks:
       - ecomart
 
@@ -89,7 +86,6 @@ services:
       PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY}
       PAYOS_RETURN_URL: ${PAYOS_RETURN_URL}
       PAYOS_CANCEL_URL: ${PAYOS_CANCEL_URL}
-      UPLOAD_DIR: /app/uploads
       SEED_ENABLED: ${SEED_ENABLED:-true}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
       SEED_CUSTOMER_PASSWORD: ${SEED_CUSTOMER_PASSWORD:-}
@@ -102,7 +98,6 @@ services:
       - ./server:/app
       - /app/target
       - m2-cache:/root/.m2
-      - uploads:/app/uploads
     networks:
       - ecomart
 
@@ -130,7 +125,6 @@ services:
 
 volumes:
   pgdata:
-  uploads:
   m2-cache:
 
 networks:

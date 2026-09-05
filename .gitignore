@@ -1,9 +1,6 @@
 # Environment secrets
 .env
 
-# Uploads
-uploads/
-
 # OS
 .DS_Store
 Thumbs.db

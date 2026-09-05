@@ -16,7 +16,6 @@ app:
     secret: this-is-a-test-only-jwt-secret-1234567890
     expiration-ms: 3600000
   client-url: http://localhost:5173
-  upload-dir: ${java.io.tmpdir}/ecomart-uploads
   shop:
     shipping-fee: 20000
   seed:

@@ -2,4 +2,4 @@ spring:
   devtools:
     restart:
       enabled: true
-      exclude: static/**,public/**,uploads/**
+      exclude: static/**,public/**
