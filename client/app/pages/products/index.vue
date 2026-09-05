@@ -43,9 +43,13 @@ function syncUrl() {
   })
 }
 
-const { data: categoriesData } = await useAsyncData<CategoryResponse[]>('product-categories', () =>
-  request<CategoryResponse[]>('/api/categories')
-)
+const { data: categoriesData } = await useAsyncData<CategoryResponse[]>('product-categories', async () => {
+  try {
+    return await request<CategoryResponse[]>('/api/categories')
+  } catch {
+    return []
+  }
+})
 const categories = computed(() => categoriesData.value ?? [])
 
 const activeCategory = computed(() => {
@@ -63,7 +67,16 @@ const activeCategory = computed(() => {
 
 const { data: initialPage, pending: initialPending } = await useAsyncData<PageResponse<Product>>(
   'product-list-initial',
-  () => request<PageResponse<Product>>(`/api/products?${buildParams().toString()}`)
+  async () => {
+    try {
+      return await request<PageResponse<Product>>(`/api/products?${buildParams().toString()}`)
+    } catch (error: any) {
+      if (import.meta.client) {
+        toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
+      }
+      return { content: [], page: page.value, size, totalElements: 0, totalPages: 0 }
+    }
+  }
 )
 
 const products = ref<Product[]>(initialPage.value?.content ?? [])
