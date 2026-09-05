@@ -39,7 +39,7 @@ Các endpoint công khai duy nhất (phần còn lại yêu cầu xác thực):
 - `POST /api/auth/**` — login, register, refresh, logout
 - `GET /api/products/**`, `/api/categories/**`, `/api/banners/active`, `/api/reviews`
 - `POST /api/payments/payos/webhook`
-- `GET /uploads/**`, `/error`
+- `/error`
 
 **Bảo vệ route trên client** bằng middleware (chỉ là UX, không phải ranh giới bảo mật):
 - `middleware/auth.ts` — yêu cầu đã đăng nhập.
@@ -149,8 +149,8 @@ server/routes/api/[...].ts   Nitro proxy /api → backend (runtimeConfig.apiTarg
 - **Mọi request qua `useApi()`**: không gọi `$fetch` trực tiếp trong page để đảm bảo header JWT luôn được đính và cơ chế auto-refresh hoạt động.
 - **Quyền ADMIN kiểm soát ở server**: `SecurityConfig` bắt buộc xác thực tại tầng HTTP (`anyRequest().authenticated()`), admin write dùng `@PreAuthorize("hasRole('ADMIN')")`, controller user-scoped dùng `@PreAuthorize("isAuthenticated()")`. Hết phiên/refresh lỗi → 401 (`UnauthorizedException`, chỉ ở `AuthService` + webhook PayOS chưa auth); đã login nhưng đụng tài nguyên người khác → 403 (`AccessDeniedException`). Middleware client chỉ là UX.
 - **Trang công khai dùng `useAsyncData`** (`index`, `products`, `products/[slug]` — SSR + SEO); trang đã xác thực/admin giữ fetch client (`onMounted`). Filter `products` đồng bộ 2 chiều với URL query.
-- **DataSeeder** (`config/DataSeeder.java`) idempotent theo slug/tên (DB đã seed vẫn nhận hàng mới khi boot lại): tạo admin `admin@ecomart.vn`, customer `customer@ecomart.vn`, danh mục (3 gốc + 7 lá), vật liệu, banner, ~45 sản phẩm mẫu (mỗi SP 1–3 ảnh Unsplash, ít nhất 2 SP hết hàng `stock = 0` để e2e `cart-robustness` chạy thật). Vật liệu seed map theo nhóm danh mục (rau → Lá chuối, củ quả/ngũ cốc → Giấy, ...). Mật khẩu demo mặc định `Admin@123` / `Customer@123`, ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`. Để reset dữ liệu demo, xoá volume `pgdata`.
-- **Upload** đi qua `UploadController` (chỉ ADMIN) lưu vào `UPLOAD_DIR`; trong Docker nằm trong volume `uploads`. Ảnh sản phẩm/banner là URL (Unsplash trong seeder); `client/public/images/` chỉ chứa ảnh tĩnh cho UI (hero, steps, features).
+- **DataSeeder** (`config/DataSeeder.java`) idempotent theo slug/tên (DB đã seed vẫn nhận hàng mới khi boot lại): tạo admin `admin@ecomart.vn`, customer `customer@ecomart.vn`, danh mục (3 gốc + 7 lá), vật liệu, banner, ~45 sản phẩm mẫu (mỗi SP 1–2 ảnh WebP trong `client/public/images/products/`, ít nhất 2 SP hết hàng `stock = 0` để e2e `cart-robustness` chạy thật). Vật liệu seed map theo nhóm danh mục (rau → Lá chuối, củ quả/ngũ cốc → Giấy, ...). Mật khẩu demo mặc định `Admin@123` / `Customer@123`, ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`. Để reset dữ liệu demo, xoá volume `pgdata`.
+- **Ảnh sản phẩm/banner** là file tĩnh trong `client/public/images/` (`products/<slug>-<n>.webp`, `banners/`), seed trong `DataSeeder` trỏ đường dẫn tương đối `/images/...`. Không còn endpoint upload server — admin thêm ảnh bằng URL trong form.
 
 ## Môi trường và cấu hình
 
@@ -162,7 +162,6 @@ Mọi bí mật nằm trong **một file `.env` duy nhất ở root** (được 
 | `JWT_SECRET` / `JWT_ACCESS_EXPIRATION` / `JWT_REFRESH_EXPIRATION` | ký + giới hạn access/refresh token |
 | `PAYOS_CLIENT_ID` / `PAYOS_API_KEY` / `PAYOS_CHECKSUM_KEY` | thanh toán QR |
 | `PAYOS_RETURN_URL` / `PAYOS_CANCEL_URL` | URL chuyển hướng trả về/huỷ từ PayOS |
-| `UPLOAD_DIR` | thư mục lưu ảnh upload |
 | `CLIENT_URL` | nguồn CORS hợp lệ |
 | `SEED_ENABLED` / `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD` | bật/tắt + mật khẩu tài khoản demo |
 | `SHIPPING_FEE` | phí giao hàng (`app.shop.shipping-fee`, mặc định 20000) |
