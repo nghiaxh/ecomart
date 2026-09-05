@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const target = process.env.NUXT_API_TARGET || 'http://localhost:8080'
+  const target = useRuntimeConfig(event).apiTarget as string || 'http://localhost:8080'
   const headers = getRequestHeaders(event)
   delete headers.host
   delete headers.origin

@@ -37,7 +37,7 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    apiTarget: process.env.API_PROXY_TARGET || 'http://localhost:8080',
+    apiTarget: process.env.NUXT_API_TARGET || 'http://localhost:8080',
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
       supportPhone: process.env.NUXT_PUBLIC_SUPPORT_PHONE || '0900 000 000',

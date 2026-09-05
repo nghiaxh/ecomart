@@ -115,6 +115,7 @@ services:
     env_file: .env
     environment:
       NUXT_PUBLIC_API_BASE: http://localhost:8080
+      CHOKIDAR_USEPOLLING: 'true'
       HOST: 0.0.0.0
       PORT: 5173
     ports:

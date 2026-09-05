@@ -1,6 +1,10 @@
 FROM maven:3.9-eclipse-temurin-25
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends inotify-tools \
+    && rm -rf /var/lib/apt/lists/*
 COPY pom.xml .
 RUN mvn -B dependency:go-offline
+COPY dev-watch.sh /usr/local/bin/dev-watch.sh
+RUN chmod +x /usr/local/bin/dev-watch.sh
 EXPOSE 8080
-CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.profiles=dev"]
+CMD ["dev-watch.sh"]
