@@ -171,9 +171,9 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedBanners() {
-        banner("Ưu đãi cuối tuần", "Giảm giá nhiều mặt hàng thiết yếu hàng ngày", "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1600", "/products?category=rau-cu-sach", 1);
-        banner("Hàng mới về", "Khám phá bộ sưu tập sản phẩm mới nhất", "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1600", "/products", 2);
-        banner("Trái cây tươi mỗi ngày", "Chọn lọc từ những vùng trồng uy tín", "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1600", "/products?category=trai-cay-tuoi", 3);
+        banner("Ưu đãi cuối tuần", "Giảm giá nhiều mặt hàng thiết yếu hàng ngày", "/images/banners/banner-1-uu-dai.webp", "/products?category=rau-cu-sach", 1);
+        banner("Hàng mới về", "Khám phá bộ sưu tập sản phẩm mới nhất", "/images/banners/banner-2-hang-moi.webp", "/products", 2);
+        banner("Trái cây tươi mỗi ngày", "Chọn lọc từ những vùng trồng uy tín", "/images/banners/banner-3-trai-cay.webp", "/products?category=trai-cay-tuoi", 3);
     }
 
     private void banner(String title, String subtitle, String image, String link, int order) {
@@ -192,133 +192,133 @@ public class DataSeeder implements CommandLineRunner {
     private record SeedProduct(String name, String slug, double price, int stock, double weight, String origin,
                                String categorySlug, String... images) {}
 
-    private void seedProducts() {
-        List<SeedProduct> products = List.of(
+    private static List<SeedProduct> seedProductList() {
+        return List.of(
                 // Rau xanh
                 new SeedProduct("Rau muống sạch", "rau-muong-sach", 12000, 100, 200, "Đà Lạt", "rau-xanh",
-                        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
-                        "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800"),
+                        "rau-muong-sach-1.webp",
+                        "rau-muong-sach-2.webp"),
                 new SeedProduct("Cải bó xôi", "cai-bo-xoi", 18000, 80, 150, "Đà Lạt", "rau-xanh",
-                        "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=800",
-                        "https://images.unsplash.com/photo-1518843875459-f738682238a6?w=800"),
+                        "cai-bo-xoi-1.webp",
+                        "cai-bo-xoi-2.webp"),
                 new SeedProduct("Xà lách xoăn", "xa-lach-xoan", 22000, 60, 150, "Đà Lạt", "rau-xanh",
-                        "https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=800"),
+                        "xa-lach-xoan-1.webp"),
                 new SeedProduct("Cải thảo", "cai-thao", 16000, 90, 300, "Mộc Châu", "rau-xanh",
-                        "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800"),
+                        "cai-thao-1.webp"),
                 new SeedProduct("Rau ngót", "rau-ngot", 15000, 70, 200, "Lâm Đồng", "rau-xanh",
-                        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800"),
+                        "rau-ngot-1.webp"),
                 new SeedProduct("Cải ngọt", "cai-ngot", 14000, 85, 250, "Đà Lạt", "rau-xanh",
-                        "https://images.unsplash.com/photo-1518843875459-f738682238a6?w=800",
-                        "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800"),
+                        "cai-ngot-1.webp",
+                        "cai-ngot-2.webp"),
                 new SeedProduct("Rau mồng tơi", "rau-mong-toi", 13000, 75, 200, "Lâm Đồng", "rau-xanh",
-                        "https://images.unsplash.com/photo-1597362925123-77861d3fb959?w=800",
-                        "https://images.unsplash.com/photo-1467453678174-768ec283a940?w=800"),
+                        "rau-mong-toi-1.webp",
+                        "rau-mong-toi-2.webp"),
                 // Củ quả
                 new SeedProduct("Cà rốt Đà Lạt", "ca-rot-da-lat", 15000, 120, 250, "Đà Lạt", "cu-qua",
-                        "https://images.unsplash.com/photo-1447175008436-054170c2e979?w=800",
-                        "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800"),
+                        "ca-rot-da-lat-1.webp",
+                        "ca-rot-da-lat-2.webp"),
                 new SeedProduct("Khoai tây", "khoai-tay", 16000, 90, 300, "Lâm Đồng", "cu-qua",
-                        "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800"),
+                        "khoai-tay-1.webp"),
                 new SeedProduct("Bí đỏ", "bi-do", 25000, 50, 1200, "Đà Lạt", "cu-qua",
-                        "https://images.unsplash.com/photo-1553621042-f6e147245754?w=800"),
+                        "bi-do-1.webp"),
                 new SeedProduct("Cà chua sạch", "ca-chua-sach", 28000, 80, 500, "Lâm Đồng", "cu-qua",
-                        "https://images.unsplash.com/photo-1561136594-7f68413baa99?w=800",
-                        "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800"),
+                        "ca-chua-sach-1.webp",
+                        "ca-chua-sach-2.webp"),
                 new SeedProduct("Dưa chuột", "dua-chuot", 12000, 100, 300, "Lâm Đồng", "cu-qua",
-                        "https://images.unsplash.com/photo-1438593793753-34b209e3281b?w=800"),
+                        "dua-chuot-1.webp"),
                 new SeedProduct("Hành tây", "hanh-tay", 18000, 90, 250, "Ninh Thuận", "cu-qua",
-                        "https://images.unsplash.com/photo-1508747703725-719777637510?w=800"),
+                        "hanh-tay-1.webp"),
                 new SeedProduct("Ớt chuông", "ot-chuong", 32000, 60, 200, "Lâm Đồng", "cu-qua",
-                        "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=800"),
+                        "ot-chuong-1.webp"),
                 new SeedProduct("Khoai lang mật", "khoai-lang-mat", 20000, 110, 500, "Đà Lạt", "cu-qua",
-                        "https://images.unsplash.com/photo-1596097635121-14b63b7a0c19?w=800",
-                        "https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=800"),
+                        "khoai-lang-mat-1.webp",
+                        "khoai-lang-mat-2.webp"),
                 // Trái cây nhiệt đới
                 new SeedProduct("Cam sành Việt", "cam-sanh-viet", 25000, 60, 300, "Tây Ninh", "trai-cay-nhiet-doi",
-                        "https://images.unsplash.com/photo-1547514701-42782101795e?w=800",
-                        "https://images.unsplash.com/photo-1490885578174-acda8905c2c6?w=800"),
+                        "cam-sanh-viet-1.webp",
+                        "cam-sanh-viet-2.webp"),
                 new SeedProduct("Xoài cát Hòa Lộc", "xoai-cat-hoa-loc", 45000, 50, 500, "Tiền Giang", "trai-cay-nhiet-doi",
-                        "https://images.unsplash.com/photo-1553279768-865429fa0078?w=800",
-                        "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800"),
+                        "xoai-cat-hoa-loc-1.webp",
+                        "xoai-cat-hoa-loc-2.webp"),
                 new SeedProduct("Chuối sứ", "chuoi-su", 18000, 150, 400, "Tiền Giang", "trai-cay-nhiet-doi",
-                        "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=800"),
+                        "chuoi-su-1.webp"),
                 new SeedProduct("Bưởi da xanh", "buoi-da-xanh", 35000, 40, 1300, "Bến Tre", "trai-cay-nhiet-doi",
-                        "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800"),
+                        "buoi-da-xanh-1.webp"),
                 new SeedProduct("Dưa hấu ruột đỏ", "dua-hau-ruot-do", 30000, 30, 2500, "Long An", "trai-cay-nhiet-doi",
-                        "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800"),
+                        "dua-hau-ruot-do-1.webp"),
                 new SeedProduct("Bơ sáp Đắk Lắk", "bo-sap-dak-lak", 38000, 0, 400, "Đắk Lắk", "trai-cay-nhiet-doi",
-                        "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=800",
-                        "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?w=800"),
+                        "bo-sap-dak-lak-1.webp",
+                        "bo-sap-dak-lak-2.webp"),
                 new SeedProduct("Sầu riêng Ri6", "sau-rieng-ri6", 120000, 0, 2000, "Tiền Giang", "trai-cay-nhiet-doi",
-                        "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=800",
-                        "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800"),
+                        "sau-rieng-ri6-1.webp",
+                        "sau-rieng-ri6-2.webp"),
                 new SeedProduct("Thanh long ruột đỏ", "thanh-long-ruot-do", 28000, 55, 600, "Bình Thuận", "trai-cay-nhiet-doi",
-                        "https://images.unsplash.com/photo-1527325678964-54921661f888?w=800",
-                        "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=800"),
+                        "thanh-long-ruot-do-1.webp",
+                        "thanh-long-ruot-do-2.webp"),
                 // Trái cây nhập khẩu
                 new SeedProduct("Táo Mỹ", "tao-my", 55000, 70, 200, "Mỹ", "trai-cay-nhap-khau",
-                        "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-                        "https://images.unsplash.com/photo-1568702846914-96b7d2c6ce31?w=800"),
+                        "tao-my-1.webp"),
                 new SeedProduct("Nho xanh không hạt", "nho-xanh-khong-hat", 60000, 60, 500, "Úc", "trai-cay-nhap-khau",
-                        "https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=800"),
+                        "nho-xanh-khong-hat-1.webp"),
                 new SeedProduct("Lê Hàn Quốc", "le-han-quoc", 65000, 45, 400, "Hàn Quốc", "trai-cay-nhap-khau",
-                        "https://images.unsplash.com/photo-1568702846914-96b7d2c6ce31?w=800",
-                        "https://images.unsplash.com/photo-1490885578174-acda8905c2c6?w=800"),
+                        "le-han-quoc-1.webp"),
                 new SeedProduct("Cherry Chile", "cherry-chile", 120000, 35, 500, "Chile", "trai-cay-nhap-khau",
-                        "https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=800",
-                        "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800"),
+                        "cherry-chile-1.webp",
+                        "cherry-chile-2.webp"),
                 new SeedProduct("Kiwi New Zealand", "kiwi-new-zealand", 75000, 40, 300, "New Zealand", "trai-cay-nhap-khau",
-                        "https://images.unsplash.com/photo-1585059895524-72359e06133a?w=800",
-                        "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800"),
+                        "kiwi-new-zealand-1.webp",
+                        "kiwi-new-zealand-2.webp"),
                 new SeedProduct("Cam vàng Úc", "cam-vang-uc", 58000, 50, 350, "Úc", "trai-cay-nhap-khau",
-                        "https://images.unsplash.com/photo-1547514701-42782101795e?w=800",
-                        "https://images.unsplash.com/photo-1557800636-894a64c1696f?w=800"),
+                        "cam-vang-uc-1.webp",
+                        "cam-vang-uc-2.webp"),
                 // Ngũ cốc
                 new SeedProduct("Gạo lứt hữu cơ", "gao-lut-huu-co", 68000, 70, 1000, "An Giang", "ngu-coc",
-                        "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800"),
+                        "gao-lut-huu-co-1.webp"),
                 new SeedProduct("Gạo ST25", "gao-st25", 89000, 60, 1000, "Sóc Trăng", "ngu-coc",
-                        "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=800",
-                        "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800"),
+                        "gao-st25-1.webp",
+                        "gao-st25-2.webp"),
                 new SeedProduct("Yến mạch nguyên chất", "yen-mach-nguyen-chat", 45000, 80, 500, "Bắc Giang", "ngu-coc",
-                        "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=800"),
+                        "yen-mach-nguyen-chat-1.webp"),
                 new SeedProduct("Hạt quinoa hữu cơ", "hat-quinoa-huu-co", 98000, 40, 500, "Lâm Đồng", "ngu-coc",
-                        "https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=800",
-                        "https://images.unsplash.com/photo-1499529112087-3cb3b73cec95?w=800"),
+                        "hat-quinoa-huu-co-1.webp",
+                        "hat-quinoa-huu-co-2.webp"),
                 new SeedProduct("Bột mì nguyên cám", "bot-mi-nguyen-cam", 35000, 65, 1000, "Hà Nội", "ngu-coc",
-                        "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800",
-                        "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800"),
+                        "bot-mi-nguyen-cam-1.webp",
+                        "bot-mi-nguyen-cam-2.webp"),
                 new SeedProduct("Gạo nếp than", "gao-nep-than", 55000, 55, 1000, "Tây Ninh", "ngu-coc",
-                        "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?w=800",
-                        "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=800"),
+                        "gao-nep-than-1.webp",
+                        "gao-nep-than-2.webp"),
                 // Đậu & hạt
                 new SeedProduct("Đậu xanh", "dau-xanh", 32000, 90, 500, "Thanh Hóa", "dau-va-hat",
-                        "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=800"),
+                        "dau-xanh-1.webp"),
                 new SeedProduct("Hạt chia", "hat-chia", 95000, 50, 250, "Đà Lạt", "dau-va-hat",
-                        "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?w=800"),
+                        "hat-chia-1.webp"),
                 new SeedProduct("Hạt điều rang muối", "hat-dieu-rang-muoi", 88000, 45, 500, "Bình Phước", "dau-va-hat",
-                        "https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?w=800"),
+                        "hat-dieu-rang-muoi-1.webp"),
                 new SeedProduct("Hạnh nhân Mỹ", "hanh-nhan-my", 110000, 38, 400, "Mỹ", "dau-va-hat",
-                        "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=800",
-                        "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=800"),
+                        "hanh-nhan-my-1.webp",
+                        "hanh-nhan-my-2.webp"),
                 new SeedProduct("Óc chó Mỹ", "oc-cho-my", 125000, 32, 400, "Mỹ", "dau-va-hat",
-                        "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=800",
-                        "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=800"),
+                        "oc-cho-my-1.webp",
+                        "oc-cho-my-2.webp"),
                 new SeedProduct("Đậu đỏ Tây Ninh", "dau-do-tay-ninh", 30000, 75, 500, "Tây Ninh", "dau-va-hat",
-                        "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=800",
-                        "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800"),
+                        "dau-do-tay-ninh-1.webp",
+                        "dau-do-tay-ninh-2.webp"),
                 // Trái cây sấy
                 new SeedProduct("Xoài sấy dẻo", "xoai-say-deo", 65000, 60, 250, "Tiền Giang", "trai-cay-say",
-                        "https://images.unsplash.com/photo-1553279768-865429fa0078?w=800",
-                        "https://images.unsplash.com/photo-1591073113125-e46713c829ed?w=800"),
+                        "xoai-say-deo-1.webp",
+                        "xoai-say-deo-2.webp"),
                 new SeedProduct("Chuối sấy giòn", "chuoi-say-gion", 45000, 80, 250, "Tiền Giang", "trai-cay-say",
-                        "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=800",
-                        "https://images.unsplash.com/photo-1528825871115-3581a5387919?w=800"),
+                        "chuoi-say-gion-1.webp",
+                        "chuoi-say-gion-2.webp"),
                 new SeedProduct("Mít sấy giòn", "mit-say-gion", 55000, 70, 250, "Tiền Giang", "trai-cay-say",
-                        "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=800",
-                        "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=800")
+                        "mit-say-gion-1.webp",
+                        "mit-say-gion-2.webp")
         );
+    }
 
-        for (SeedProduct sp : products) {
+    private void seedProducts() {
+        for (SeedProduct sp : seedProductList()) {
             seedProduct(sp);
         }
     }
@@ -341,10 +341,10 @@ public class DataSeeder implements CommandLineRunner {
         p.setActive(true);
 
         int order = 0;
-        for (String url : sp.images()) {
+        for (String fileName : sp.images()) {
             ProductImage img = new ProductImage();
             img.setProduct(p);
-            img.setUrl(url);
+            img.setUrl("/images/products/" + fileName);
             img.setPrimary(order == 0);
             img.setDisplayOrder(order);
             p.getImages().add(img);
