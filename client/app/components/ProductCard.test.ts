@@ -23,4 +23,9 @@ describe('ProductCard', () => {
     expect(wrapper.text()).toContain('Bơ sáp')
     expect(wrapper.text()).toContain(`25.000\u00A0₫`)
   })
+
+  it('shows out-of-stock badge when stock is zero', async () => {
+    const wrapper = await mountSuspended(ProductCard, { props: { product: { ...product, stock: 0 } } })
+    expect(wrapper.text()).toContain('Hết hàng')
+  })
 })

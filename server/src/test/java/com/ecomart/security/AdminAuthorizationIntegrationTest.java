@@ -39,18 +39,8 @@ class AdminAuthorizationIntegrationTest {
     ObjectMapper objectMapper;
 
     private ProductRequest product() {
-        ProductRequest p = new ProductRequest();
-        p.name = "Bơ";
-        p.slug = "bo";
-        p.price = 25000.0;
-        p.stock = 10;
-        p.weight = 0.5;
-        p.origin = "Việt Nam";
-        p.categoryId = 1L;
-        p.active = true;
-        p.images = new java.util.ArrayList<>();
-        p.materials = new java.util.ArrayList<>();
-        return p;
+        return new ProductRequest("Bơ", "bo", null, 25000.0, 10, 0.5, "Việt Nam", 1L, true,
+                new java.util.ArrayList<>(), new java.util.ArrayList<>());
     }
 
     @Test

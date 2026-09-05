@@ -17,5 +17,7 @@ app:
     expiration-ms: 3600000
   client-url: http://localhost:5173
   upload-dir: ${java.io.tmpdir}/ecomart-uploads
+  shop:
+    shipping-fee: 20000
   seed:
     enabled: false

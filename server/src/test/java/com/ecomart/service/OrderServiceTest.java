@@ -13,7 +13,7 @@ import com.ecomart.domain.enums.PaymentMethod;
 import com.ecomart.domain.enums.PaymentStatus;
 import com.ecomart.dto.request.CheckoutRequest;
 import com.ecomart.exception.BadRequestException;
-import com.ecomart.exception.UnauthorizedException;
+import com.ecomart.config.ShopProperties;
 import com.ecomart.integration.payos.PayOSClient;
 import com.ecomart.repository.AddressRepository;
 import com.ecomart.repository.CartItemRepository;
@@ -55,7 +55,7 @@ class OrderServiceTest {
     void setUp() {
         service = new OrderService(securityUtils, cartService, cartItemRepository, addressRepository,
                 orderRepository, orderItemRepository, paymentRepository, productRepository,
-                customerRepository, notificationService, payOSClient);
+                customerRepository, notificationService, payOSClient, new ShopProperties(20000));
     }
 
     private Customer customer(long id) {
@@ -80,7 +80,7 @@ class OrderServiceTest {
         cart.setItems(new ArrayList<>());
         when(cartService.getCart()).thenReturn(cart);
         assertThrows(BadRequestException.class,
-                () -> service.checkout(new CheckoutRequest(1L, "COD", null)));
+                () -> service.checkout(new CheckoutRequest(1L, PaymentMethod.COD, null)));
     }
 
     @Test
@@ -97,20 +97,23 @@ class OrderServiceTest {
         when(securityUtils.currentUser()).thenReturn(customer(7L));
 
         assertThrows(BadRequestException.class,
-                () -> service.checkout(new CheckoutRequest(1L, "COD", null)));
+                () -> service.checkout(new CheckoutRequest(1L, PaymentMethod.COD, null)));
     }
 
     @Test
-    void allOrdersRejectsInvalidStatus() {
-        assertThrows(BadRequestException.class, () -> service.allOrders("NOT_A_STATUS", org.springframework.data.domain.PageRequest.of(0, 10)));
+    void allOrdersReturnsAllWhenStatusNull() {
+        org.springframework.data.domain.Page<Order> page =
+                new org.springframework.data.domain.PageImpl<>(java.util.List.of());
+        when(orderRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 10))).thenReturn(page);
+        service.allOrders(null, org.springframework.data.domain.PageRequest.of(0, 10));
     }
 
     @Test
-    void updateStatusRejectsInvalidStatus() {
+    void updateStatusAppliesNewStatus() {
         Order order = new Order();
         order.setId(5L);
         when(orderRepository.findById(5L)).thenReturn(Optional.of(order));
-        assertThrows(BadRequestException.class, () -> service.updateStatus(5L, "BOGUS"));
+        service.updateStatus(5L, OrderStatus.CONFIRMED);
     }
 
     @Test
@@ -124,7 +127,7 @@ class OrderServiceTest {
         when(securityUtils.currentUserHasRole("ADMIN")).thenReturn(false);
         when(orderRepository.findById(2L)).thenReturn(Optional.of(order));
 
-        assertThrows(UnauthorizedException.class, () -> service.confirmPaymentByCurrentUser(2L));
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> service.confirmPaymentByCurrentUser(2L));
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.ecomart.service;
 import com.ecomart.domain.enums.OrderStatus;
 import com.ecomart.domain.enums.PaymentStatus;
 import com.ecomart.domain.enums.UserRole;
+import com.ecomart.dto.response.AdminDashboardResponse;
 import com.ecomart.repository.OrderRepository;
 import com.ecomart.repository.ProductRepository;
 import com.ecomart.repository.UserRepository;
@@ -11,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -39,12 +38,12 @@ class AdminStatsServiceTest {
         when(orderRepository.count()).thenReturn(8L);
         when(orderRepository.sumTotalByStatusAndPaid(OrderStatus.COMPLETED, PaymentStatus.PAID)).thenReturn(500000L);
 
-        Map<String, Object> result = service.dashboard();
+        AdminDashboardResponse result = service.dashboard();
 
-        assertEquals(30L, result.get("productCount"));
-        assertEquals(12L, result.get("customerCount"));
-        assertEquals(8L, result.get("orderCount"));
-        assertEquals(500000.0, result.get("revenue"));
+        assertEquals(30L, result.productCount());
+        assertEquals(12L, result.customerCount());
+        assertEquals(8L, result.orderCount());
+        assertEquals(500000.0, result.revenue());
         verify(orderRepository).sumTotalByStatusAndPaid(OrderStatus.COMPLETED, PaymentStatus.PAID);
     }
 
@@ -55,8 +54,8 @@ class AdminStatsServiceTest {
         when(orderRepository.count()).thenReturn(0L);
         when(orderRepository.sumTotalByStatusAndPaid(OrderStatus.COMPLETED, PaymentStatus.PAID)).thenReturn(null);
 
-        Map<String, Object> result = service.dashboard();
+        AdminDashboardResponse result = service.dashboard();
 
-        assertEquals(0.0, result.get("revenue"));
+        assertEquals(0.0, result.revenue());
     }
 }

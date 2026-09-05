@@ -30,5 +30,8 @@ describe('useFormat', () => {
     it('appends kg suffix', () => {
       expect(formatKg(0.5)).toBe('0.5 kg')
     })
+    it('renders zero instead of empty', () => {
+      expect(formatKg(0)).toBe('0 kg')
+    })
   })
 })
