@@ -11,17 +11,24 @@ const { formatVND, formatKg } = useFormat()
     class="group block overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-900/5"
   >
     <div class="relative aspect-[4/3] overflow-hidden bg-gray-50">
-      <img
-        v-if="product.images && product.images.length > 0"
-        :src="product.images[0]"
+      <UiImg
+        :src="product.images && product.images.length > 0 ? product.images[0] : null"
         :alt="product.name"
-        loading="lazy"
-        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'"
+        img-class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        :class="{ 'opacity-60 grayscale': product.stock === 0 }"
       />
-      <div v-else class="grid h-full w-full place-items-center text-gray-200">
-        <UIcon name="i-ph-image" class="h-12 w-12" />
-      </div>
+      <span
+        v-if="product.stock === 0"
+        class="absolute left-2 top-2 rounded-full bg-red-500 px-2.5 py-1 text-xs font-semibold text-white"
+      >
+        Hết hàng
+      </span>
+      <span
+        v-else-if="product.stock <= 10"
+        class="absolute left-2 top-2 rounded-full bg-orange-500 px-2.5 py-1 text-xs font-semibold text-white"
+      >
+        Chỉ còn {{ product.stock }}
+      </span>
     </div>
 
     <div class="p-4">

@@ -44,8 +44,8 @@ public class ProductController {
                                                  @RequestParam(defaultValue = "false") boolean showAll,
                                                  @RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "12") int size) {
-        boolean onlyActive = !showAll || !securityUtils.currentUserHasRole("ADMIN");
-        return productService.search(q, category, minPrice, maxPrice, onlyActive, PageRequest.of(page, size));
+        return productService.search(q, category, minPrice, maxPrice, showAll,
+                securityUtils.currentUserHasRole("ADMIN"), PageRequest.of(page, size));
     }
 
     @GetMapping("/latest")

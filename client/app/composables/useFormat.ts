@@ -19,7 +19,7 @@ export const useFormat = () => {
   }
 
   const formatKg = (value?: number) => {
-    if (!value) return ''
+    if (value === undefined || value === null) return ''
     return `${value} kg`
   }
 

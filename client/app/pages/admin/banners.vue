@@ -5,6 +5,8 @@ import type { Banner, BannerRequest } from '~/types'
 import { bannerSchema } from '~/schemas'
 
 const { request } = useApi()
+const { errors, applyIssues, clearErrors } = useFormErrors()
+const { confirm } = useConfirm()
 const toast = useToast()
 
 const banners = ref<Banner[]>([])
@@ -15,7 +17,6 @@ const showForm = ref(false)
 const editingId = ref<number | null>(null)
 const saving = ref(false)
 const form = reactive({ title: '', subtitle: '', imageUrl: '', linkUrl: '', displayOrder: 0, active: true })
-const errors = ref<Record<string, string>>({})
 
 async function load() {
   loading.value = true
@@ -29,22 +30,22 @@ async function load() {
 function openCreate() {
   editingId.value = null
   Object.assign(form, { title: '', subtitle: '', imageUrl: '', linkUrl: '', displayOrder: 0, active: true })
-  errors.value = {}
+  clearErrors()
   showForm.value = true
 }
 
 function openEdit(b: Banner) {
   editingId.value = b.id
   Object.assign(form, { title: b.title, subtitle: b.subtitle || '', imageUrl: b.imageUrl, linkUrl: b.linkUrl || '', displayOrder: b.displayOrder, active: b.active })
-  errors.value = {}
+  clearErrors()
   showForm.value = true
 }
 
 async function submit() {
-  errors.value = {}
+  clearErrors()
   const result = bannerSchema.safeParse(form)
   if (!result.success) {
-    for (const issue of result.error.issues) errors.value[String(issue.path[0])] = issue.message
+    applyIssues(result.error)
     return
   }
   saving.value = true
@@ -67,7 +68,7 @@ async function submit() {
 
 async function remove(b: Banner) {
   if (busyIds.value.has(b.id)) return
-  if (!confirm(`Xóa banner "${b.title}"?`)) return
+  if (!await confirm(`Xóa banner "${b.title}"?`, 'Xóa banner')) return
   busyIds.value.add(b.id)
   try {
     await request(`/api/banners/${b.id}`, { method: 'DELETE' })
@@ -130,7 +131,7 @@ onMounted(load)
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <div v-for="b in banners" :key="b.id" class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-        <img :src="b.imageUrl" :alt="b.title" class="h-40 w-full object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
+        <UiImg :src="b.imageUrl" :alt="b.title" img-class="h-40 w-full object-cover" />
         <div class="p-4">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-gray-800">{{ b.title }}</h3>

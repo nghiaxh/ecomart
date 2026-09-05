@@ -1,3 +1,5 @@
+import { UNAUTHORIZED_EVENT } from '~/utils/session-storage'
+
 export default defineNuxtPlugin(() => {
   const { restore, forceLogout } = useAuth()
 
@@ -6,9 +8,7 @@ export default defineNuxtPlugin(() => {
   // full page loads and bounce the user to /login despite a valid session.
   restore()
 
-  if (import.meta.client) {
-    document.addEventListener('ecomart:unauthorized', () => {
-      forceLogout()
-    })
-  }
+  document.addEventListener(UNAUTHORIZED_EVENT, () => {
+    forceLogout()
+  })
 })

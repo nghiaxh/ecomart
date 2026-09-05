@@ -2,7 +2,7 @@
 import { loginSchema } from '~/schemas'
 
 definePageMeta({
-  layout: 'auth'
+  layout: false
 })
 
 const { login } = useAuth()
@@ -10,7 +10,6 @@ const toast = useToast()
 
 const form = reactive({ identifier: '', password: '' })
 const loading = ref(false)
-const showPassword = ref(false)
 const remember = ref(false)
 
 async function submit() {
@@ -54,29 +53,12 @@ async function submit() {
       </div>
       <div class="mb-6">
         <label for="login-password" class="mb-1.5 block text-sm font-medium text-gray-700">Mật khẩu</label>
-        <UInput
-          id="login-password"
+        <PasswordInput
           v-model="form.password"
-          :type="showPassword ? 'text' : 'password'"
-          autocomplete="current-password"
           placeholder="Nhập mật khẩu"
           icon="i-ph-lock"
           size="lg"
-          class="w-full"
-          :ui="{ trailing: 'pe-1' }"
-        >
-          <template #trailing>
-            <UButton
-              color="neutral"
-              variant="link"
-              size="md"
-              :icon="showPassword ? 'i-ph-eye-slash' : 'i-ph-eye'"
-              :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-              :aria-pressed="showPassword"
-              @click="showPassword = !showPassword"
-            />
-          </template>
-        </UInput>
+        />
       </div>
       <div class="flex items-center justify-between">
         <UCheckbox v-model="remember" label="Ghi nhớ đăng nhập" />

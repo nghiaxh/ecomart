@@ -1,12 +1,11 @@
 package com.ecomart.controller;
 
+import com.ecomart.dto.response.AdminDashboardResponse;
 import com.ecomart.service.AdminStatsService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -20,7 +19,7 @@ public class AdminController {
     }
 
     @GetMapping("/dashboard")
-    public Map<String, Object> dashboard() {
+    public AdminDashboardResponse dashboard() {
         return adminStatsService.dashboard();
     }
 }

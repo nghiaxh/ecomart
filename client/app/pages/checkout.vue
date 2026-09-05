@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import type { Address, Cart, CheckoutResult } from '~/types'
-import { addressSchema } from '~/schemas'
+import type { Address, CheckoutResult } from '~/types'
+import { addressSchema, type AddressForm } from '~/schemas'
 
 definePageMeta({ middleware: 'customer' })
 
 const { request } = useApi()
 const { cart, fetchCart, reset } = useCart()
 const { formatVND } = useFormat()
+const { errors: addressErrors, applyIssues, clearErrors } = useFormErrors()
 const toast = useToast()
 
 const addresses = ref<Address[]>([])
@@ -17,10 +18,9 @@ const loading = ref(false)
 const showAddressForm = ref(false)
 const savingAddress = ref(false)
 
-const addressForm = reactive({
+const addressForm = ref<AddressForm>({
   label: '', street: '', ward: '', district: '', city: '', receiverName: '', receiverPhone: '', isDefault: false
 })
-const addressErrors = ref<Record<string, string>>({})
 
 async function loadAddresses() {
   try {
@@ -41,20 +41,25 @@ async function loadCart() {
   }
 }
 
+function resetAddressForm() {
+  addressForm.value = { label: '', street: '', ward: '', district: '', city: '', receiverName: '', receiverPhone: '', isDefault: false }
+  clearErrors()
+}
+
 async function createAddress() {
-  addressErrors.value = {}
-  const result = addressSchema.safeParse(addressForm)
+  clearErrors()
+  const result = addressSchema.safeParse(addressForm.value)
   if (!result.success) {
-    for (const issue of result.error.issues) addressErrors.value[String(issue.path[0])] = issue.message
+    applyIssues(result.error)
     return
   }
   savingAddress.value = true
   try {
-    const created = await request<Address>('/api/addresses', { method: 'POST', body: addressForm })
+    const created = await request<Address>('/api/addresses', { method: 'POST', body: addressForm.value })
     await loadAddresses()
     if (created.isDefault) await loadCart()
     showAddressForm.value = false
-    Object.assign(addressForm, { label: '', street: '', ward: '', district: '', city: '', receiverName: '', receiverPhone: '', isDefault: false })
+    resetAddressForm()
   } catch (error: any) {
     toast.add({ title: error?.data?.message || 'Không thể lưu địa chỉ', color: 'error' })
   } finally {
@@ -105,59 +110,24 @@ onMounted(() => {
             <UButton color="primary" variant="soft" size="md" icon="i-ph-plus" label="Thêm mới" @click="showAddressForm = !showAddressForm" />
           </div>
 
-          <form v-if="showAddressForm" class="mt-4 grid gap-3 sm:grid-cols-2" @submit.prevent="createAddress">
-            <div>
-              <UInput v-model="addressForm.label" placeholder="Nhãn (Nhà, Cơ quan...)" />
-              <p v-if="addressErrors.label" class="mt-1 text-xs text-red-600">{{ addressErrors.label }}</p>
-            </div>
-            <div>
-              <UInput v-model="addressForm.receiverName" placeholder="Người nhận" />
-              <p v-if="addressErrors.receiverName" class="mt-1 text-xs text-red-600">{{ addressErrors.receiverName }}</p>
-            </div>
-            <div class="sm:col-span-2">
-              <UInput v-model="addressForm.receiverPhone" placeholder="Số điện thoại" />
-              <p v-if="addressErrors.receiverPhone" class="mt-1 text-xs text-red-600">{{ addressErrors.receiverPhone }}</p>
-            </div>
-            <div class="sm:col-span-2">
-              <UInput v-model="addressForm.street" placeholder="Số nhà, đường, thôn/xóm" />
-              <p v-if="addressErrors.street" class="mt-1 text-xs text-red-600">{{ addressErrors.street }}</p>
-            </div>
-            <div>
-              <UInput v-model="addressForm.ward" placeholder="Phường/Xã" />
-              <p v-if="addressErrors.ward" class="mt-1 text-xs text-red-600">{{ addressErrors.ward }}</p>
-            </div>
-            <div>
-              <UInput v-model="addressForm.district" placeholder="Quận/Huyện" />
-              <p v-if="addressErrors.district" class="mt-1 text-xs text-red-600">{{ addressErrors.district }}</p>
-            </div>
-            <div>
-              <UInput v-model="addressForm.city" placeholder="Tỉnh/Thành phố" />
-              <p v-if="addressErrors.city" class="mt-1 text-xs text-red-600">{{ addressErrors.city }}</p>
-            </div>
-            <UCheckbox v-model="addressForm.isDefault" label="Đặt làm địa chỉ mặc định" />
-            <div class="sm:col-span-2 flex justify-end gap-2">
-              <UButton color="neutral" variant="ghost" label="Hủy" @click="showAddressForm = false" />
-              <UButton type="submit" color="primary" label="Lưu địa chỉ" :loading="savingAddress" />
-            </div>
-          </form>
+          <AddressForm
+            v-if="showAddressForm"
+            v-model="addressForm"
+            :errors="addressErrors"
+            :saving="savingAddress"
+            @submit="createAddress"
+            @cancel="showAddressForm = false; resetAddressForm()"
+          />
 
           <div v-else class="mt-4 space-y-3">
-            <label
+            <AddressCard
               v-for="a in addresses"
               :key="a.id"
-              class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
-              :class="selectedAddressId === a.id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'"
-            >
-              <input type="radio" :checked="selectedAddressId === a.id" class="mt-1 accent-emerald-600" @change="selectedAddressId = a.id" />
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <span class="font-semibold text-gray-800">{{ a.receiverName }}</span>
-                  <span class="text-sm text-gray-400">{{ a.receiverPhone }}</span>
-                  <span v-if="a.isDefault" class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">Mặc định</span>
-                </div>
-                <p class="mt-1 text-sm text-gray-500">{{ a.label }} · {{ a.street }}, {{ a.ward }}, {{ a.district }}, {{ a.city }}</p>
-              </div>
-            </label>
+              :address="a"
+              selectable
+              :selected="selectedAddressId === a.id"
+              @select="selectedAddressId = $event"
+            />
             <p v-if="!addresses.length" class="py-4 text-center text-gray-400">Chưa có địa chỉ nào. Vui lòng thêm địa chỉ giao hàng.</p>
           </div>
         </section>
@@ -187,24 +157,25 @@ onMounted(() => {
       </div>
 
       <!-- Summary -->
-      <div class="h-fit rounded-2xl border border-emerald-100 bg-white p-6 lg:sticky lg:top-20" v-if="cart">
-        <h2 class="text-lg font-bold text-gray-800">Đơn hàng ({{ cart.itemCount }} món)</h2>
-        <div class="mt-4 space-y-3 max-h-64 overflow-auto">
-          <div v-for="item in cart.items" :key="item.productId" class="flex justify-between text-sm">
-            <span class="text-gray-600">{{ item.productName }} <span class="text-gray-400">× {{ item.quantity }}</span></span>
-            <span class="font-medium text-gray-700">{{ formatVND(item.price * item.quantity) }}</span>
+      <OrderSummaryCard
+        v-if="cart"
+        :subtotal="cart.subtotal"
+        :item-count="cart.itemCount"
+        :title="`Đơn hàng (${cart.itemCount} món)`"
+      >
+        <template #items>
+          <div class="max-h-64 space-y-3 overflow-auto">
+            <div v-for="item in cart.items" :key="item.productId" class="flex justify-between text-sm">
+              <span class="text-gray-600">{{ item.productName }} <span class="text-gray-400">× {{ item.quantity }}</span></span>
+              <span class="font-medium text-gray-700">{{ formatVND(item.price * item.quantity) }}</span>
+            </div>
           </div>
-        </div>
-        <div class="mt-4 space-y-2 border-t border-emerald-50 pt-4 text-sm">
-          <div class="flex justify-between text-gray-500"><span>Tạm tính</span><span>{{ formatVND(cart.subtotal) }}</span></div>
-          <div class="flex justify-between text-gray-500"><span>Phí giao hàng</span><span>Miễn phí</span></div>
-        </div>
-        <div class="mt-4 border-t border-emerald-50 pt-4">
-          <div class="flex justify-between text-lg"><span class="font-semibold text-gray-700">Tổng cộng</span><span class="font-bold text-emerald-700">{{ formatVND(cart.subtotal) }}</span></div>
-        </div>
-        <UTextarea v-model="notes" placeholder="Ghi chú cho đơn hàng (tùy chọn)..." class="mt-4" :rows="2" />
-        <UButton color="primary" size="lg" block class="mt-4" :loading="loading" label="Đặt hàng" icon="i-ph-check-circle" @click="checkout" />
-      </div>
+        </template>
+        <template #actions>
+          <UTextarea v-model="notes" placeholder="Ghi chú cho đơn hàng (tùy chọn)..." :rows="2" />
+          <UButton color="primary" size="lg" block class="mt-4" :loading="loading" label="Đặt hàng" icon="i-ph-check-circle" @click="checkout" />
+        </template>
+      </OrderSummaryCard>
     </div>
   </div>
 </template>

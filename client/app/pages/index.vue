@@ -1,80 +1,29 @@
 <script setup lang="ts">
 import type { Banner, CategoryResponse, Product } from '~/types'
+import { categoryImage, homeAboutPoints, homeFeatures, homeStats, homeSteps, homeTestimonials } from '~/data/home'
 
 const { request } = useApi()
 const config = useRuntimeConfig()
-const supportPhone = config.public.supportPhone
+const supportPhone = config.public.supportPhone as string
 
-const banners = useState<Banner[]>('home_banners', () => [])
-const categories = useState<CategoryResponse[]>('home_categories', () => [])
-const products = useState<Product[]>('home_products', () => [])
-const loading = ref(true)
-
-onMounted(async () => {
-  try {
-    const [b, c, p] = await Promise.all([
-      request<Banner[]>('/api/banners/active'),
-      request<CategoryResponse[]>('/api/categories'),
-      request<Product[]>('/api/products/latest')
-    ])
-    banners.value = b
-    categories.value = c
-    products.value = p
-  } finally {
-    loading.value = false
-  }
+const { data: homeData, pending: loading } = await useAsyncData('home', async () => {
+  const [banners, categories, products] = await Promise.all([
+    request<Banner[]>('/api/banners/active'),
+    request<CategoryResponse[]>('/api/categories'),
+    request<Product[]>('/api/products/latest')
+  ])
+  return { banners, categories, products }
 })
 
-const stats = [
-  { value: '100%', label: 'Nguồn gốc rõ ràng' },
-  { value: '5,000+', label: 'Sản phẩm đa dạng' },
-  { value: '12,000', label: 'Khách hàng tin dùng' },
-]
+const banners = computed(() => homeData.value?.banners ?? [])
+const categories = computed(() => homeData.value?.categories ?? [])
+const products = computed(() => homeData.value?.products ?? [])
 
-const features = [
-  { icon: 'i-ph-leaf', title: 'Sạch & an toàn', desc: 'Sản phẩm có nguồn gốc rõ ràng, đảm bảo vệ sinh thực phẩm.', photo: '/images/feature-safe.jpg' },
-  { icon: 'i-ph-truck', title: 'Giao hàng nhanh', desc: 'Nội thành nhận hàng trong ngày, toàn quốc 2-4 ngày.', photo: '/images/feature-truck.jpg' },
-  { icon: 'i-ph-wallet', title: 'Thanh toán linh hoạt', desc: 'COD hoặc quét mã QR qua PayOS tiện lợi.', photo: '/images/feature-pay.jpg' },
-  { icon: 'i-ph-headset', title: 'Hỗ trợ tận tâm', desc: `Hotline ${supportPhone} hỗ trợ 8h-20h mỗi ngày.`, photo: '/images/feature-support.jpg' },
-]
-
-const steps = [
-  { title: 'Chọn sản phẩm', desc: 'Duyệt danh mục và chọn món bạn cần.', photo: '/images/step-browse.jpg' },
-  { title: 'Thêm vào giỏ', desc: 'Đặt số lượng và thêm vào giỏ hàng.', photo: '/images/step-cart.jpg' },
-  { title: 'Thanh toán', desc: 'Chọn COD hoặc quét mã QR PayOS.', photo: '/images/step-pay.jpg' },
-  { title: 'Nhận hàng', desc: 'Nhận hàng tận nơi, kiểm tra và thưởng thức.', photo: '/images/step-delivery.jpg' },
-]
-
-const testimonials = [
-  { name: 'Chị Thu Hà', role: 'Quận 7, TP.HCM', initial: 'TH', content: 'Rau củ luôn tươi, đóng gói cẩn thận. Giao hàng đúng giờ, tôi đặt hằng tuần cho cả gia đình.' },
-  { name: 'Anh Minh Quang', role: 'Đà Nẵng', initial: 'MQ', content: 'Đặt xoài và trái cây giờ chỉ quen EcoMart. Giá hợp lý, chất lượng ổn định, thanh toán rất dễ.' },
-  { name: 'Chị Ngọc Anh', role: 'Thanh Xuân, Hà Nội', initial: 'NA', content: 'Nhân viên hỗ trợ nhanh và thân thiện. Có lần giao hàng bị sai sót, bên mình đổi ngay trong ngày.' },
-]
-
-const categoryImageMap: Record<string, string> = {
-  'rau-cu-sach': '/images/cat-vegetables.jpg',
-  'trai-cay-tuoi': '/images/cat-fruits.jpg',
-  'thuc-pham-kho': '/images/cat-grains.jpg',
-  'rau-cu': '/images/cat-vegetables.jpg',
-  'trai-cay': '/images/cat-fruits.jpg',
-  'ngu-co': '/images/cat-grains.jpg',
-  'thit-ca': '/images/cat-meat.jpg',
-  vegetables: '/images/cat-vegetables.jpg',
-  fruits: '/images/cat-fruits.jpg',
-  grains: '/images/cat-grains.jpg',
-  'meat-seafood': '/images/cat-meat.jpg',
-}
-
-const fallbackCategoryImages = [
-  '/images/cat-vegetables.jpg',
-  '/images/cat-fruits.jpg',
-  '/images/cat-grains.jpg',
-  '/images/cat-meat.jpg',
-]
-
-function categoryImage(slug: string, index: number) {
-  return categoryImageMap[slug] || fallbackCategoryImages[index % fallbackCategoryImages.length]
-}
+const stats = homeStats
+const features = homeFeatures(supportPhone)
+const steps = homeSteps
+const testimonials = homeTestimonials
+const aboutPoints = homeAboutPoints
 </script>
 
 <template>
@@ -274,7 +223,7 @@ function categoryImage(slug: string, index: number) {
             </p>
             <ul class="mt-8 flex flex-wrap items-center justify-center gap-3">
               <li
-                v-for="item in ['Sản phẩm đa dạng, nguồn gốc rõ ràng', 'Giao hàng nhanh, thanh toán linh hoạt', 'Chăm sóc khách hàng tận tâm', 'Đóng gói thân thiện môi trường']"
+                v-for="item in aboutPoints"
                 :key="item"
                 class="flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm text-gray-700">
                 <span class="grid h-5 w-5 place-items-center rounded-full bg-emerald-100 text-emerald-700">
@@ -336,10 +285,8 @@ function categoryImage(slug: string, index: number) {
             icon="i-ph-shopping-bag">
             Mua sắm ngay
           </UButton>
-        </div>
-      </Reveal>
+      </div>
+    </Reveal>
     </section>
-
-    <FooterGlobal />
   </div>
 </template>

@@ -116,10 +116,12 @@ watch(statusFilter, () => { page.value = 0; load() })
       <p v-if="(!loading && !orders.length) || loadError" class="py-16 text-center text-gray-400">Không có đơn hàng.</p>
     </div>
 
-    <div v-if="totalPages > 1" class="mt-4 flex items-center justify-center gap-2">
-      <UButton color="neutral" variant="soft" icon="i-ph-caret-left" :disabled="page === 0" @click="page--; load()" />
-      <span class="px-3 text-sm">Trang {{ page + 1 }} / {{ totalPages }}</span>
-      <UButton color="neutral" variant="soft" icon="i-ph-caret-right" :disabled="page >= totalPages - 1" @click="page++; load()" />
-    </div>
+    <PaginationBar
+      v-if="totalPages > 1"
+      :page="page"
+      :total-pages="totalPages"
+      @prev="page--; load()"
+      @next="page++; load()"
+    />
   </div>
 </template>

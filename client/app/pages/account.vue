@@ -7,6 +7,7 @@ definePageMeta({ middleware: 'auth' })
 const { request } = useApi()
 const toast = useToast()
 const { session, updateSession, isAdmin, logout } = useAuth()
+const { errors, applyIssues, clearErrors } = useFormErrors()
 
 const profile = ref<ProfileResponse | null>(null)
 const addresses = ref<Address[]>([])
@@ -17,7 +18,6 @@ const saving = ref(false)
 const profileForm = reactive({
   username: '', numberPhone: '', avatarUrl: '', currentPassword: '', newPassword: ''
 })
-const errors = ref<Record<string, string>>({})
 
 async function load() {
   loading.value = true
@@ -38,14 +38,15 @@ function startEdit() {
   if (profile.value) {
     Object.assign(profileForm, { username: profile.value.username, numberPhone: profile.value.numberPhone, avatarUrl: profile.value.avatarUrl || '', currentPassword: '', newPassword: '' })
   }
+  clearErrors()
   editMode.value = true
 }
 
 async function saveProfile() {
-  errors.value = {}
+  clearErrors()
   const result = profileSchema.safeParse(profileForm)
   if (!result.success) {
-    for (const issue of result.error.issues) errors.value[String(issue.path[0])] = issue.message
+    applyIssues(result.error)
     return
   }
   saving.value = true
@@ -165,14 +166,7 @@ onMounted(load)
         <div class="rounded-2xl border border-emerald-100 bg-white p-6">
           <h3 class="font-semibold text-gray-800">Địa chỉ của tôi</h3>
           <div v-if="addresses.length" class="mt-3 space-y-2">
-            <div v-for="a in addresses" :key="a.id" class="rounded-lg border border-gray-100 p-3 text-sm" :class="a.isDefault ? 'border-l-2 border-l-emerald-500' : ''">
-              <div class="flex items-center gap-2">
-                <span class="font-medium text-gray-700">{{ a.label }}</span>
-                <span v-if="a.isDefault" class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">Mặc định</span>
-              </div>
-              <p class="mt-1 text-xs text-gray-400">{{ a.receiverName }} · {{ a.receiverPhone }}</p>
-              <p class="mt-0.5 text-xs text-gray-500">{{ a.street }}, {{ a.ward }}, {{ a.district }}, {{ a.city }}</p>
-            </div>
+            <AddressCard v-for="a in addresses" :key="a.id" :address="a" />
           </div>
           <p v-else class="mt-3 text-sm text-gray-400">Chưa có địa chỉ. Thêm khi đặt hàng.</p>
         </div>

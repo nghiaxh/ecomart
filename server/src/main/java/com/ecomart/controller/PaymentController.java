@@ -2,10 +2,7 @@ package com.ecomart.controller;
 
 import com.ecomart.dto.response.MessageResponse;
 import com.ecomart.dto.response.OrderResponse;
-import com.ecomart.exception.BadRequestException;
-import com.ecomart.exception.UnauthorizedException;
-import com.ecomart.integration.payos.PayOSClient;
-import com.ecomart.service.OrderService;
+import com.ecomart.service.PaymentService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,12 +16,10 @@ import java.util.Map;
 @RequestMapping("/api/payments")
 public class PaymentController {
 
-    private final OrderService orderService;
-    private final PayOSClient payOSClient;
+    private final PaymentService paymentService;
 
-    public PaymentController(OrderService orderService, PayOSClient payOSClient) {
-        this.orderService = orderService;
-        this.payOSClient = payOSClient;
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
     }
 
     /**
@@ -35,7 +30,7 @@ public class PaymentController {
     @PostMapping("/payos/return")
     @PreAuthorize("isAuthenticated()")
     public OrderResponse payosReturn(@RequestParam Long orderId) {
-        return orderService.confirmPaymentByCurrentUser(orderId);
+        return paymentService.handleReturn(orderId);
     }
 
     /**
@@ -45,23 +40,6 @@ public class PaymentController {
      */
     @PostMapping("/payos/webhook")
     public MessageResponse payosWebhook(@RequestBody Map<String, Object> body) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> data = (Map<String, Object>) body.get("data");
-        String signature = (String) body.get("signature");
-
-        if (!payOSClient.verifySignature(data, signature)) {
-            throw new UnauthorizedException("Chữ ký PayOS không hợp lệ");
-        }
-        if (data == null || data.get("orderCode") == null) {
-            throw new BadRequestException("Dữ liệu webhook không hợp lệ");
-        }
-        Long orderId;
-        try {
-            orderId = Long.valueOf(String.valueOf(data.get("orderCode")));
-        } catch (NumberFormatException ex) {
-            throw new BadRequestException("Mã đơn hàng không hợp lệ");
-        }
-        orderService.confirmPayment(orderId);
-        return new MessageResponse("Thanh toán đã được xác nhận");
+        return paymentService.handleWebhook(body);
     }
 }

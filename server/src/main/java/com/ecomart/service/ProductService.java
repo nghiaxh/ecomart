@@ -3,9 +3,6 @@ package com.ecomart.service;
 import com.ecomart.common.Mapper;
 import com.ecomart.domain.entity.Category;
 import com.ecomart.domain.entity.Product;
-import com.ecomart.domain.entity.ProductImage;
-import com.ecomart.domain.entity.ProductMaterial;
-import com.ecomart.domain.entity.ProductMaterialId;
 import com.ecomart.domain.entity.Material;
 import com.ecomart.dto.request.ProductRequest;
 import com.ecomart.dto.response.PageResponse;
@@ -15,15 +12,11 @@ import com.ecomart.exception.ResourceNotFoundException;
 import com.ecomart.repository.CategoryRepository;
 import com.ecomart.repository.MaterialRepository;
 import com.ecomart.repository.ProductRepository;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -43,32 +36,21 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> search(String keyword, Long categoryId, Double minPrice,
+                                                Double maxPrice, boolean showAll, boolean isAdmin, Pageable pageable) {
+        return search(keyword, categoryId, minPrice, maxPrice, onlyActive(showAll, isAdmin), pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ProductResponse> search(String keyword, Long categoryId, Double minPrice,
                                                 Double maxPrice, boolean onlyActive, Pageable pageable) {
-        Specification<Product> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            if (onlyActive) {
-                predicates.add(cb.isTrue(root.get("isActive")));
-            }
-            if (keyword != null && !keyword.isBlank()) {
-                String like = "%" + keyword.toLowerCase() + "%";
-                predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("name")), like),
-                        cb.like(cb.lower(root.get("description")), like)));
-            }
-            if (categoryId != null) {
-                predicates.add(cb.equal(root.get("category").get("id"), categoryId));
-            }
-            if (minPrice != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("price"), minPrice));
-            }
-            if (maxPrice != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("price"), maxPrice));
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-        Page<Product> page = productRepository.findAll(spec, pageable);
+        String q = keyword == null || keyword.isBlank() ? "" : keyword.trim();
+        Page<Product> page = productRepository.search(q, categoryId, minPrice, maxPrice, onlyActive, pageable);
         List<ProductResponse> content = page.getContent().stream().map(Mapper::toProduct).toList();
         return Mapper.toPage(page, content);
+    }
+
+    private boolean onlyActive(boolean showAll, boolean isAdmin) {
+        return !showAll || !isAdmin;
     }
 
     @Transactional(readOnly = true)
@@ -94,22 +76,27 @@ public class ProductService {
 
     @Transactional
     public ProductResponse create(ProductRequest request) {
-        if (productRepository.existsBySlug(request.slug)) {
+        if (productRepository.existsBySlug(request.slug())) {
             throw new BadRequestException("Slug đã tồn tại");
         }
-        Category category = categoryRepository.findById(request.categoryId)
+        Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
-        Product product = apply(productRepository.save(new Product()), request, category);
-        return Mapper.toProduct(product);
+        Product product = productRepository.save(new Product());
+        Mapper.mergeProduct(product, request, category);
+        attachMaterials(product, request);
+        return Mapper.toProduct(productRepository.save(product));
     }
 
     @Transactional
     public ProductResponse update(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
-        Category category = categoryRepository.findById(request.categoryId)
+        Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
-        return Mapper.toProduct(apply(product, request, category));
+        Mapper.mergeProduct(product, request, category);
+        product.getMaterials().clear();
+        attachMaterials(product, request);
+        return Mapper.toProduct(productRepository.save(product));
     }
 
     @Transactional
@@ -128,44 +115,14 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    private Product apply(Product product, ProductRequest req, Category category) {
-        product.setName(req.name);
-        product.setSlug(req.slug);
-        product.setDescription(req.description);
-        product.setPrice(req.price);
-        product.setStock(req.stock);
-        product.setWeight(req.weight == null ? 0 : req.weight);
-        product.setOrigin(req.origin);
-        product.setCategory(category);
-        product.setActive(req.active);
-
-        product.getImages().clear();
-        if (req.images != null) {
-            int order = 0;
-            for (ProductRequest.ProductImageRequest img : req.images) {
-                ProductImage pi = new ProductImage();
-                pi.setProduct(product);
-                pi.setUrl(img.url());
-                pi.setPrimary(img.primary());
-                pi.setDisplayOrder(img.displayOrder() == null ? order : img.displayOrder());
-                product.getImages().add(pi);
-                order++;
-            }
+    private void attachMaterials(Product product, ProductRequest req) {
+        if (req.materials() == null) {
+            return;
         }
-
-        product.getMaterials().clear();
-        if (req.materials != null) {
-            for (ProductRequest.ProductMaterialRequest m : req.materials) {
-                Material material = materialRepository.findById(m.materialId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vật liệu"));
-                ProductMaterial pm = new ProductMaterial();
-                pm.setId(new ProductMaterialId(product.getId(), material.getId()));
-                pm.setProduct(product);
-                pm.setMaterial(material);
-                pm.setPercentage(m.percentage());
-                product.getMaterials().add(pm);
-            }
+        for (ProductRequest.ProductMaterialRequest m : req.materials()) {
+            Material material = materialRepository.findById(m.materialId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vật liệu"));
+            product.getMaterials().add(Mapper.productMaterial(product, material, m.percentage()));
         }
-        return productRepository.save(product);
     }
 }

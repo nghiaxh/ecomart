@@ -108,9 +108,19 @@ public class ChatBot {
                 tokens.add(token);
             }
         }
+        if (tokens.isEmpty()) {
+            return List.of();
+        }
+
+        Set<Product> candidates = new HashSet<>();
+        org.springframework.data.domain.Pageable limit =
+                org.springframework.data.domain.PageRequest.of(0, 20);
+        for (String token : tokens.stream().limit(3).toList()) {
+            candidates.addAll(productRepository.searchActiveByKeyword(token, limit));
+        }
 
         List<ScoredProduct> scored = new ArrayList<>();
-        for (Product product : productRepository.findAllByIsActiveTrue()) {
+        for (Product product : candidates) {
             String name = normalize(product.getName());
             String category = normalize(product.getCategory() == null ? "" : product.getCategory().getName());
             String description = normalize(product.getDescription());

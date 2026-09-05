@@ -2,6 +2,7 @@ package com.ecomart.service;
 
 import com.ecomart.common.Mapper;
 import com.ecomart.common.SecurityUtils;
+import com.ecomart.config.ShopProperties;
 import com.ecomart.domain.entity.*;
 import com.ecomart.domain.enums.*;
 import com.ecomart.dto.request.CheckoutRequest;
@@ -14,6 +15,7 @@ import com.ecomart.integration.payos.PayOSClient;
 import com.ecomart.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,8 +36,7 @@ public class OrderService {
     private final CustomerRepository customerRepository;
     private final NotificationService notificationService;
     private final PayOSClient payOSClient;
-
-    private static final double SHIPPING_FEE = 20000;
+    private final ShopProperties shopProperties;
 
     public OrderService(SecurityUtils securityUtils,
                         CartService cartService,
@@ -47,7 +48,8 @@ public class OrderService {
                         ProductRepository productRepository,
                         CustomerRepository customerRepository,
                         NotificationService notificationService,
-                        PayOSClient payOSClient) {
+                        PayOSClient payOSClient,
+                        ShopProperties shopProperties) {
         this.securityUtils = securityUtils;
         this.cartService = cartService;
         this.cartItemRepository = cartItemRepository;
@@ -59,20 +61,45 @@ public class OrderService {
         this.customerRepository = customerRepository;
         this.notificationService = notificationService;
         this.payOSClient = payOSClient;
+        this.shopProperties = shopProperties;
     }
 
     @Transactional
     public CheckoutResponse checkout(CheckoutRequest request) {
+        Cart cart = resolveCart();
+        Address address = resolveAddress(request.addressId());
+        Customer customer = (Customer) securityUtils.currentUser();
+        PaymentMethod method = request.paymentMethod();
+
+        validateStock(cart);
+        Order order = buildOrder(cart, address, customer, request.notes());
+        applyStockDecrement(cart);
+        Payment payment = createPayment(order, method);
+        String checkoutUrl = createPayOSLink(order, payment, method);
+        clearCart(cart);
+
+        notificationService.send(customer, "Đơn hàng #" + order.getId() + " đã được tạo",
+                "Đơn hàng của bạn với tổng giá trị " + Math.round(order.getTotal()) + "đ đã được ghi nhận.",
+                NotificationType.ORDER, String.valueOf(order.getId()));
+
+        return new CheckoutResponse(order.getId(), order.getStatus().name(), checkoutUrl,
+                method == PaymentMethod.COD ? "Đặt hàng thành công, thanh toán khi nhận hàng" : "Vui lòng hoàn tất thanh toán");
+    }
+
+    private Cart resolveCart() {
         Cart cart = cartService.getCart();
         if (cart.getItems().isEmpty()) {
             throw new BadRequestException("Giỏ hàng trống");
         }
-        Address address = addressRepository.findById(request.addressId())
+        return cart;
+    }
+
+    private Address resolveAddress(Long addressId) {
+        return addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy địa chỉ giao hàng"));
-        Customer customer = (Customer) securityUtils.currentUser();
+    }
 
-        PaymentMethod method = parseMethod(request.paymentMethod());
-
+    private void validateStock(Cart cart) {
         for (CartItem ci : cart.getItems()) {
             Product p = ci.getProduct();
             if (!p.isActive()) {
@@ -82,11 +109,12 @@ public class OrderService {
                 throw new BadRequestException("Sản phẩm " + p.getName() + " không đủ hàng");
             }
         }
+    }
 
+    private Order buildOrder(Cart cart, Address address, Customer customer, String notes) {
         double subtotal = 0;
         for (CartItem ci : cart.getItems()) {
-            Product p = ci.getProduct();
-            subtotal += p.getPrice() * ci.getQuantity();
+            subtotal += ci.getProduct().getPrice() * ci.getQuantity();
         }
 
         Order order = new Order();
@@ -96,9 +124,9 @@ public class OrderService {
         order.setAddress(address.getStreet() + ", " + address.getWard() + ", " + address.getDistrict() + ", " + address.getCity());
         order.setStatus(OrderStatus.PENDING);
         order.setSubtotal(subtotal);
-        order.setShippingFee(SHIPPING_FEE);
-        order.setTotal(subtotal + SHIPPING_FEE);
-        order.setNotes(request.notes());
+        order.setShippingFee(shopProperties.shippingFee());
+        order.setTotal(subtotal + shopProperties.shippingFee());
+        order.setNotes(notes);
         order = orderRepository.save(order);
 
         List<OrderItem> items = new ArrayList<>();
@@ -113,44 +141,52 @@ public class OrderService {
             oi.setUnitPrice(p.getPrice());
             orderItemRepository.save(oi);
             items.add(oi);
+        }
+        order.setItems(items);
+        return orderRepository.save(order);
+    }
 
+    private void applyStockDecrement(Cart cart) {
+        for (CartItem ci : cart.getItems()) {
+            Product p = ci.getProduct();
             p.setStock(p.getStock() - ci.getQuantity());
             productRepository.save(p);
         }
-        order.setItems(items);
+    }
 
+    private Payment createPayment(Order order, PaymentMethod method) {
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setMethod(method);
-        payment.setStatus(method == PaymentMethod.COD ? PaymentStatus.PENDING : PaymentStatus.PENDING);
+        payment.setStatus(PaymentStatus.PENDING);
         payment.setAmount(order.getTotal());
         paymentRepository.save(payment);
         order.setPayment(payment);
         orderRepository.save(order);
+        return payment;
+    }
 
-        String checkoutUrl = null;
-        if (method == PaymentMethod.PAYOS) {
-            checkoutUrl = payOSClient.createCheckoutUrl(order.getId(), Math.round(order.getTotal()), "EcoMart order #" + order.getId());
-            if (checkoutUrl != null) {
-                payment.setPayosOrderCode(String.valueOf(order.getId()));
-                paymentRepository.save(payment);
-            } else {
-                payment.setStatus(PaymentStatus.FAILED);
-                paymentRepository.save(payment);
-                order.setStatus(OrderStatus.CANCELLED);
-                orderRepository.save(order);
-                throw new BadRequestException("Không thể tạo thanh toán PayOS, vui lòng thử lại hoặc chọn COD");
-            }
+    private String createPayOSLink(Order order, Payment payment, PaymentMethod method) {
+        if (method != PaymentMethod.PAYOS) {
+            return null;
         }
+        String checkoutUrl = payOSClient.createCheckoutUrl(order.getId(), Math.round(order.getTotal()),
+                "EcoMart order #" + order.getId());
+        if (checkoutUrl != null) {
+            payment.setPayosOrderCode(String.valueOf(order.getId()));
+            paymentRepository.save(payment);
+            return checkoutUrl;
+        }
+        payment.setStatus(PaymentStatus.FAILED);
+        paymentRepository.save(payment);
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        throw new BadRequestException("Không thể tạo thanh toán PayOS, vui lòng thử lại hoặc chọn COD");
+    }
 
+    private void clearCart(Cart cart) {
         cart.getItems().clear();
         cartItemRepository.deleteByCartId(cart.getId());
-        notificationService.send(customer, "Đơn hàng #" + order.getId() + " đã được tạo",
-                "Đơn hàng của bạn với tổng giá trị " + Math.round(order.getTotal()) + "đ đã được ghi nhận.",
-                NotificationType.ORDER, String.valueOf(order.getId()));
-
-        return new CheckoutResponse(order.getId(), order.getStatus().name(), checkoutUrl,
-                method == PaymentMethod.COD ? "Đặt hàng thành công, thanh toán khi nhận hàng" : "Vui lòng hoàn tất thanh toán");
     }
 
     @Transactional(readOnly = true)
@@ -163,44 +199,24 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderResponse getMyOrder(Long orderId) {
         Customer customer = (Customer) securityUtils.currentUser();
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
-        if (!order.getCustomer().getId().equals(customer.getId())) {
-            throw new BadRequestException("Không thể xem đơn hàng này");
-        }
+        Order order = findOwnedOrder(orderId, customer.getId(), false);
         return Mapper.toOrder(order);
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<OrderResponse> allOrders(String status, Pageable pageable) {
-        Page<Order> page;
-        if (status != null && !status.isBlank()) {
-            OrderStatus orderStatus;
-            try {
-                orderStatus = OrderStatus.valueOf(status);
-            } catch (IllegalArgumentException ex) {
-                throw new BadRequestException("Trạng thái đơn hàng không hợp lệ: " + status);
-            }
-            page = orderRepository.findByStatus(orderStatus, pageable);
-        } else {
-            page = orderRepository.findAll(pageable);
-        }
+    public PageResponse<OrderResponse> allOrders(OrderStatus status, Pageable pageable) {
+        Page<Order> page = status == null
+                ? orderRepository.findAll(pageable)
+                : orderRepository.findByStatus(status, pageable);
         return Mapper.toPage(page, page.getContent().stream().map(Mapper::toOrder).toList());
     }
 
     @Transactional
-    public OrderResponse updateStatus(Long orderId, String status) {
+    public OrderResponse updateStatus(Long orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
-        OrderStatus newStatus;
-        try {
-            newStatus = OrderStatus.valueOf(status);
-        } catch (IllegalArgumentException ex) {
-            throw new BadRequestException("Trạng thái đơn hàng không hợp lệ: " + status);
-        }
-        order.setStatus(newStatus);
+        order.setStatus(status);
         orderRepository.save(order);
-
         return Mapper.toOrder(order);
     }
 
@@ -215,14 +231,19 @@ public class OrderService {
     @Transactional
     public OrderResponse confirmPaymentByCurrentUser(Long orderId) {
         Customer customer = (Customer) securityUtils.currentUser();
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
-        if (!order.getCustomer().getId().equals(customer.getId())
-                && !securityUtils.currentUserHasRole("ADMIN")) {
-            throw new com.ecomart.exception.UnauthorizedException("Không thể thanh toán đơn hàng này");
-        }
+        Order order = findOwnedOrder(orderId, customer.getId(), true);
         markPaid(order);
         return Mapper.toOrder(order);
+    }
+
+    private Order findOwnedOrder(Long orderId, Long customerId, boolean adminBypass) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+        if (!order.getCustomer().getId().equals(customerId)
+                && !(adminBypass && securityUtils.currentUserHasRole("ADMIN"))) {
+            throw new AccessDeniedException("Không thể truy cập đơn hàng này");
+        }
+        return order;
     }
 
     private void markPaid(Order order) {
@@ -235,14 +256,6 @@ public class OrderService {
                     "Thanh toán đơn hàng #" + order.getId() + " thành công",
                     "Cảm ơn bạn! Thanh toán cho đơn hàng đã được hoàn tất.",
                     NotificationType.ORDER, String.valueOf(order.getId()));
-        }
-    }
-
-    private PaymentMethod parseMethod(String value) {
-        try {
-            return PaymentMethod.valueOf(value.toUpperCase());
-        } catch (Exception ex) {
-            throw new BadRequestException("Phương thức thanh toán không hợp lệ");
         }
     }
 }

@@ -40,11 +40,11 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
-        if (categoryRepository.existsBySlug(request.slug)) {
+        if (categoryRepository.existsBySlug(request.slug())) {
             throw new BadRequestException("Slug danh mục đã tồn tại");
         }
         Category category = new Category();
-        apply(category, request);
+        Mapper.mergeCategory(category, request, resolveParent(request));
         return Mapper.toCategory(categoryRepository.save(category));
     }
 
@@ -52,7 +52,7 @@ public class CategoryService {
     public CategoryResponse update(Long id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
-        apply(category, request);
+        Mapper.mergeCategory(category, request, resolveParent(request));
         return Mapper.toCategory(categoryRepository.save(category));
     }
 
@@ -70,16 +70,11 @@ public class CategoryService {
         categoryRepository.deleteById(id);
     }
 
-    private void apply(Category category, CategoryRequest req) {
-        if (req.parentId != null) {
-            Category parent = categoryRepository.findById(req.parentId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục cha"));
-            category.setParent(parent);
+    private Category resolveParent(CategoryRequest req) {
+        if (req.parentId() == null) {
+            return null;
         }
-        category.setName(req.name);
-        category.setSlug(req.slug);
-        category.setIcon(req.icon);
-        category.setDisplayOrder(req.displayOrder == null ? 0 : req.displayOrder);
-        category.setActive(req.active);
+        return categoryRepository.findById(req.parentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục cha"));
     }
 }

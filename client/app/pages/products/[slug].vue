@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Product, Review } from '~/types'
+import type { MaterialType, Product, Review } from '~/types'
 import { reviewSchema } from '~/schemas'
 
 const { request } = useApi()
@@ -9,54 +9,66 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
-const product = ref<Product | null>(null)
+const slug = route.params.slug as string
+
+const { data: product, pending: loading } = await useAsyncData<Product | null>(
+  `product-${slug}`,
+  async () => {
+    try {
+      return await request<Product>(`/api/products/slug/${slug}`)
+    } catch (error: any) {
+      toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
+      return null
+    }
+  }
+)
+
+useHead({ title: () => (product.value ? `${product.value.name} | EcoMart` : 'Sản phẩm | EcoMart') })
+
 const reviews = ref<Review[]>([])
 const quantity = ref(1)
-const loading = ref(true)
 const adding = ref(false)
 const submittingReview = ref(false)
 const reviewLoadError = ref(false)
 
 const selectedImage = ref('')
-const reviewFormOpen = ref(false)
-const reviewForm = reactive({ rating: 5, content: '' })
+watch(product, (p) => {
+  selectedImage.value = p?.images?.[0] || ''
+  quantity.value = 1
+}, { immediate: true })
 
 const liveTotal = computed(() => (product.value?.price || 0) * quantity.value)
 const avgRating = computed(() => reviews.value.length ? reviews.value.reduce((s, r) => s + r.rating, 0) / reviews.value.length : 0)
 const reviewCount = computed(() => reviews.value.length)
+
+const MATERIAL_META: Record<MaterialType, { icon: string; color: string }> = {
+  ORGANIC: { icon: 'i-ph-leaf', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  RECYCLED: { icon: 'i-ph-recycle', color: 'bg-teal-50 text-teal-700 border-teal-200' },
+  NATURAL: { icon: 'i-ph-flower', color: 'bg-sky-50 text-sky-700 border-sky-200' },
+  SYNTHETIC: { icon: 'i-ph-flask', color: 'bg-slate-100 text-slate-700 border-slate-200' }
+}
+
+function materialIcon(type: string) {
+  return (MATERIAL_META[type as MaterialType] || { icon: 'i-ph-package' }).icon
+}
+
+function materialColor(type: string) {
+  return (MATERIAL_META[type as MaterialType] || { color: 'bg-gray-100 text-gray-600 border-gray-200' }).color
+}
 
 function goBack() {
   if (typeof window !== 'undefined' && window.history.length > 1) router.back()
   else navigateTo('/products')
 }
 
-function materialIcon(type: string) {
-  const map: Record<string, string> = { ORGANIC: 'i-ph-leaf', RECYCLED: 'i-ph-recycle', NATURAL: 'i-ph-flower', SYNTHETIC: 'i-ph-flask' }
-  return map[type] || 'i-ph-package'
-}
-
-function materialColor(type: string) {
-  const map: Record<string, string> = { ORGANIC: 'bg-emerald-50 text-emerald-700 border-emerald-200', RECYCLED: 'bg-teal-50 text-teal-700 border-teal-200', NATURAL: 'bg-sky-50 text-sky-700 border-sky-200', SYNTHETIC: 'bg-slate-100 text-slate-700 border-slate-200' }
-  return map[type] || 'bg-gray-100 text-gray-600 border-gray-200'
-}
-
-async function load() {
-  loading.value = true
-  try {
-    const p = await request<Product>(`/api/products/slug/${route.params.slug}`)
-    product.value = p
-    selectedImage.value = p.images?.[0] || ''
-  } catch (error: any) {
-    toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
-  } finally {
-    loading.value = false
-  }
-}
+const reviewFormOpen = ref(false)
+const reviewForm = reactive({ rating: 5, content: '' })
 
 async function loadReviews() {
+  if (!product.value) return
   reviewLoadError.value = false
   try {
-    reviews.value = await request<Review[]>(`/api/reviews?productId=${product.value?.id}&includeHidden=false`)
+    reviews.value = await request<Review[]>(`/api/reviews?productId=${product.value.id}&includeHidden=false`)
   } catch {
     reviewLoadError.value = true
   }
@@ -71,9 +83,10 @@ async function addToCart() {
     navigateTo('/admin')
     return
   }
+  if (!product.value || product.value.stock <= 0) return
   adding.value = true
   try {
-    await useCart().add(product.value!.id, quantity.value)
+    await useCart().add(product.value.id, quantity.value)
     toast.add({ title: 'Đã thêm vào giỏ hàng', icon: 'i-ph-check-circle', color: 'success' })
   } finally {
     adding.value = false
@@ -104,9 +117,7 @@ async function submitReview() {
   }
 }
 
-onMounted(() => {
-  load().then(loadReviews)
-})
+onMounted(loadReviews)
 </script>
 
 <template>
@@ -127,16 +138,7 @@ onMounted(() => {
       <!-- Gallery -->
       <div class="lg:sticky lg:top-24 lg:self-start">
         <div class="group aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl bg-emerald-50">
-          <img
-            v-if="selectedImage"
-            :src="selectedImage"
-            :alt="product.name"
-            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'"
-          />
-          <div v-else class="grid h-full w-full place-items-center text-emerald-200">
-            <UIcon name="i-ph-image" class="h-16 w-16" />
-          </div>
+          <UiImg :src="selectedImage" :alt="product.name" img-class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         </div>
         <div v-if="product.images && product.images.length > 1" class="mt-3 flex gap-2">
           <button
@@ -146,7 +148,7 @@ onMounted(() => {
             :class="selectedImage === img ? 'border-emerald-600 ring-2 ring-emerald-600/20' : 'border-transparent hover:border-emerald-200'"
             @click="selectedImage = img"
           >
-            <img :src="img" :alt="product.name" class="h-full w-full object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
+            <UiImg :src="img" :alt="product.name" img-class="h-full w-full object-cover" />
           </button>
         </div>
       </div>
@@ -201,16 +203,7 @@ onMounted(() => {
             <span class="w-10 text-center font-semibold">{{ quantity }}</span>
             <UButton color="neutral" variant="ghost" icon="i-ph-plus" :disabled="quantity >= product.stock" class="min-h-11 min-w-11 justify-center" @click="quantity++" />
           </div>
-          <UButton
-            v-if="!isAdmin"
-            color="primary"
-            size="lg"
-            icon="i-ph-shopping-cart"
-            :label="product.stock > 0 ? 'Thêm vào giỏ' : 'Hết hàng'"
-            :disabled="product.stock <= 0"
-            :loading="adding"
-            @click="addToCart"
-          />
+          <AddToCartButton v-if="!isAdmin" :stock="product.stock" :loading="adding" @add="addToCart" />
           <span class="text-sm text-gray-500">
             Tổng: <strong class="text-emerald-700">{{ formatVND(liveTotal) }}</strong>
           </span>
@@ -285,15 +278,7 @@ onMounted(() => {
           <p class="text-lg font-extrabold text-emerald-700">{{ formatVND(product.price) }}</p>
           <p class="text-xs text-gray-400">x{{ quantity }}</p>
         </div>
-        <UButton
-          color="primary"
-          size="lg"
-          icon="i-ph-shopping-cart"
-          :label="product.stock > 0 ? 'Thêm vào giỏ' : 'Hết hàng'"
-          :disabled="product.stock <= 0"
-          :loading="adding"
-          @click="addToCart"
-        />
+        <AddToCartButton :stock="product.stock" :loading="adding" @add="addToCart" />
       </div>
     </div>
   </div>

@@ -1,8 +1,9 @@
 package com.ecomart.dto.request;
 
+import com.ecomart.domain.enums.OrderStatus;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateOrderStatusRequest(
-        @NotNull String status
+        @NotNull OrderStatus status
 ) {
 }

@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useAuth } from '~/composables/useAuth'
-
-const { isLoggedIn, isAdmin, session, restore } = useAuth()
+const { isLoggedIn, isAdmin, session } = useAuth()
 const { itemCount } = useCart()
 
 const links = [
@@ -10,14 +7,6 @@ const links = [
   { label: 'Sản phẩm', to: '/products' },
   { label: 'Về chúng tôi', to: '/#about' }
 ]
-
-let restored = false
-onMounted(() => {
-  if (!restored) {
-    restore()
-    restored = true
-  }
-})
 </script>
 
 <template>
@@ -72,6 +61,8 @@ onMounted(() => {
     <main class="flex-1">
       <slot />
     </main>
+
+    <FooterGlobal />
 
     <ClientOnly>
       <ChatWidget />

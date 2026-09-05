@@ -5,6 +5,8 @@ import type { CategoryRequest, CategoryResponse } from '~/types'
 import { categorySchema } from '~/schemas'
 
 const { request } = useApi()
+const { errors, applyIssues, clearErrors } = useFormErrors()
+const { confirm } = useConfirm()
 const toast = useToast()
 
 const categories = ref<CategoryResponse[]>([])
@@ -28,7 +30,6 @@ const showForm = ref(false)
 const editingId = ref<number | null>(null)
 const saving = ref(false)
 const form = reactive({ name: '', slug: '', icon: '', parentId: null as number | null, displayOrder: 0, active: true })
-const errors = ref<Record<string, string>>({})
 
 async function load() {
   loading.value = true
@@ -42,22 +43,22 @@ async function load() {
 function openCreate() {
   editingId.value = null
   Object.assign(form, { name: '', slug: '', icon: '', parentId: null, displayOrder: 0, active: true })
-  errors.value = {}
+  clearErrors()
   showForm.value = true
 }
 
 function openEdit(c: CategoryResponse) {
   editingId.value = c.id
   Object.assign(form, { name: c.name, slug: c.slug, icon: c.icon || '', parentId: null, displayOrder: c.displayOrder, active: c.active })
-  errors.value = {}
+  clearErrors()
   showForm.value = true
 }
 
 async function submit() {
-  errors.value = {}
+  clearErrors()
   const result = categorySchema.safeParse(form)
   if (!result.success) {
-    for (const issue of result.error.issues) errors.value[String(issue.path[0])] = issue.message
+    applyIssues(result.error)
     return
   }
   saving.value = true
@@ -80,7 +81,7 @@ async function submit() {
 
 async function remove(c: CategoryResponse) {
   if (busyIds.value.has(c.id)) return
-  if (!confirm(`Xóa danh mục "${c.name}"?`)) return
+  if (!await confirm(`Xóa danh mục "${c.name}"?`, 'Xóa danh mục')) return
   busyIds.value.add(c.id)
   try {
     await request(`/api/categories/${c.id}`, { method: 'DELETE' })

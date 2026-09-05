@@ -28,6 +28,13 @@ export const useCart = () => {
     }
   }, { immediate: true })
 
+  const notifyError = (error: any, fallback: string) => {
+    toast.add({
+      title: error?.data?.message || fallback,
+      color: 'error'
+    })
+  }
+
   const add = async (productId: number, quantity = 1) => {
     try {
       cart.value = await request<Cart>('/api/cart', {
@@ -36,10 +43,7 @@ export const useCart = () => {
       })
       return cart.value
     } catch (error: any) {
-      toast.add({
-        title: error?.data?.message || 'Không thể thêm sản phẩm vào giỏ hàng',
-        color: 'error'
-      })
+      notifyError(error, 'Không thể thêm sản phẩm vào giỏ hàng')
       throw error
     }
   }
@@ -51,10 +55,7 @@ export const useCart = () => {
       })
       return cart.value
     } catch (error: any) {
-      toast.add({
-        title: error?.data?.message || 'Không thể cập nhật giỏ hàng',
-        color: 'error'
-      })
+      notifyError(error, 'Không thể cập nhật giỏ hàng')
       throw error
     }
   }
@@ -66,10 +67,7 @@ export const useCart = () => {
       })
       return cart.value
     } catch (error: any) {
-      toast.add({
-        title: error?.data?.message || 'Không thể xóa sản phẩm khỏi giỏ hàng',
-        color: 'error'
-      })
+      notifyError(error, 'Không thể xóa sản phẩm khỏi giỏ hàng')
       throw error
     }
   }

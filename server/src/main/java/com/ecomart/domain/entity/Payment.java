@@ -33,8 +33,6 @@ public class Payment {
     @Column(nullable = false)
     private double amount;
 
-    private String transactionRef;
-
     private String payosOrderCode;
 
     private Instant paidAt;

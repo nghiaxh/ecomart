@@ -2,7 +2,7 @@
 import { registerSchema } from '~/schemas'
 
 definePageMeta({
-  layout: 'auth'
+  layout: false
 })
 
 const { register } = useAuth()
@@ -10,7 +10,6 @@ const toast = useToast()
 
 const form = reactive({ username: '', email: '', numberPhone: '', password: '' })
 const loading = ref(false)
-const showPassword = ref(false)
 
 async function submit() {
   const result = registerSchema.safeParse(form)
@@ -79,29 +78,12 @@ async function submit() {
       </div>
       <div>
         <label for="register-password" class="mb-1.5 block text-sm font-medium text-gray-700">Mật khẩu</label>
-        <UInput
-          id="register-password"
+        <PasswordInput
           v-model="form.password"
-          :type="showPassword ? 'text' : 'password'"
-          autocomplete="new-password"
           placeholder="Nhập mật khẩu"
           icon="i-ph-lock"
           size="lg"
-          class="w-full"
-          :ui="{ trailing: 'pe-1' }"
-        >
-          <template #trailing>
-            <UButton
-              color="neutral"
-              variant="link"
-              size="md"
-              :icon="showPassword ? 'i-ph-eye-slash' : 'i-ph-eye'"
-              :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-              :aria-pressed="showPassword"
-              @click="showPassword = !showPassword"
-            />
-          </template>
-        </UInput>
+        />
       </div>
       <UButton type="submit" color="primary" size="xl" block :loading="loading" label="Đăng ký" class="mt-2" />
     </form>

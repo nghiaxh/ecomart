@@ -21,11 +21,14 @@ public class UploadService {
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "image/jpeg", "image/png", "image/webp", "image/gif");
 
-    @Value("${app.upload-dir}")
-    private String uploadDir;
+    private final String uploadDir;
+    private final String baseUrl;
 
-    @Value("${app.client-url}")
-    private String baseUrl;
+    public UploadService(@Value("${app.upload-dir}") String uploadDir,
+                         @Value("${app.client-url}") String baseUrl) {
+        this.uploadDir = uploadDir;
+        this.baseUrl = baseUrl;
+    }
 
     public MessageResponse upload(MultipartFile file, String folder) {
         if (file == null || file.isEmpty()) {

@@ -5,7 +5,9 @@ import com.ecomart.dto.response.CartResponse;
 import com.ecomart.dto.response.MessageResponse;
 import com.ecomart.service.CartService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/cart")
 @PreAuthorize("isAuthenticated()")
+@Validated
 public class CartController {
 
     private final CartService cartService;
@@ -38,7 +41,7 @@ public class CartController {
     }
 
     @PutMapping("/{productId}")
-    public CartResponse updateQuantity(@PathVariable Long productId, @RequestParam int quantity) {
+    public CartResponse updateQuantity(@PathVariable Long productId, @RequestParam @Min(0) int quantity) {
         return cartService.updateQuantity(productId, quantity);
     }
 

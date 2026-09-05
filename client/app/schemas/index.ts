@@ -19,7 +19,7 @@ export const addressSchema = z.object({
   district: z.string().min(1, 'Vui lòng nhập quận/huyện'),
   city: z.string().min(1, 'Vui lòng nhập tỉnh/thành phố'),
   receiverName: z.string().min(1, 'Vui lòng nhập tên người nhận'),
-  receiverPhone: z.string().min(10, 'Số điện thoại không hợp lệ'),
+  receiverPhone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ'),
   isDefault: z.boolean().optional()
 })
 
@@ -74,3 +74,8 @@ export const bannerSchema = z.object({
 export type LoginForm = z.infer<typeof loginSchema>
 export type RegisterForm = z.infer<typeof registerSchema>
 export type AddressForm = z.infer<typeof addressSchema>
+export type ReviewForm = z.infer<typeof reviewSchema>
+export type ProfileForm = z.infer<typeof profileSchema>
+export type ProductForm = z.infer<typeof productSchema>
+export type CategoryForm = z.infer<typeof categorySchema>
+export type BannerForm = z.infer<typeof bannerSchema>

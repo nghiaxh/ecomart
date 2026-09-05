@@ -2,8 +2,8 @@ export type UserRole = 'CUSTOMER' | 'ADMIN'
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'COMPLETED' | 'CANCELLED'
 export type PaymentMethod = 'PAYOS' | 'COD'
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED'
-export type NotificationType = 'ORDER' | 'PROMO' | 'SYSTEM'
-export type ChatRole = 'USER' | 'BOT' | 'SYSTEM'
+export type NotificationType = 'ORDER'
+export type ChatRole = 'USER' | 'BOT'
 export type MaterialType = 'ORGANIC' | 'RECYCLED' | 'NATURAL' | 'SYNTHETIC'
 
 export interface AuthResponse {
@@ -42,7 +42,7 @@ export interface ProductMaterial {
   id: number
   name: string
   percentage: number
-  type: string
+  type: MaterialType
 }
 
 export interface Product {
@@ -141,18 +141,9 @@ export interface Order {
 
 export interface CheckoutResult {
   orderId: number
-  status: string
+  status: OrderStatus
   payosCheckoutUrl?: string
   message: string
-}
-
-export interface NotificationItem {
-  id: number
-  title: string
-  message: string
-  type: NotificationType
-  read: boolean
-  createdAt: string
 }
 
 export interface Review {
@@ -222,15 +213,4 @@ export interface BannerRequest {
   linkUrl?: string
   displayOrder?: number
   active: boolean
-}
-
-export interface AddressRequest {
-  label: string
-  street: string
-  ward: string
-  district: string
-  city: string
-  receiverName: string
-  receiverPhone: string
-  isDefault: boolean
 }

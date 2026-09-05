@@ -6,6 +6,8 @@ import { productSchema } from '~/schemas'
 
 const { request } = useApi()
 const { formatVND } = useFormat()
+const { errors, applyIssues, clearErrors } = useFormErrors()
+const { confirm } = useConfirm()
 const toast = useToast()
 
 const products = ref<Product[]>([])
@@ -23,7 +25,6 @@ const form = reactive({
   name: '', slug: '', description: '', price: 0, stock: 0,
   weight: 0, origin: '', categoryId: 0, active: true, imageUrl: ''
 })
-const errors = ref<Record<string, string>>({})
 
 async function loadCats() {
   categories.value = await request<CategoryResponse[]>('/api/categories')
@@ -48,7 +49,7 @@ async function load() {
 function openCreate() {
   editingId.value = null
   Object.assign(form, { name: '', slug: '', description: '', price: 0, stock: 0, weight: 0, origin: '', categoryId: 0, active: true, imageUrl: '' })
-  errors.value = {}
+  clearErrors()
   showForm.value = true
 }
 
@@ -59,15 +60,15 @@ function openEdit(p: Product) {
     weight: p.weight, origin: p.origin || '', categoryId: p.categoryId, active: p.active,
     imageUrl: p.images?.[0] || ''
   })
-  errors.value = {}
+  clearErrors()
   showForm.value = true
 }
 
 async function submit() {
-  errors.value = {}
+  clearErrors()
   const result = productSchema.safeParse(form)
   if (!result.success) {
-    for (const issue of result.error.issues) errors.value[String(issue.path[0])] = issue.message
+    applyIssues(result.error)
     return
   }
   saving.value = true
@@ -75,7 +76,7 @@ async function submit() {
     name: form.name, slug: form.slug, description: form.description, price: Number(form.price), stock: Number(form.stock),
     weight: Number(form.weight || 0), origin: form.origin,
     categoryId: Number(form.categoryId), active: form.active,
-    images: form.imageUrl ? [{ url: form.imageUrl, primary: true }] : []
+    images: form.imageUrl ? [{ url: form.imageUrl, primary: true, displayOrder: 0 }] : []
   }
   try {
     if (editingId.value) {
@@ -108,7 +109,7 @@ async function toggle(p: Product) {
 
 async function remove(p: Product) {
   if (busyIds.value.has(p.id)) return
-  if (!confirm(`Xóa sản phẩm "${p.name}"?`)) return
+  if (!await confirm(`Xóa sản phẩm "${p.name}"?`, 'Xóa sản phẩm')) return
   busyIds.value.add(p.id)
   try {
     await request(`/api/products/${p.id}`, { method: 'DELETE' })
@@ -207,7 +208,7 @@ watch(search, debouncedLoad)
           <tr v-for="p in products" :key="p.id" class="border-t border-gray-100">
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
-                <img :src="p.images?.[0]" :alt="p.name" class="h-10 w-10 rounded-lg object-cover" @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'" />
+                <UiImg :src="p.images?.[0]" :alt="p.name" img-class="h-10 w-10 rounded-lg object-cover" />
                 <span class="font-medium text-gray-800">{{ p.name }}</span>
               </div>
             </td>
@@ -228,10 +229,12 @@ watch(search, debouncedLoad)
       </table>
     </div>
 
-    <div v-if="totalPages > 1" class="mt-4 flex items-center justify-center gap-2">
-      <UButton color="neutral" variant="soft" icon="i-ph-caret-left" :disabled="page === 0" @click="page--; load()" />
-      <span class="px-3 text-sm">Trang {{ page + 1 }} / {{ totalPages }}</span>
-      <UButton color="neutral" variant="soft" icon="i-ph-caret-right" :disabled="page >= totalPages - 1" @click="page++; load()" />
-    </div>
+    <PaginationBar
+      v-if="totalPages > 1"
+      :page="page"
+      :total-pages="totalPages"
+      @prev="page--; load()"
+      @next="page++; load()"
+    />
   </div>
 </template>

@@ -49,11 +49,7 @@ public class AddressController {
 
     @PatchMapping("/{id}/default")
     public AddressResponse setDefault(@PathVariable Long id) {
-        addressService.setDefault(id);
-        return addressService.myAddresses().stream()
-                .filter(a -> a.id().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new com.ecomart.exception.ResourceNotFoundException("Không tìm thấy địa chỉ"));
+        return addressService.setDefault(id);
     }
 
     @DeleteMapping("/{id}")

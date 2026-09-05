@@ -10,18 +10,18 @@ import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
-public class ProductRequest {
-    @NotBlank @Size(max = 200) public String name;
-    @NotBlank @Size(max = 200) public String slug;
-    @Size(max = 4000) public String description;
-    @NotNull @Positive public Double price;
-    @NotNull @PositiveOrZero public Integer stock;
-    public Double weight;
-    @Size(max = 100) public String origin;
-    @NotNull public Long categoryId;
-    @NotNull public Boolean active;
-    public List<@Valid ProductImageRequest> images;
-    public List<@Valid ProductMaterialRequest> materials;
+public record ProductRequest(
+        @NotBlank @Size(max = 200) String name,
+        @NotBlank @Size(max = 200) String slug,
+        @Size(max = 4000) String description,
+        @NotNull @Positive Double price,
+        @NotNull @PositiveOrZero Integer stock,
+        Double weight,
+        @Size(max = 100) String origin,
+        @NotNull Long categoryId,
+        @NotNull Boolean active,
+        List<@Valid ProductImageRequest> images,
+        List<@Valid ProductMaterialRequest> materials) {
 
     public record ProductImageRequest(
             @NotBlank @Pattern(regexp = "^(https?://|/).*", message = "Đường dẫn ảnh không hợp lệ") String url,

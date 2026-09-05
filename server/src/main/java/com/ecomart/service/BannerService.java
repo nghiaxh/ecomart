@@ -38,7 +38,7 @@ public class BannerService {
     @Transactional
     public BannerResponse create(BannerRequest request) {
         Banner banner = new Banner();
-        apply(banner, request);
+        Mapper.mergeBanner(banner, request);
         return Mapper.toBanner(bannerRepository.save(banner));
     }
 
@@ -46,7 +46,7 @@ public class BannerService {
     public BannerResponse update(Long id, BannerRequest request) {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy banner"));
-        apply(banner, request);
+        Mapper.mergeBanner(banner, request);
         return Mapper.toBanner(bannerRepository.save(banner));
     }
 
@@ -56,16 +56,5 @@ public class BannerService {
             throw new ResourceNotFoundException("Không tìm thấy banner");
         }
         bannerRepository.deleteById(id);
-    }
-
-    private void apply(Banner banner, BannerRequest req) {
-        banner.setTitle(req.title);
-        banner.setSubtitle(req.subtitle);
-        banner.setImageUrl(req.imageUrl);
-        banner.setLinkUrl(req.linkUrl);
-        banner.setDisplayOrder(req.displayOrder == null ? 0 : req.displayOrder);
-        if (req.active != null) {
-            banner.setActive(req.active);
-        }
     }
 }

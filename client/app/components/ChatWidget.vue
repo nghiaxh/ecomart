@@ -7,7 +7,6 @@ const { request } = useApi()
 const open = ref(false)
 const messages = ref<ChatMessage[]>([])
 const sessionId = ref<number | null>(null)
-const input = ref('')
 const sending = ref(false)
 const greeting = 'Xin chào! Tôi là EcoBot. Bạn cần hỗ trợ gì hôm nay?'
 
@@ -18,9 +17,7 @@ function toggle() {
   }
 }
 
-async function send() {
-  const msg = input.value.trim()
-  if (!msg || sending.value) return
+async function send(msg: string) {
   sending.value = true
   try {
     const res = await request<ChatResponse>('/api/chat/send', {
@@ -29,7 +26,6 @@ async function send() {
     })
     messages.value = res.messages
     sessionId.value = res.sessionId
-    input.value = ''
   } catch {
     messages.value.push({ id: Date.now(), role: 'BOT', content: 'Đã có lỗi xảy ra, vui lòng thử lại sau.', createdAt: new Date().toISOString() })
   } finally {
@@ -66,30 +62,7 @@ function goLogin() {
             <UButton color="primary" size="sm" label="Đăng nhập" @click="goLogin" />
           </div>
 
-          <template v-else>
-            <div class="flex-1 space-y-3 overflow-y-auto p-4">
-              <div
-                v-for="m in messages"
-                :key="m.id"
-                class="flex"
-                :class="m.role === 'USER' ? 'justify-end' : 'justify-start'"
-              >
-                <div
-                  class="max-w-[80%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm leading-relaxed"
-                  :class="m.role === 'USER' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-800'"
-                >
-                  {{ m.content }}
-                </div>
-              </div>
-            </div>
-
-            <form class="border-t border-emerald-100 p-3" @submit.prevent="send">
-              <div class="flex gap-2">
-                <UInput v-model="input" placeholder="Nhập tin nhắn..." size="md" class="flex-1" />
-                <UButton type="submit" color="primary" icon="i-ph-paper-plane-tilt" :disabled="!input.trim() || sending" :loading="sending" aria-label="Gửi tin nhắn" />
-              </div>
-            </form>
-          </template>
+          <ChatThread v-else :messages="messages" :sending="sending" compact @send="send" />
         </div>
       </transition>
 

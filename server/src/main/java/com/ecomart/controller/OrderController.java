@@ -1,5 +1,6 @@
 package com.ecomart.controller;
 
+import com.ecomart.domain.enums.OrderStatus;
 import com.ecomart.dto.request.CheckoutRequest;
 import com.ecomart.dto.request.UpdateOrderStatusRequest;
 import com.ecomart.dto.response.CheckoutResponse;
@@ -49,7 +50,7 @@ public class OrderController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public PageResponse<OrderResponse> allOrders(@RequestParam(required = false) String status,
+    public PageResponse<OrderResponse> allOrders(@RequestParam(required = false) OrderStatus status,
                                                  @RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "10") int size) {
         return orderService.allOrders(status, PageRequest.of(page, size));

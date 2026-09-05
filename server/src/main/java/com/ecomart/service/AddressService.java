@@ -36,7 +36,7 @@ public class AddressService {
         Customer customer = (Customer) securityUtils.currentUser();
         Address address = new Address();
         address.setCustomer(customer);
-        apply(address, request);
+        Mapper.mergeAddress(address, request);
         if (request.isDefault()) {
             clearDefault(customer.getId());
         }
@@ -47,9 +47,10 @@ public class AddressService {
     public AddressResponse update(Long id, AddressRequest request) {
         Customer customer = (Customer) securityUtils.currentUser();
         Address address = getOwned(id, customer.getId());
-        apply(address, request);
+        Mapper.mergeAddress(address, request);
         if (request.isDefault()) {
-            clearDefault(customer.getId());
+            clearDefaultExcept(customer.getId(), id);
+            address.setDefault(true);
         }
         return Mapper.toAddress(addressRepository.save(address));
     }
@@ -62,12 +63,12 @@ public class AddressService {
     }
 
     @Transactional
-    public void setDefault(Long id) {
+    public AddressResponse setDefault(Long id) {
         Customer customer = (Customer) securityUtils.currentUser();
         Address address = getOwned(id, customer.getId());
-        clearDefault(customer.getId());
+        clearDefaultExcept(customer.getId(), id);
         address.setDefault(true);
-        addressRepository.save(address);
+        return Mapper.toAddress(addressRepository.save(address));
     }
 
     public Address getOwned(Long id, Long customerId) {
@@ -86,13 +87,13 @@ public class AddressService {
                 });
     }
 
-    private void apply(Address address, AddressRequest req) {
-        address.setLabel(req.label());
-        address.setStreet(req.street());
-        address.setWard(req.ward());
-        address.setDistrict(req.district());
-        address.setCity(req.city());
-        address.setReceiverName(req.receiverName());
-        address.setReceiverPhone(req.receiverPhone());
+    private void clearDefaultExcept(Long customerId, Long excludeId) {
+        addressRepository.findByCustomerId(customerId)
+                .forEach(a -> {
+                    if (!a.getId().equals(excludeId) && a.isDefault()) {
+                        a.setDefault(false);
+                        addressRepository.save(a);
+                    }
+                });
     }
 }

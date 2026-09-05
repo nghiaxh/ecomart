@@ -1,4 +1,5 @@
 import type { FetchOptions } from 'ofetch'
+import { clearSession, emitUnauthorized, loadToken } from '~/utils/session-storage'
 
 const AUTH_URL_PREFIX = '/api/auth'
 
@@ -7,21 +8,6 @@ let refreshInflight: Promise<unknown> | null = null
 export const useApi = () => {
   const config = useRuntimeConfig()
   const router = useRouter()
-
-  const getToken = () => {
-    if (import.meta.client) {
-      return localStorage.getItem('ecomart_token') ?? sessionStorage.getItem('ecomart_token')
-    }
-    return null
-  }
-
-  const clearSession = () => {
-    if (!import.meta.client) return
-    localStorage.removeItem('ecomart_session')
-    localStorage.removeItem('ecomart_token')
-    sessionStorage.removeItem('ecomart_session')
-    sessionStorage.removeItem('ecomart_token')
-  }
 
   const tryRefreshOnce = async () => {
     try {
@@ -41,7 +27,7 @@ export const useApi = () => {
     const headers: Record<string, string> = {
       ...(opts.headers as Record<string, string> || {})
     }
-    const token = getToken()
+    const token = loadToken()
     if (token) {
       headers.Authorization = `Bearer ${token}`
     }
@@ -72,7 +58,7 @@ export const useApi = () => {
       }
       if (import.meta.client && error?.response?.status === 401) {
         clearSession()
-        document.dispatchEvent(new Event('ecomart:unauthorized'))
+        emitUnauthorized()
         const noAuthPage = ['/login', '/register'].includes(router.currentRoute.value.path)
         if (!noAuthPage) {
           navigateTo('/login')
@@ -82,5 +68,5 @@ export const useApi = () => {
     }
   }
 
-  return { request, getToken, apiBase: config.public.apiBase }
+  return { request }
 }

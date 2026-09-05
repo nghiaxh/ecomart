@@ -24,7 +24,7 @@ public class NotificationService {
 
     @Transactional
     public void send(User user, String title, String message, NotificationType type, String referenceId) {
-        Notification notification = Mapper.newNotification(user, title, message, type, referenceId);
+        Notification notification = newNotification(user, title, message, type, referenceId);
         notificationRepository.save(notification);
     }
 
@@ -51,5 +51,15 @@ public class NotificationService {
     @Transactional
     public void markAllRead(Long userId) {
         notificationRepository.markAllReadByUserId(userId);
+    }
+
+    private Notification newNotification(User user, String title, String message, NotificationType type, String referenceId) {
+        Notification n = new Notification();
+        n.setUser(user);
+        n.setTitle(title);
+        n.setMessage(message);
+        n.setType(type);
+        n.setReferenceId(referenceId);
+        return n;
     }
 }

@@ -5,20 +5,22 @@ definePageMeta({ middleware: 'customer' })
 
 const { request } = useApi()
 const { formatDate } = useFormat()
+const toast = useToast()
 
 const sessions = ref<ChatSession[]>([])
 const currentSessionId = ref<number | null>(null)
 const messages = ref<ChatMessage[]>([])
-const input = ref('')
 const sending = ref(false)
 
 async function loadSessions() {
-  sessions.value = await request<ChatSession[]>('/api/chat/sessions')
+  try {
+    sessions.value = await request<ChatSession[]>('/api/chat/sessions')
+  } catch {
+    toast.add({ title: 'Không thể tải cuộc trò chuyện', color: 'error' })
+  }
 }
 
-async function send() {
-  const msg = input.value.trim()
-  if (!msg) return
+async function send(msg: string) {
   sending.value = true
   try {
     const res = await request<ChatResponse>('/api/chat/send', {
@@ -28,8 +30,9 @@ async function send() {
     messages.value = res.messages
     currentSessionId.value = res.sessionId
     await loadSessions()
+  } catch {
+    messages.value.push({ id: Date.now(), role: 'BOT', content: 'Đã có lỗi xảy ra, vui lòng thử lại sau.', createdAt: new Date().toISOString() })
   } finally {
-    input.value = ''
     sending.value = false
   }
 }
@@ -67,34 +70,7 @@ onMounted(loadSessions)
 
       <!-- Chat area -->
       <div class="flex h-[600px] flex-col rounded-2xl border border-emerald-100 bg-white lg:col-span-3">
-        <div class="flex-1 overflow-y-auto p-6 space-y-4">
-          <div v-if="!messages.length" class="grid h-full place-items-center text-gray-300">
-            <div class="text-center">
-              <UIcon name="i-ph-chats-circle" class="mx-auto h-12 w-12" />
-              <p class="mt-2 text-sm">Xin chào! Bạn cần hỗ trợ gì?</p>
-            </div>
-          </div>
-          <div
-            v-for="m in messages"
-            :key="m.id"
-            class="flex"
-            :class="m.role === 'USER' ? 'justify-end' : 'justify-start'"
-          >
-            <div
-              class="max-w-[70%] rounded-2xl px-4 py-3"
-              :class="m.role === 'USER' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-800'"
-            >
-              <p class="whitespace-pre-wrap text-sm leading-relaxed">{{ m.content }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="border-t border-emerald-100 p-4">
-          <form class="flex gap-2" @submit.prevent="send">
-            <UInput v-model="input" placeholder="Nhập tin nhắn..." class="flex-1" size="lg" />
-            <UButton type="submit" color="primary" icon="i-ph-paper-plane-tilt" :disabled="!input.trim()" :loading="sending" />
-          </form>
-        </div>
+        <ChatThread :messages="messages" :sending="sending" @send="send" />
       </div>
     </div>
   </div>

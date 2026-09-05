@@ -7,6 +7,7 @@ const { request } = useApi()
 const { formatVND, formatDate } = useFormat()
 const { orderStatus, paymentStatus, paymentMethod } = useStatusLabels()
 const route = useRoute()
+const toast = useToast()
 
 const order = ref<Order | null>(null)
 const loading = ref(true)
@@ -14,6 +15,8 @@ const loading = ref(true)
 onMounted(async () => {
   try {
     order.value = await request<Order>(`/api/orders/${route.params.id}`)
+  } catch (error: any) {
+    toast.add({ title: error?.data?.message || 'Không thể tải đơn hàng', color: 'error' })
   } finally {
     loading.value = false
   }
@@ -63,7 +66,7 @@ onMounted(async () => {
         <h2 class="font-semibold text-gray-800">Sản phẩm</h2>
         <div class="mt-4 space-y-4">
           <div v-for="item in order.items" :key="item.productId" class="flex items-center gap-4">
-            <img :src="item.imageUrl" :alt="item.productName" class="h-16 w-16 rounded-xl object-cover" />
+            <UiImg :src="item.imageUrl" :alt="item.productName" img-class="h-16 w-16 rounded-xl object-cover" />
             <div class="flex-1">
               <p class="font-medium text-gray-800">{{ item.productName }}</p>
               <p class="text-sm text-gray-400">{{ formatVND(item.unitPrice) }} × {{ item.quantity }}</p>

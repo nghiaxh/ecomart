@@ -1,13 +1,18 @@
-import type { AuthResponse, UserRole } from '~/types'
+import type { AuthResponse } from '~/types'
+import {
+  clearSession,
+  isPersistentSession,
+  loadSessionRaw,
+  saveSession
+} from '~/utils/session-storage'
 
-interface Session {
-  token: string
-  refreshToken: string
-  id: number
-  username: string
-  email: string
-  avatarUrl?: string
-  role: UserRole
+export type Session = Pick<AuthResponse, 'token' | 'refreshToken' | 'id' | 'username' | 'email' | 'avatarUrl' | 'role'>
+
+function isValidSessionShape(value: unknown): value is Session {
+  if (typeof value !== 'object' || value === null) return false
+  const v = value as Record<string, unknown>
+  return typeof v.token === 'string' && typeof v.username === 'string'
+    && typeof v.email === 'string' && typeof v.role === 'string'
 }
 
 export const useAuth = () => {
@@ -18,46 +23,30 @@ export const useAuth = () => {
   const isLoggedIn = computed(() => !!session.value)
   const isAdmin = computed(() => session.value?.role === 'ADMIN')
 
-  const SESSION_KEY = 'ecomart_session'
-  const TOKEN_KEY = 'ecomart_token'
-
-  const clearStorages = () => {
-    localStorage.removeItem(SESSION_KEY)
-    localStorage.removeItem(TOKEN_KEY)
-    sessionStorage.removeItem(SESSION_KEY)
-    sessionStorage.removeItem(TOKEN_KEY)
-  }
-
-  const isRemembered = () => {
-    if (!import.meta.client) return false
-    return localStorage.getItem(SESSION_KEY) !== null
-  }
+  const isRemembered = () => isPersistentSession()
 
   const persist = (value: Session | null, remember?: boolean) => {
     if (!import.meta.client) return
     if (!value) {
-      clearStorages()
+      clearSession()
       return
     }
     const usePersistent = remember ?? isRemembered()
-    const primary = usePersistent ? localStorage : sessionStorage
-    const secondary = usePersistent ? sessionStorage : localStorage
-    primary.setItem(SESSION_KEY, JSON.stringify(value))
-    primary.setItem(TOKEN_KEY, value.token)
-    secondary.removeItem(SESSION_KEY)
-    secondary.removeItem(TOKEN_KEY)
+    saveSession(JSON.stringify(value), value.token, usePersistent)
   }
 
   const restore = () => {
     if (!import.meta.client) return
-    const raw = localStorage.getItem(SESSION_KEY) ?? sessionStorage.getItem(SESSION_KEY)
+    const raw = loadSessionRaw()
     if (raw) {
       try {
-        session.value = JSON.parse(raw)
+        const parsed: unknown = JSON.parse(raw)
+        if (!isValidSessionShape(parsed)) throw new Error('invalid session')
+        session.value = parsed
         persist(session.value)
       } catch {
         session.value = null
-        clearStorages()
+        clearSession()
       }
     } else if (session.value) {
       persist(session.value)
@@ -65,15 +54,8 @@ export const useAuth = () => {
   }
 
   const setSession = (data: AuthResponse, opts?: { remember?: boolean }) => {
-    session.value = {
-      token: data.token,
-      refreshToken: data.refreshToken,
-      id: data.id,
-      username: data.username,
-      email: data.email,
-      avatarUrl: data.avatarUrl,
-      role: data.role
-    }
+    const { token, refreshToken, id, username, email, avatarUrl, role } = data
+    session.value = { token, refreshToken, id, username, email, avatarUrl, role }
     persist(session.value, opts?.remember ?? false)
   }
 
@@ -116,14 +98,10 @@ export const useAuth = () => {
     session.value = null
     persist(null)
     if (refreshToken) {
-      try {
-        Promise.resolve(request('/api/auth/logout', {
-          method: 'POST',
-          body: { refreshToken }
-        })).catch(() => {})
-      } catch {
-        // Bỏ qua lỗi revoke phía server khi đăng xuất
-      }
+      request('/api/auth/logout', {
+        method: 'POST',
+        body: { refreshToken }
+      }).catch(() => {})
     }
     navigateTo('/')
   }

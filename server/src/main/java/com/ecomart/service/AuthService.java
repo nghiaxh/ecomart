@@ -3,22 +3,14 @@ package com.ecomart.service;
 import com.ecomart.common.Mapper;
 import com.ecomart.common.SecurityUtils;
 import com.ecomart.config.JwtProperties;
-import com.ecomart.config.PayOSProperties;
 import com.ecomart.domain.entity.*;
-import com.ecomart.domain.enums.ChatRole;
-import com.ecomart.domain.enums.MaterialType;
-import com.ecomart.domain.enums.NotificationType;
 import com.ecomart.domain.enums.UserRole;
 import com.ecomart.dto.request.*;
 import com.ecomart.dto.response.*;
 import com.ecomart.exception.BadRequestException;
-import com.ecomart.exception.ResourceNotFoundException;
 import com.ecomart.exception.UnauthorizedException;
 import com.ecomart.repository.*;
 import com.ecomart.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,16 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class AuthService {

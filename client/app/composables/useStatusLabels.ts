@@ -1,4 +1,4 @@
-import type { OrderStatus, PaymentStatus, PaymentMethod, NotificationType } from '~/types'
+import type { OrderStatus, PaymentStatus, PaymentMethod } from '~/types'
 
 type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
 
@@ -23,16 +23,9 @@ export const useStatusLabels = () => {
     COD: 'COD'
   }
 
-  const notificationType: Record<NotificationType, string> = {
-    ORDER: 'Đơn hàng',
-    PROMO: 'Khuyến mãi',
-    SYSTEM: 'Hệ thống'
-  }
-
   return {
     orderStatus,
     paymentStatus,
-    paymentMethod,
-    notificationType
+    paymentMethod
   }
 }

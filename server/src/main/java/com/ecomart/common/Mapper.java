@@ -1,8 +1,8 @@
 package com.ecomart.common;
 
+import com.ecomart.dto.request.*;
 import com.ecomart.dto.response.*;
 import com.ecomart.domain.entity.*;
-import com.ecomart.domain.enums.NotificationType;
 
 import java.util.List;
 
@@ -119,13 +119,71 @@ public final class Mapper {
                 page.getTotalElements(), page.getTotalPages());
     }
 
-    public static Notification newNotification(User user, String title, String message, NotificationType type, String referenceId) {
-        Notification n = new Notification();
-        n.setUser(user);
-        n.setTitle(title);
-        n.setMessage(message);
-        n.setType(type);
-        n.setReferenceId(referenceId);
-        return n;
+    public static void mergeProduct(Product product, ProductRequest req, Category category) {
+        product.setName(req.name());
+        product.setSlug(req.slug());
+        product.setDescription(req.description());
+        product.setPrice(req.price());
+        product.setStock(req.stock());
+        product.setWeight(req.weight() == null ? 0 : req.weight());
+        product.setOrigin(req.origin());
+        product.setCategory(category);
+        product.setActive(req.active());
+
+        product.getImages().clear();
+        if (req.images() != null) {
+            int order = 0;
+            for (ProductRequest.ProductImageRequest img : req.images()) {
+                ProductImage pi = new ProductImage();
+                pi.setProduct(product);
+                pi.setUrl(img.url());
+                pi.setPrimary(img.primary());
+                pi.setDisplayOrder(img.displayOrder() == null ? order : img.displayOrder());
+                product.getImages().add(pi);
+                order++;
+            }
+        }
+    }
+
+    public static ProductMaterial productMaterial(Product product, Material material, Double percentage) {
+        ProductMaterial pm = new ProductMaterial();
+        pm.setId(new ProductMaterialId(product.getId(), material.getId()));
+        pm.setProduct(product);
+        pm.setMaterial(material);
+        pm.setPercentage(percentage);
+        return pm;
+    }
+
+    public static void mergeCategory(Category category, CategoryRequest req, Category parent) {
+        if (parent != null) {
+            category.setParent(parent);
+        }
+        category.setName(req.name());
+        category.setSlug(req.slug());
+        category.setIcon(req.icon());
+        category.setDisplayOrder(req.displayOrder() == null ? 0 : req.displayOrder());
+        category.setActive(req.active());
+    }
+
+    public static void mergeBanner(Banner banner, BannerRequest req) {
+        banner.setTitle(req.title());
+        banner.setSubtitle(req.subtitle());
+        banner.setImageUrl(req.imageUrl());
+        banner.setLinkUrl(req.linkUrl());
+        banner.setDisplayOrder(req.displayOrder() == null ? 0 : req.displayOrder());
+        if (req.active() != null) {
+            banner.setActive(req.active());
+        }
+    }
+
+    public static void mergeAddress(Address address, AddressRequest req) {
+        address.setLabel(req.label());
+        address.setStreet(req.street());
+        address.setWard(req.ward());
+        address.setDistrict(req.district());
+        address.setCity(req.city());
+        address.setReceiverName(req.receiverName());
+        address.setReceiverPhone(req.receiverPhone());
+        address.setDefault(req.isDefault());
     }
 }

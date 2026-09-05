@@ -12,7 +12,6 @@ import com.ecomart.dto.request.AddToCartRequest;
 import com.ecomart.dto.response.CartResponse;
 import com.ecomart.exception.BadRequestException;
 import com.ecomart.exception.ResourceNotFoundException;
-import com.ecomart.exception.UnauthorizedException;
 import com.ecomart.repository.CartItemRepository;
 import com.ecomart.repository.CartRepository;
 import com.ecomart.repository.ProductRepository;
@@ -60,8 +59,11 @@ public class CartService {
                     return ci;
                 });
         int newQuantity = item.getQuantity() + request.quantity();
+        if (product.getStock() == 0) {
+            throw new BadRequestException("Sản phẩm đã hết hàng");
+        }
         if (newQuantity > product.getStock()) {
-            throw new BadRequestException("Số lượng vượt quá tồn kho");
+            throw new BadRequestException("Số lượng vượt quá tồn kho, chỉ còn " + product.getStock());
         }
         item.setQuantity(newQuantity);
         cartItemRepository.save(item);
@@ -77,8 +79,11 @@ public class CartService {
         if (quantity <= 0) {
             cartItemRepository.delete(item);
         } else {
+            if (product.getStock() == 0) {
+                throw new BadRequestException("Sản phẩm đã hết hàng");
+            }
             if (quantity > product.getStock()) {
-                throw new BadRequestException("Số lượng vượt quá tồn kho");
+                throw new BadRequestException("Số lượng vượt quá tồn kho, chỉ còn " + product.getStock());
             }
             item.setQuantity(quantity);
             cartItemRepository.save(item);
@@ -100,6 +105,6 @@ public class CartService {
             return cartRepository.findByCustomerId(customer.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giỏ hàng"));
         }
-        throw new UnauthorizedException("Chỉ khách hàng mới có giỏ hàng");
+        throw new org.springframework.security.access.AccessDeniedException("Chỉ khách hàng mới có giỏ hàng");
     }
 }

@@ -55,7 +55,7 @@ onMounted(load)
           </div>
         </div>
         <div class="mt-3 flex gap-2 overflow-hidden">
-          <img v-for="item in o.items.slice(0, 4)" :key="item.productId" :src="item.imageUrl" :alt="item.productName" class="h-12 w-12 rounded-lg object-cover" />
+          <UiImg v-for="item in o.items.slice(0, 4)" :key="item.productId" :src="item.imageUrl" :alt="item.productName" img-class="h-12 w-12 rounded-lg object-cover" />
           <span v-if="o.items.length > 4" class="grid h-12 w-12 place-items-center rounded-lg bg-emerald-50 text-xs font-semibold text-emerald-700">+{{ o.items.length - 4 }}</span>
         </div>
       </NuxtLink>
@@ -67,10 +67,12 @@ onMounted(load)
       <UButton to="/products" color="primary" class="mt-4" label="Mua sắm ngay" />
     </div>
 
-    <div v-if="totalPages > 1" class="mt-8 flex items-center justify-center gap-2">
-      <UButton color="neutral" variant="soft" icon="i-ph-caret-left" :disabled="page === 0" @click="page--; load()" />
-      <span class="px-3 text-sm text-gray-600">Trang {{ page + 1 }} / {{ totalPages }}</span>
-      <UButton color="neutral" variant="soft" icon="i-ph-caret-right" :disabled="page >= totalPages - 1" @click="page++; load()" />
-    </div>
+    <PaginationBar
+      v-if="totalPages > 1"
+      :page="page"
+      :total-pages="totalPages"
+      @prev="page--; load()"
+      @next="page++; load()"
+    />
   </div>
 </template>

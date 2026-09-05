@@ -2,25 +2,51 @@
 import type { CategoryResponse, PageResponse, Product } from '~/types'
 
 const { request } = useApi()
-const { formatVND } = useFormat()
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
-const products = ref<Product[]>([])
-const categories = ref<CategoryResponse[]>([])
-const total = ref(0)
-const totalPages = ref(0)
-const page = ref(0)
-const loading = ref(false)
 const size = 12
 let loadSeq = 0
 
 const filters = reactive({
   q: (route.query.q as string) || '',
   category: (route.query.category as string) || '',
-  minPrice: '',
-  maxPrice: ''
+  minPrice: (route.query.minPrice as string) || '',
+  maxPrice: (route.query.maxPrice as string) || ''
 })
+const page = ref(Number(route.query.page) || 0)
+
+function buildParams() {
+  const params = new URLSearchParams()
+  if (filters.q) params.set('q', filters.q)
+  if (filters.category) {
+    const cat = activeCategory.value
+    params.set('category', cat ? String(cat.id) : filters.category)
+  }
+  if (filters.minPrice) params.set('minPrice', filters.minPrice)
+  if (filters.maxPrice) params.set('maxPrice', filters.maxPrice)
+  params.set('page', String(page.value))
+  params.set('size', String(size))
+  return params
+}
+
+function syncUrl() {
+  router.replace({
+    query: {
+      ...(filters.q ? { q: filters.q } : {}),
+      ...(filters.category ? { category: filters.category } : {}),
+      ...(filters.minPrice ? { minPrice: filters.minPrice } : {}),
+      ...(filters.maxPrice ? { maxPrice: filters.maxPrice } : {}),
+      ...(page.value ? { page: String(page.value) } : {})
+    }
+  })
+}
+
+const { data: categoriesData } = await useAsyncData<CategoryResponse[]>('product-categories', () =>
+  request<CategoryResponse[]>('/api/categories')
+)
+const categories = computed(() => categoriesData.value ?? [])
 
 const activeCategory = computed(() => {
   if (!filters.category) return null
@@ -35,34 +61,26 @@ const activeCategory = computed(() => {
   return find(categories.value)
 })
 
-async function loadCats() {
-  categories.value = await request<CategoryResponse[]>('/api/categories')
-}
+const { data: initialPage, pending: initialPending } = await useAsyncData<PageResponse<Product>>(
+  'product-list-initial',
+  () => request<PageResponse<Product>>(`/api/products?${buildParams().toString()}`)
+)
+
+const products = ref<Product[]>(initialPage.value?.content ?? [])
+const total = ref(initialPage.value?.totalElements ?? 0)
+const totalPages = ref(initialPage.value?.totalPages ?? 0)
+const loading = ref(false)
 
 async function load() {
   const seq = ++loadSeq
   loading.value = true
   try {
-    const params = new URLSearchParams()
-    if (filters.q) params.set('q', filters.q)
-    if (filters.category) {
-      const cat = activeCategory.value
-      if (cat) {
-        params.set('category', String(cat.id))
-      } else {
-        params.set('category', filters.category)
-      }
-    }
-    if (filters.minPrice) params.set('minPrice', filters.minPrice)
-    if (filters.maxPrice) params.set('maxPrice', filters.maxPrice)
-    params.set('page', String(page.value))
-    params.set('size', String(size))
-
-    const data = await request<PageResponse<Product>>(`/api/products?${params.toString()}`)
+    const data = await request<PageResponse<Product>>(`/api/products?${buildParams().toString()}`)
     if (seq !== loadSeq) return
     products.value = data.content
     total.value = data.totalElements
     totalPages.value = data.totalPages
+    syncUrl()
   } catch (error: any) {
     if (seq !== loadSeq) return
     toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
@@ -91,10 +109,6 @@ function clearFilters() {
 
 const debouncedApply = useDebounceFn(applyFilters, 500)
 
-onMounted(() => {
-  loadCats()
-  load()
-})
 watch(() => filters.q, debouncedApply)
 </script>
 
@@ -139,7 +153,7 @@ watch(() => filters.q, debouncedApply)
     </div>
 
     <!-- Product grid -->
-    <div v-if="loading" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+    <div v-if="loading || initialPending" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       <USkeleton v-for="i in 8" :key="i" class="h-72 rounded-2xl" />
     </div>
     <div v-else-if="products.length" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -152,10 +166,12 @@ watch(() => filters.q, debouncedApply)
     </div>
 
     <!-- Pagination -->
-    <div v-if="totalPages > 1" class="mt-10 flex items-center justify-center gap-2">
-      <UButton color="neutral" variant="soft" icon="i-ph-caret-left" :disabled="page === 0" @click="page--; load()" />
-      <span class="px-3 text-sm text-gray-600">Trang {{ page + 1 }} / {{ totalPages }}</span>
-      <UButton color="neutral" variant="soft" icon="i-ph-caret-right" :disabled="page >= totalPages - 1" @click="page++; load()" />
-    </div>
+    <PaginationBar
+      v-if="totalPages > 1"
+      :page="page"
+      :total-pages="totalPages"
+      @prev="page--; load()"
+      @next="page++; load()"
+    />
   </div>
 </template>

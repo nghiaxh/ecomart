@@ -1,6 +1,7 @@
 package com.ecomart.service;
 
 import com.ecomart.common.Mapper;
+import com.ecomart.common.SecurityUtils;
 import com.ecomart.domain.entity.Customer;
 import com.ecomart.domain.entity.Product;
 import com.ecomart.domain.entity.Review;
@@ -19,11 +20,11 @@ import java.util.List;
 @Service
 public class ReviewService {
 
-    private final com.ecomart.common.SecurityUtils securityUtils;
+    private final SecurityUtils securityUtils;
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
 
-    public ReviewService(com.ecomart.common.SecurityUtils securityUtils,
+    public ReviewService(SecurityUtils securityUtils,
                          ReviewRepository reviewRepository,
                          ProductRepository productRepository) {
         this.securityUtils = securityUtils;
@@ -60,10 +61,10 @@ public class ReviewService {
     }
 
     @Transactional
-    public void toggleHidden(Long reviewId) {
+    public ReviewResponse toggleHidden(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá"));
         review.setHidden(!review.isHidden());
-        reviewRepository.save(review);
+        return Mapper.toReview(reviewRepository.save(review));
     }
 }
