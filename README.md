@@ -21,7 +21,7 @@ Nền tảng mua sắm thực phẩm trực tuyến với sản phẩm tươi s�
 ### Khách hàng
 - Đăng ký / đăng nhập bằng email hoặc số điện thoại, ghi nhớ phiên (JWT access + refresh)
 - Danh mục sản phẩm với bộ lọc, tìm kiếm, sắp xếp
-- Chi tiết sản phẩm với đánh giá từ người dùng
+- Chi tiết sản phẩm với gallery nhiều ảnh, đánh giá từ người dùng, badge "Hết hàng" khi hết tồn kho
 - Giỏ hàng và thanh toán: **PayOS QR** hoặc **COD**
 - Lịch sử đơn hàng, theo dõi và hủy đơn
 - **Chat hỗ trợ** (từ khóa + RAG nội bộ) tư vấn mua sắm
@@ -82,6 +82,8 @@ docker compose --profile prod up --build
 docker compose --profile dev up
 ```
 
+Profile `dev` tự reload khi sửa code: server restart nhờ DevTools + watcher (`server/dev-watch.sh`, chỉ `--build` lại khi đổi `pom.xml`/`Dockerfile.dev`), client hot-reload qua HMR (bật polling `CHOKIDAR_USEPOLLING`).
+
 ### Chạy dev riêng lẻ
 
 **Client** (`./client`):
@@ -100,7 +102,7 @@ Lưu ý: `mvn spring-boot:run` **không** tự đọc `.env` — cần nạp cá
 
 ## Tài khoản demo
 
-`DataSeeder` tự tạo dữ liệu mẫu khi DB trống, với mật khẩu demo (mặc định bên dưới, có thể ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`). Tắt bằng `SEED_ENABLED=false`, reset bằng cách xoá volume `pgdata`.
+`DataSeeder` tạo dữ liệu mẫu idempotent theo slug/tên (DB đã seed vẫn nhận hàng mới khi boot lại, không cần xoá volume), với mật khẩu demo (mặc định bên dưới, có thể ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`). Tắt bằng `SEED_ENABLED=false`, reset bằng cách xoá volume `pgdata`. Seed gồm ~45 sản phẩm (mỗi SP 1–3 ảnh), 7 danh mục lá và ít nhất 2 sản phẩm hết hàng để kiểm thử luồng hết hàng.
 
 | Vai trò | Email | Mật khẩu |
 |---------|-------|----------|
