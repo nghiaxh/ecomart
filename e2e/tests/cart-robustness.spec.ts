@@ -45,7 +45,12 @@ test('out-of-stock product disables add-to-cart', async ({ request }) => {
   test.skip(!empty, 'no out-of-stock product in seed')
 })
 
-test('products page survives API failure with error toast', async ({ authedPage: page }) => {
+test('products page survives reload failure keeping list with error toast', async ({ authedPage: page }) => {
+  await gotoReady(page, '/products')
+  const cards = page.locator('a[href^="/products/"]')
+  await expect(cards.first()).toBeVisible({ timeout: 20_000 })
+  const countBefore = await cards.count()
+
   await page.route('**/api/products**', (route) => {
     route.fulfill({
       status: 500,
@@ -57,14 +62,13 @@ test('products page survives API failure with error toast', async ({ authedPage:
       })
     })
   })
-  await page.route('**/api/categories**', (route) => {
-    route.fulfill({ status: 200, body: JSON.stringify([]) })
-  })
-  await gotoReady(page, '/products')
-  // The products page should show empty state when API fails
-  await expect(page.getByText('Không tìm thấy sản phẩm phù hợp').first()).toBeVisible({ timeout: 20_000 })
+  // Trigger a client-side reload (initial SSR load bypasses page.route)
+  await page.getByRole('button', { name: 'Lọc', exact: true }).click()
+  await expect(page.getByText(/Không thể tải sản phẩm|Internal Server Error/).first()).toBeVisible({ timeout: 20_000 })
+  // Stale list is kept instead of flipping to the empty state
+  await expect(cards.first()).toBeVisible({ timeout: 20_000 })
+  expect(await cards.count()).toBe(countBefore)
   await page.unroute('**/api/products**')
-  await page.unroute('**/api/categories**')
 })
 
 

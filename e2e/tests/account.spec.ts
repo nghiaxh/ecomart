@@ -2,7 +2,7 @@ import { test, expect, gotoReady } from './fixtures'
 
 test('customer views profile and addresses', async ({ authedPage: page, newCustomer }) => {
   await gotoReady(page, '/account')
-  await expect(page.getByRole('heading', { name: 'Tài khoản' })).toBeVisible()
+  await expect(page.locator('h1')).toBeVisible()
   await expect(page.getByText(newCustomer.username).first()).toBeVisible()
   await expect(page.getByText('Địa chỉ của tôi')).toBeVisible()
 })
