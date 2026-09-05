@@ -79,7 +79,9 @@ async function submit() {
       <div>
         <label for="register-password" class="mb-1.5 block text-sm font-medium text-gray-700">Mật khẩu</label>
         <PasswordInput
+          id="register-password"
           v-model="form.password"
+          autocomplete="new-password"
           placeholder="Nhập mật khẩu"
           icon="i-ph-lock"
           size="lg"

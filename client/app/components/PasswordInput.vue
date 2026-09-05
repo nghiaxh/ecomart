@@ -2,12 +2,14 @@
 const props = withDefaults(
   defineProps<{
     modelValue: string
+    id?: string
+    autocomplete?: string
     label?: string
     placeholder?: string
     icon?: string
     size?: 'md' | 'lg' | 'xl'
   }>(),
-  { label: undefined, placeholder: undefined, icon: undefined, size: 'lg' }
+  { id: undefined, autocomplete: undefined, label: undefined, placeholder: undefined, icon: undefined, size: 'lg' }
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
@@ -21,8 +23,10 @@ function toggle() {
 
 <template>
   <UInput
+    :id="props.id"
     :model-value="props.modelValue"
     :type="show ? 'text' : 'password'"
+    :autocomplete="props.autocomplete"
     :label="label"
     :placeholder="placeholder"
     :icon="icon"
