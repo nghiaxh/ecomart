@@ -15,20 +15,23 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
     @Override
-    @EntityGraph(attributePaths = {"images", "materials", "materials.material", "category"})
+    @EntityGraph(attributePaths = {"images", "category"})
     Optional<Product> findById(Long id);
 
+    @EntityGraph(attributePaths = {"images", "category"})
     Optional<Product> findBySlug(String slug);
 
     boolean existsBySlug(String slug);
     boolean existsByCategoryId(Long categoryId);
 
+    @EntityGraph(attributePaths = {"images", "category"})
     List<Product> findTop8ByIsActiveTrueOrderByCreatedAtDesc();
 
     @Query("SELECT p FROM Product p LEFT JOIN p.category c WHERE p.isActive = true "
             + "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) "
             + "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')) "
             + "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    @EntityGraph(attributePaths = {"images", "category"})
     List<Product> searchActiveByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE (:onlyActive = false OR p.isActive = true) "
@@ -37,6 +40,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             + "AND (:categoryId IS NULL OR p.category.id = :categoryId) "
             + "AND (:minPrice IS NULL OR p.price >= :minPrice) "
             + "AND (:maxPrice IS NULL OR p.price <= :maxPrice)")
+    @EntityGraph(attributePaths = {"images", "category"})
     Page<Product> search(@Param("keyword") String keyword,
                          @Param("categoryId") Long categoryId,
                          @Param("minPrice") Double minPrice,

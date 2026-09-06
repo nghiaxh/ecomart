@@ -1,5 +1,7 @@
 import type { Cart } from '~/types'
 
+let pendingFetch: Promise<Cart | null> | null = null
+
 export const useCart = () => {
   const cart = useState<Cart | null>('ecomart_cart', () => null)
   const { request } = useApi()
@@ -9,8 +11,7 @@ export const useCart = () => {
   const itemCount = computed(() => cart.value?.itemCount ?? 0)
   const subtotal = computed(() => cart.value?.subtotal ?? 0)
 
-  const fetchCart = async () => {
-    if (!isLoggedIn.value) return null
+  const load = async () => {
     try {
       cart.value = await request<Cart>('/api/cart')
       return cart.value
@@ -18,6 +19,15 @@ export const useCart = () => {
       cart.value = null
       return null
     }
+  }
+
+  const fetchCart = () => {
+    if (!isLoggedIn.value) return Promise.resolve(null)
+    if (!pendingFetch) {
+      pendingFetch = load()
+      pendingFetch.finally(() => { pendingFetch = null })
+    }
+    return pendingFetch
   }
 
   watch(isLoggedIn, (loggedIn) => {

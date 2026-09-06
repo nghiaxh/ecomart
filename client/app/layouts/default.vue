@@ -53,6 +53,12 @@ const links = [
                 <UButton :to="'/register'" color="primary" size="lg" class="ml-1">Đăng ký</UButton>
               </template>
             </template>
+            <template #fallback>
+              <div class="flex items-center gap-1" aria-hidden="true">
+                <div class="h-10 w-[104px] animate-pulse rounded-lg bg-gray-100" />
+                <div class="ml-1 h-10 w-[88px] animate-pulse rounded-lg bg-emerald-100" />
+              </div>
+            </template>
           </ClientOnly>
         </div>
       </div>
@@ -63,9 +69,6 @@ const links = [
     </main>
 
     <FooterGlobal />
-
-    <ClientOnly>
-      <ChatWidget />
-    </ClientOnly>
+    <ChatWidget />
   </div>
 </template>

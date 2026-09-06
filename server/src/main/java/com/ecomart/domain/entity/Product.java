@@ -47,6 +47,7 @@ public class Product {
     @Column(nullable = false)
     private boolean isActive = true;
 
+    @BatchSize(size = 20)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
 

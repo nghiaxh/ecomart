@@ -41,7 +41,8 @@ function goLogin() {
 <template>
   <Teleport to="body">
     <div class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
-      <transition name="chat-pop">
+      <ClientOnly>
+        <transition name="chat-pop">
         <div v-if="open" class="flex h-[28rem] w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-2xl shadow-emerald-900/10">
           <div class="flex items-center justify-between border-b border-emerald-100 bg-emerald-600 px-4 py-3">
             <div class="flex items-center gap-2 text-white">
@@ -64,7 +65,8 @@ function goLogin() {
 
           <ChatThread v-else :messages="messages" :sending="sending" compact @send="send" />
         </div>
-      </transition>
+        </transition>
+      </ClientOnly>
 
       <button
         type="button"
