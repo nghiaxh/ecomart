@@ -11,16 +11,65 @@ const toast = useToast()
 
 const order = ref<Order | null>(null)
 const loading = ref(true)
+const polling = ref(false)
+
+let pollTimer: ReturnType<typeof setInterval> | null = null
+const MAX_POLLS = 36
+
+const shouldPoll = (o: Order | null) => o?.payment.method === 'PAYOS' && o.payment.status === 'PENDING'
+
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+}
+
+async function pollOnce() {
+  try {
+    const next = await request<Order>(`/api/orders/${route.params.id}`)
+    order.value = next
+    if (!shouldPoll(next)) {
+      stopPolling()
+      polling.value = false
+      if (next.payment.status === 'PAID') {
+        toast.add({ title: 'Thanh toán đã được xác nhận', icon: 'i-ph-check-circle', color: 'success' })
+      }
+    }
+  } catch {
+    stopPolling()
+    polling.value = false
+  }
+}
+
+function startPolling() {
+  if (pollTimer) return
+  polling.value = true
+  let attempts = 0
+  pollTimer = setInterval(async () => {
+    attempts++
+    await pollOnce()
+    if (attempts >= MAX_POLLS) {
+      stopPolling()
+      polling.value = false
+    }
+  }, 5000)
+}
 
 onMounted(async () => {
   try {
     order.value = await request<Order>(`/api/orders/${route.params.id}`)
+    if (shouldPoll(order.value)) {
+      startPolling()
+    }
   } catch (error: any) {
     toast.add({ title: error?.data?.message || 'Không thể tải đơn hàng', color: 'error' })
   } finally {
     loading.value = false
   }
 })
+
+onBeforeUnmount(stopPolling)
 </script>
 
 <template>
@@ -46,6 +95,7 @@ onMounted(async () => {
               <span class="text-sm text-gray-500">Thanh toán:</span>
               <span class="text-sm font-medium">{{ paymentStatus[order.payment.status].label }}</span>
             </div>
+            <p v-if="polling" class="text-xs font-medium text-amber-600">Đang chờ xác nhận thanh toán...</p>
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-500">Phương thức:</span>
               <span class="text-sm font-medium">{{ paymentMethod[order.payment.method] }}</span>

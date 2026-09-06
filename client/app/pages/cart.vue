@@ -3,6 +3,7 @@ definePageMeta({ middleware: 'customer' })
 
 const { cart, fetchCart, updateQuantity, remove } = useCart()
 const { formatVND } = useFormat()
+const { confirm } = useConfirm()
 const toast = useToast()
 const loading = ref(true)
 const busyProductIds = ref<Set<number>>(new Set())
@@ -29,9 +30,13 @@ async function changeQuantity(productId: number, quantity: number) {
 
 async function deleteItem(productId: number) {
   if (busyProductIds.value.has(productId)) return
+  const item = cart.value?.items.find(i => i.productId === productId)
+  const confirmed = await confirm(`Xóa "${item?.productName ?? 'sản phẩm'}" khỏi giỏ hàng?`, 'Xóa sản phẩm')
+  if (!confirmed) return
   busyProductIds.value.add(productId)
   try {
     await remove(productId)
+    toast.add({ title: 'Đã xóa sản phẩm khỏi giỏ hàng', icon: 'i-ph-check-circle', color: 'success' })
   } catch {
     await fetchCart()
   } finally {
