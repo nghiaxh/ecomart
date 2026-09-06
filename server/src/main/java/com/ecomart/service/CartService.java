@@ -12,7 +12,6 @@ import com.ecomart.dto.request.AddToCartRequest;
 import com.ecomart.dto.response.CartResponse;
 import com.ecomart.exception.BadRequestException;
 import com.ecomart.exception.ResourceNotFoundException;
-import com.ecomart.repository.CartItemRepository;
 import com.ecomart.repository.CartRepository;
 import com.ecomart.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -23,16 +22,13 @@ public class CartService {
 
     private final SecurityUtils securityUtils;
     private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
 
     public CartService(SecurityUtils securityUtils,
                        CartRepository cartRepository,
-                       CartItemRepository cartItemRepository,
                        ProductRepository productRepository) {
         this.securityUtils = securityUtils;
         this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
     }
 
@@ -49,54 +45,61 @@ public class CartService {
         if (!product.isActive()) {
             throw new BadRequestException("Sản phẩm đã ngừng kinh doanh");
         }
-        CartItem item = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId())
+        if (product.getStock() == 0) {
+            throw new BadRequestException("Sản phẩm đã hết hàng");
+        }
+        cart.getItems().size();
+        CartItem item = cart.getItems().stream()
+                .filter(ci -> ci.getId().getProductId().equals(product.getId()))
+                .findFirst()
                 .orElseGet(() -> {
                     CartItem ci = new CartItem();
                     ci.setId(new CartItemId(cart.getId(), product.getId()));
                     ci.setCart(cart);
                     ci.setProduct(product);
                     ci.setQuantity(0);
+                    cart.getItems().add(ci);
                     return ci;
                 });
         int newQuantity = item.getQuantity() + request.quantity();
-        if (product.getStock() == 0) {
-            throw new BadRequestException("Sản phẩm đã hết hàng");
-        }
         if (newQuantity > product.getStock()) {
             throw new BadRequestException("Số lượng vượt quá tồn kho, chỉ còn " + product.getStock());
         }
         item.setQuantity(newQuantity);
-        cartItemRepository.save(item);
-        return Mapper.toCart(getCart());
+        return Mapper.toCart(cart);
     }
 
     @Transactional
     public CartResponse updateQuantity(Long productId, int quantity) {
         Cart cart = getCart();
-        CartItem item = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId)
+        cart.getItems().size();
+        CartItem item = cart.getItems().stream()
+                .filter(ci -> ci.getId().getProductId().equals(productId))
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không có trong giỏ hàng"));
-        Product product = item.getProduct();
         if (quantity <= 0) {
-            cartItemRepository.delete(item);
-        } else {
-            if (product.getStock() == 0) {
-                throw new BadRequestException("Sản phẩm đã hết hàng");
-            }
-            if (quantity > product.getStock()) {
-                throw new BadRequestException("Số lượng vượt quá tồn kho, chỉ còn " + product.getStock());
-            }
-            item.setQuantity(quantity);
-            cartItemRepository.save(item);
+            cart.getItems().remove(item);
+            return Mapper.toCart(cart);
         }
-        return Mapper.toCart(getCart());
+        Product product = item.getProduct();
+        if (product.getStock() == 0) {
+            throw new BadRequestException("Sản phẩm đã hết hàng");
+        }
+        if (quantity > product.getStock()) {
+            throw new BadRequestException("Số lượng vượt quá tồn kho, chỉ còn " + product.getStock());
+        }
+        item.setQuantity(quantity);
+        return Mapper.toCart(cart);
     }
 
     @Transactional
     public CartResponse remove(Long productId) {
         Cart cart = getCart();
-        cartItemRepository.findByCartIdAndProductId(cart.getId(), productId)
-                .ifPresent(cartItemRepository::delete);
-        return Mapper.toCart(getCart());
+        boolean removed = cart.getItems().removeIf(ci -> ci.getId().getProductId().equals(productId));
+        if (!removed) {
+            throw new ResourceNotFoundException("Sản phẩm không có trong giỏ hàng");
+        }
+        return Mapper.toCart(cart);
     }
 
     public Cart getCart() {

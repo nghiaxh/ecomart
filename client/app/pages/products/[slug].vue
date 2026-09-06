@@ -25,6 +25,7 @@ const { data: product, pending: loading } = await useAsyncData<Product | null>(
 
 useHead({ title: () => (product.value ? `${product.value.name} | EcoMart` : 'Sản phẩm | EcoMart') })
 
+const { add: addToCartApi } = useCart()
 const reviews = ref<Review[]>([])
 const quantity = ref(1)
 const adding = ref(false)
@@ -86,7 +87,7 @@ async function addToCart() {
   if (!product.value || product.value.stock <= 0) return
   adding.value = true
   try {
-    await useCart().add(product.value.id, quantity.value)
+    await addToCartApi(product.value.id, quantity.value)
     toast.add({ title: 'Đã thêm vào giỏ hàng', icon: 'i-ph-check-circle', color: 'success' })
   } finally {
     adding.value = false
