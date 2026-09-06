@@ -17,6 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 @Service
@@ -44,9 +47,33 @@ public class ProductService {
     public PageResponse<ProductResponse> search(String keyword, Long categoryId, Double minPrice,
                                                 Double maxPrice, boolean onlyActive, Pageable pageable) {
         String q = keyword == null || keyword.isBlank() ? "" : keyword.trim();
-        Page<Product> page = productRepository.search(q, categoryId, minPrice, maxPrice, onlyActive, pageable);
+        List<Long> categoryIds = resolveCategoryIds(categoryId);
+        if (categoryId != null && categoryIds.isEmpty()) {
+            return Mapper.toPage(Page.<Product>empty(pageable), List.<ProductResponse>of());
+        }
+        Page<Product> page = productRepository.search(q, categoryIds, minPrice, maxPrice, onlyActive, pageable);
         List<ProductResponse> content = page.getContent().stream().map(Mapper::toProduct).toList();
         return Mapper.toPage(page, content);
+    }
+
+    private List<Long> resolveCategoryIds(Long categoryId) {
+        if (categoryId == null) {
+            return null;
+        }
+        if (!categoryRepository.existsById(categoryId)) {
+            return List.of();
+        }
+        List<Long> ids = new ArrayList<>();
+        Deque<Long> queue = new ArrayDeque<>();
+        queue.add(categoryId);
+        while (!queue.isEmpty()) {
+            Long current = queue.poll();
+            ids.add(current);
+            for (Category child : categoryRepository.findByParentId(current)) {
+                queue.add(child.getId());
+            }
+        }
+        return ids;
     }
 
     private boolean onlyActive(boolean showAll, boolean isAdmin) {

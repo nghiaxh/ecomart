@@ -22,7 +22,9 @@ function buildParams() {
   if (filters.q) params.set('q', filters.q)
   if (filters.category) {
     const cat = activeCategory.value
-    params.set('category', cat ? String(cat.id) : filters.category)
+    // Chỉ gửi id số lên backend (nhận Long). Slug lạ hoặc categories
+    // chưa về thì bỏ qua để tránh 400 MethodArgumentTypeMismatch.
+    if (cat) params.set('category', String(cat.id))
   }
   if (filters.minPrice) params.set('minPrice', filters.minPrice)
   if (filters.maxPrice) params.set('maxPrice', filters.maxPrice)
@@ -123,6 +125,16 @@ function clearFilters() {
 const debouncedApply = useDebounceFn(applyFilters, 500)
 
 watch(() => filters.q, debouncedApply)
+
+// Đồng bộ khi điều hướng bằng banner/footer/nút back-forward.
+watch(() => route.query.category, (slug) => {
+  const next = (slug as string) || ''
+  if (next !== filters.category) {
+    filters.category = next
+    page.value = 0
+    load()
+  }
+})
 </script>
 
 <template>

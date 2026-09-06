@@ -37,12 +37,12 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p FROM Product p WHERE (:onlyActive = false OR p.isActive = true) "
             + "AND (:keyword = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) "
             + "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
-            + "AND (:categoryId IS NULL OR p.category.id = :categoryId) "
+            + "AND (:categoryIds IS NULL OR p.category.id IN :categoryIds) "
             + "AND (:minPrice IS NULL OR p.price >= :minPrice) "
             + "AND (:maxPrice IS NULL OR p.price <= :maxPrice)")
     @EntityGraph(attributePaths = {"images", "category"})
     Page<Product> search(@Param("keyword") String keyword,
-                         @Param("categoryId") Long categoryId,
+                         @Param("categoryIds") List<Long> categoryIds,
                          @Param("minPrice") Double minPrice,
                          @Param("maxPrice") Double maxPrice,
                          @Param("onlyActive") boolean onlyActive,
