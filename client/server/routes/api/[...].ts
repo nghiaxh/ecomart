@@ -11,9 +11,16 @@ export default defineEventHandler(async (event) => {
   delete headers['sec-ch-ua-mobile']
   delete headers['sec-ch-ua-platform']
 
+  const forwardedHeaders: Record<string, string> = {}
+  for (const [key, value] of Object.entries(headers)) {
+    if (value !== undefined) {
+      forwardedHeaders[key] = value
+    }
+  }
+
   const init: RequestInit = {
     method: event.method,
-    headers
+    headers: forwardedHeaders
   }
 
   if (!['GET', 'HEAD'].includes(event.method)) {

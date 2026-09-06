@@ -80,5 +80,5 @@ const fallbackCategoryImages = [
 ]
 
 export function categoryImage(slug: string, index: number): string {
-  return categoryImageMap[slug] || fallbackCategoryImages[index % fallbackCategoryImages.length]
+  return categoryImageMap[slug] || fallbackCategoryImages[index % fallbackCategoryImages.length] || '/images/cat-vegetables.jpg'
 }
