@@ -12,7 +12,7 @@ const links = [
 <template>
   <div class="flex min-h-screen flex-col">
     <header class="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/90 backdrop-blur">
-      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <div class="mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         <NuxtLink to="/" class="flex items-center gap-2">
           <img src="/favicon.svg" alt="EcoMart" class="h-9 w-9 rounded-xl" />
           <span class="text-xl font-extrabold tracking-tight text-emerald-800">EcoMart</span>
@@ -55,8 +55,8 @@ const links = [
             </template>
             <template #fallback>
               <div class="flex items-center gap-1" aria-hidden="true">
-                <div class="h-10 w-[104px] animate-pulse rounded-lg bg-gray-100" />
-                <div class="ml-1 h-10 w-[88px] animate-pulse rounded-lg bg-emerald-100" />
+                <div class="h-10 w-26 animate-pulse rounded-lg bg-gray-100" />
+                <div class="ml-1 h-10 w-22 animate-pulse rounded-lg bg-emerald-100" />
               </div>
             </template>
           </ClientOnly>

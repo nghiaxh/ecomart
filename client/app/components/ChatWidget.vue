@@ -40,10 +40,9 @@ function goLogin() {
 
 <template>
   <Teleport to="body">
-    <div class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
-      <ClientOnly>
-        <transition name="chat-pop">
-        <div v-if="open" class="flex h-[28rem] w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-2xl shadow-emerald-900/10">
+    <ClientOnly>
+      <transition name="chat-pop">
+        <div v-if="open" class="fixed bottom-[5.5rem] right-5 z-50 flex h-[28rem] w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-2xl shadow-emerald-900/10">
           <div class="flex items-center justify-between border-b border-emerald-100 bg-emerald-600 px-4 py-3">
             <div class="flex items-center gap-2 text-white">
               <span class="grid h-8 w-8 place-items-center rounded-full bg-white/20">
@@ -60,24 +59,25 @@ function goLogin() {
           <div v-if="!isLoggedIn" class="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
             <UIcon name="i-ph-lock-key" class="h-10 w-10 text-emerald-300" />
             <p class="text-sm text-gray-500">Đăng nhập để trò chuyện cùng EcoBot</p>
-            <UButton color="primary" size="sm" label="Đăng nhập" @click="goLogin" />
+            <UButton color="primary" size="lg" label="Đăng nhập" @click="goLogin" />
           </div>
 
           <ChatThread v-else :messages="messages" :sending="sending" compact @send="send" />
         </div>
-        </transition>
-      </ClientOnly>
-
-      <button
-        type="button"
-        class="grid h-14 w-14 place-items-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-900/25"
-        :aria-label="open ? 'Đóng chat' : 'Mở chat'"
-        @click="toggle"
-      >
-        <UIcon :name="open ? 'i-ph-x' : 'i-ph-chats-circle'" class="h-6 w-6" />
-      </button>
-    </div>
+      </transition>
+    </ClientOnly>
   </Teleport>
+
+  <div class="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+    <button
+      type="button"
+      class="grid h-14 w-14 place-items-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-900/25"
+      :aria-label="open ? 'Đóng chat' : 'Mở chat'"
+      @click="toggle"
+    >
+      <UIcon :name="open ? 'i-ph-x' : 'i-ph-chats-circle'" class="h-6 w-6" />
+    </button>
+  </div>
 </template>
 
 <style scoped>

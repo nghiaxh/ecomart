@@ -172,7 +172,7 @@ onMounted(() => {
           </div>
         </template>
         <template #actions>
-          <UTextarea v-model="notes" placeholder="Ghi chú cho đơn hàng (tùy chọn)..." :rows="2" />
+          <UTextarea v-model="notes" placeholder="Ghi chú cho đơn hàng (tùy chọn)..." :rows="2" class="w-full"/>
           <UButton color="primary" size="lg" block class="mt-4" :loading="loading" label="Đặt hàng" icon="i-ph-check-circle" @click="checkout" />
         </template>
       </OrderSummaryCard>
