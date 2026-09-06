@@ -22,6 +22,7 @@ import { useAuth } from './useAuth'
 describe('useAuth', () => {
   beforeEach(() => {
     requestMock.mockReset()
+    requestMock.mockResolvedValue({})
     navigateToMock.mockReset()
     localStorage.clear()
     sessionStorage.clear()
