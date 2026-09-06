@@ -32,6 +32,14 @@ test('vietnamese search with diacritics works or shows empty state', async ({ pa
   ).toBeVisible()
 })
 
+test('parent categories show products from child categories', async ({ page }) => {
+  for (const slug of ['rau-cu-sach', 'trai-cay-tuoi', 'thuc-pham-kho']) {
+    await gotoReady(page, `/products?category=${slug}`)
+    await expect(page.locator('a[href^="/products/"]').first()).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('Không tìm thấy sản phẩm phù hợp.')).toBeHidden()
+  }
+})
+
 test('products API rejects invalid pagination shape gracefully', async ({ request }) => {
   const res = await request.get(`${API_BASE}/api/products?page=-1&size=12`)
   expect([200, 400]).toContain(res.status())

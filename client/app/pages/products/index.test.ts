@@ -86,4 +86,31 @@ describe('products index', () => {
     expect(wrapper.text()).toContain('Rau ngót')
     expect(wrapper.text()).not.toContain('Không tìm thấy sản phẩm phù hợp.')
   })
+
+  it('sends numeric id when clicking a parent category chip', async () => {
+    const categories = [
+      {
+        id: 1, name: 'Rau củ sạch', slug: 'rau-cu-sach', displayOrder: 1, active: true,
+        children: [
+          { id: 11, name: 'Rau xanh', slug: 'rau-xanh', displayOrder: 1, active: true, children: [] }
+        ]
+      }
+    ]
+    requestMock.mockImplementation((url: string) => {
+      if (url.startsWith('/api/categories')) return Promise.resolve(categories)
+      return Promise.resolve(productPage)
+    })
+    const wrapper = await mountSuspended(ProductsIndex)
+    requestMock.mockClear()
+
+    const chip = wrapper.findAll('button').find((b: { text: () => string }) => b.text().includes('Rau củ sạch'))
+    expect(chip).toBeTruthy()
+    await chip!.trigger('click')
+    await vi.waitFor(() => {
+      expect(requestMock).toHaveBeenCalled()
+    })
+    const calledUrl = requestMock.mock.calls.map((c: unknown[]) => String(c[0])).find((u: string) => u.startsWith('/api/products'))
+    expect(calledUrl).toContain('category=1')
+    expect(calledUrl).not.toContain('category=rau-cu-sach')
+  })
 })
