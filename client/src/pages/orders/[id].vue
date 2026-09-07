@@ -16,54 +16,44 @@ const order = ref<Order | null>(null)
 const loading = ref(true)
 const polling = ref(false)
 
-let pollTimer: ReturnType<typeof setInterval> | null = null
 const MAX_POLLS = 36
+let attempts = 0
 
 const shouldPoll = (o: Order | null) => o?.payment.method === 'PAYOS' && o.payment.status === 'PENDING'
 
-function stopPolling() {
-  if (pollTimer) {
-    clearInterval(pollTimer)
-    pollTimer = null
+const { pause, resume } = useIntervalFn(async () => {
+  attempts++
+  await pollOnce()
+  if (attempts >= MAX_POLLS) {
+    pause()
+    polling.value = false
   }
-}
+}, 5000, { immediate: false })
 
 async function pollOnce() {
   try {
     const next = await request<Order>(`/api/orders/${route.params.id}`)
     order.value = next
     if (!shouldPoll(next)) {
-      stopPolling()
+      pause()
       polling.value = false
       if (next.payment.status === 'PAID') {
         toast.add({ title: 'Thanh toán đã được xác nhận', icon: 'i-ph-check-circle', color: 'success' })
       }
     }
   } catch {
-    stopPolling()
+    pause()
     polling.value = false
   }
-}
-
-function startPolling() {
-  if (pollTimer) return
-  polling.value = true
-  let attempts = 0
-  pollTimer = setInterval(async () => {
-    attempts++
-    await pollOnce()
-    if (attempts >= MAX_POLLS) {
-      stopPolling()
-      polling.value = false
-    }
-  }, 5000)
 }
 
 onMounted(async () => {
   try {
     order.value = await request<Order>(`/api/orders/${route.params.id}`)
     if (shouldPoll(order.value)) {
-      startPolling()
+      attempts = 0
+      polling.value = true
+      resume()
     }
   } catch (error: any) {
     toast.add({ title: error?.data?.message || 'Không thể tải đơn hàng', color: 'error' })
@@ -71,8 +61,6 @@ onMounted(async () => {
     loading.value = false
   }
 })
-
-onBeforeUnmount(stopPolling)
 </script>
 
 <template>
@@ -81,14 +69,14 @@ onBeforeUnmount(stopPolling)
       <div class="flex items-center gap-3">
         <UButton icon="i-ph-arrow-left" color="neutral" variant="ghost" to="/orders" />
         <div>
-          <h1 class="text-2xl font-extrabold text-gray-800">Đơn hàng #{{ order.id }}</h1>
+          <h1 class="text-2xl font-extrabold text-gray-700">Đơn hàng #{{ order.id }}</h1>
           <p class="text-sm text-gray-400">{{ formatDate(order.createdAt) }}</p>
         </div>
       </div>
 
       <div class="mt-8 grid gap-6 md:grid-cols-2">
         <section class="rounded-2xl border border-emerald-100 bg-white p-6">
-          <h2 class="font-semibold text-gray-800">Trạng thái</h2>
+          <h2 class="font-semibold text-gray-700">Trạng thái</h2>
           <div class="mt-3 space-y-3">
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-500">Đơn hàng:</span>
@@ -107,7 +95,7 @@ onBeforeUnmount(stopPolling)
         </section>
 
         <section class="rounded-2xl border border-emerald-100 bg-white p-6">
-          <h2 class="font-semibold text-gray-800">Giao hàng đến</h2>
+          <h2 class="font-semibold text-gray-700">Giao hàng đến</h2>
           <div class="mt-3 space-y-1 text-sm">
             <p class="font-medium text-gray-700">{{ order.receiverName }} · {{ order.receiverPhone }}</p>
             <p class="text-gray-500">{{ order.address }}</p>
@@ -116,12 +104,12 @@ onBeforeUnmount(stopPolling)
       </div>
 
       <section class="mt-6 rounded-2xl border border-emerald-100 bg-white p-6">
-        <h2 class="font-semibold text-gray-800">Sản phẩm</h2>
+        <h2 class="font-semibold text-gray-700">Sản phẩm</h2>
         <div class="mt-4 space-y-4">
           <div v-for="item in order.items" :key="item.productId" class="flex items-center gap-4">
             <UiImg :src="item.imageUrl" :alt="item.productName" img-class="h-16 w-16 rounded-xl object-cover" />
             <div class="flex-1">
-              <p class="font-medium text-gray-800">{{ item.productName }}</p>
+              <p class="font-medium text-gray-700">{{ item.productName }}</p>
               <p class="text-sm text-gray-400">{{ formatVND(item.unitPrice) }} × {{ item.quantity }}</p>
             </div>
             <span class="font-semibold text-gray-700">{{ formatVND(item.unitPrice * item.quantity) }}</span>
