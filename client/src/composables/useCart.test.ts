@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const { requestMock, toastMock, authMock } = vi.hoisted(() => ({
@@ -30,6 +31,7 @@ const cart = {
 
 describe('useCart', () => {
   beforeEach(() => {
+    authMock.isLoggedIn = ref(true)
     requestMock.mockReset()
     toastMock.mockReset()
     requestMock.mockResolvedValue(null)
