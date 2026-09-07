@@ -1,0 +1,102 @@
+<script setup lang="ts">
+import { useCart } from '@/composables/useCart'
+import { useConfirm } from '@/composables/useConfirm'
+import { useFormat } from '@/composables/useFormat'
+const { cart, fetchCart, updateQuantity, remove } = useCart()
+const { formatVND } = useFormat()
+const { confirm } = useConfirm()
+const toast = useToast()
+const loading = ref(true)
+const busyProductIds = ref<Set<number>>(new Set())
+
+onMounted(async () => {
+  try {
+    await fetchCart()
+  } finally {
+    loading.value = false
+  }
+})
+
+async function changeQuantity(productId: number, quantity: number) {
+  if (busyProductIds.value.has(productId)) return
+  busyProductIds.value.add(productId)
+  try {
+    await updateQuantity(productId, quantity)
+  } catch {
+    await fetchCart()
+  } finally {
+    busyProductIds.value.delete(productId)
+  }
+}
+
+async function deleteItem(productId: number) {
+  if (busyProductIds.value.has(productId)) return
+  const item = cart.value?.items.find(i => i.productId === productId)
+  const confirmed = await confirm(`Xóa "${item?.productName ?? 'sản phẩm'}" khỏi giỏ hàng?`, 'Xóa sản phẩm')
+  if (!confirmed) return
+  busyProductIds.value.add(productId)
+  try {
+    await remove(productId)
+    toast.add({ title: 'Đã xóa sản phẩm khỏi giỏ hàng', icon: 'i-ph-check-circle', color: 'success' })
+  } catch {
+    await fetchCart()
+  } finally {
+    busyProductIds.value.delete(productId)
+  }
+}
+</script>
+
+<template>
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <h1 class="text-3xl font-extrabold text-gray-800">Giỏ hàng</h1>
+
+    <div v-if="loading" class="mt-8 grid gap-6 lg:grid-cols-3">
+      <div class="space-y-4 lg:col-span-2">
+        <USkeleton v-for="i in 2" :key="i" class="h-28 rounded-2xl" />
+      </div>
+      <USkeleton class="h-64 rounded-2xl" />
+    </div>
+
+    <div v-else-if="cart && cart.items.length" class="mt-8 grid gap-8 lg:grid-cols-3">
+      <div class="lg:col-span-2 space-y-4">
+        <div v-for="item in cart.items" :key="item.productId" class="flex gap-4 rounded-2xl border border-emerald-100 bg-white p-4">
+          <RouterLink :to="`/products/${item.productSlug}`" class="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-emerald-50">
+            <UiImg :src="item.imageUrl" :alt="item.productName" img-class="h-full w-full object-cover" />
+          </RouterLink>
+          <div class="flex flex-1 flex-col">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <RouterLink :to="`/products/${item.productSlug}`" class="font-semibold text-gray-800 hover:text-emerald-700">{{ item.productName }}</RouterLink>
+              </div>
+              <button class="text-gray-300 hover:text-red-500" :aria-label="`Xóa ${item.productName}`" @click="deleteItem(item.productId)">
+                <UIcon name="i-ph-trash" class="h-5 w-5" />
+              </button>
+            </div>
+            <div class="mt-auto flex items-center justify-between pt-3">
+              <div class="flex items-center rounded-lg border border-emerald-200">
+                <UButton color="neutral" variant="ghost" icon="i-ph-minus" size="md" :disabled="item.quantity <= 1 || busyProductIds.has(item.productId)" :loading="busyProductIds.has(item.productId)" @click="changeQuantity(item.productId, item.quantity - 1)" />
+                <span class="w-8 text-center text-sm font-semibold">{{ item.quantity }}</span>
+                <UButton color="neutral" variant="ghost" icon="i-ph-plus" size="md" :disabled="item.quantity >= item.stock || busyProductIds.has(item.productId)" :loading="busyProductIds.has(item.productId)" @click="changeQuantity(item.productId, item.quantity + 1)" />
+              </div>
+              <span class="font-bold text-emerald-700">{{ formatVND(item.price * item.quantity) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <OrderSummaryCard :subtotal="cart.subtotal" :item-count="cart.itemCount" title="Tóm tắt đơn hàng">
+        <template #actions>
+          <UButton to="/checkout" color="primary" size="lg" block icon="i-ph-arrow-right" label="Tiến hành thanh toán" />
+          <UButton to="/products" color="neutral" variant="ghost" block class="mt-2" label="Tiếp tục mua sắm" />
+        </template>
+      </OrderSummaryCard>
+    </div>
+
+    <div v-else class="py-24 text-center">
+      <UIcon name="i-ph-shopping-cart" class="mx-auto mb-4 h-16 w-16 text-emerald-200" />
+      <p class="text-gray-500">Giỏ hàng của bạn đang trống.</p>
+      <UButton to="/products" color="primary" class="mt-4" label="Mua sắm ngay" icon="i-ph-shopping-bag" />
+    </div>
+  </div>
+</template>
