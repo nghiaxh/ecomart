@@ -1,17 +1,29 @@
-import { defineVitestConfig } from '@nuxt/test-utils/config'
-import { fileURLToPath } from 'node:url'
+import { defineConfig } from 'vitest/config'
+import vue from '@vitejs/plugin-vue'
+import ui from '@nuxt/ui/vite'
+import { fileURLToPath, URL } from 'node:url'
 
-export default defineVitestConfig({
+export default defineConfig({
+  plugins: [
+    vue(),
+    ui({
+      autoImport: {
+        imports: ['vue', 'vue-router', '@vueuse/core']
+      },
+      components: {
+        dirs: [fileURLToPath(new URL('./src/components', import.meta.url))]
+      }
+    })
+  ],
   resolve: {
     alias: {
-      '~': fileURLToPath(new URL('./app', import.meta.url)),
-      '@': fileURLToPath(new URL('./app', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
   test: {
-    include: ['app/**/*.{test,spec}.ts'],
-    environment: 'nuxt',
-    hookTimeout: 60000,
-    globals: true
+    include: ['src/**/*.{test,spec}.ts'],
+    environment: 'happy-dom',
+    globals: true,
+    restoreMocks: true
   }
 })

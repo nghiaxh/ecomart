@@ -53,12 +53,8 @@ services:
     profiles: ["prod"]
     build: ./client
     container_name: ecomart-client
-    env_file: .env
-    environment:
-      NUXT_API_TARGET: http://server:8080
-      PORT: 5173
     ports:
-      - "5173:5173"
+      - "80:80"
     depends_on:
       - server
     networks:
@@ -107,9 +103,8 @@ services:
       context: ./client
       dockerfile: Dockerfile.dev
     container_name: ecomart-client-dev
-    env_file: .env
     environment:
-      NUXT_API_TARGET: http://server-dev:8080
+      VITE_API_TARGET: http://server-dev:8080
       CHOKIDAR_USEPOLLING: 'true'
       HOST: 0.0.0.0
       PORT: 5173
