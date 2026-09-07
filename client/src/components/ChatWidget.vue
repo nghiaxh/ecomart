@@ -54,13 +54,13 @@ function goLogin() {
                 <p class="text-[11px] text-emerald-100">Hỗ trợ tư vấn</p>
               </div>
             </div>
-            <UButton color="neutral" variant="ghost" square icon="i-ph-x" class="text-white! hover:text-black!" @click="open = false" aria-label="Đóng chat" />
+            <UButton color="neutral" variant="ghost" square icon="i-ph-x" class="text-white! hover:bg-emerald-700" @click="open = false" aria-label="Đóng chat" />
           </div>
 
           <div v-if="!isLoggedIn" class="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
             <UIcon name="i-ph-lock-key" class="h-10 w-10 text-emerald-300" />
             <p class="text-sm text-gray-500">Đăng nhập để trò chuyện cùng EcoBot</p>
-            <UButton color="primary" size="lg" label="Đăng nhập" @click="goLogin" />
+            <UButton color="primary" size="lg" label="Đăng nhập" class="text-white" @click="goLogin" />
           </div>
 
           <ChatThread v-else :messages="messages" :sending="sending" compact @send="send" />

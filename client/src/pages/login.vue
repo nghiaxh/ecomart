@@ -63,7 +63,7 @@ async function submit() {
         />
       </div>
       <div class="flex items-center justify-between">
-        <UCheckbox v-model="remember" label="Ghi nhớ đăng nhập" />
+        <UCheckbox v-model="remember" label="Ghi nhớ đăng nhập"/>
       </div>
       <UButton type="submit" color="primary" size="xl" block :loading="loading" label="Đăng nhập" class="mt-2" />
     </form>
