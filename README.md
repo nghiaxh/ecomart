@@ -1,6 +1,6 @@
 # EcoMart
 
-[![Nuxt](https://img.shields.io/badge/Nuxt-4.5-00dc82?logo=nuxtdotjs&logoColor=white)](https://nuxt.com)
+[![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vitejs.dev)
 [![Vue](https://img.shields.io/badge/Vue-3.5-4fc08d?logo=vuedotjs&logoColor=white)](https://vuejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-6db33f?logo=spring&logoColor=white)](https://spring.io)
@@ -38,7 +38,7 @@ Monorepo client-server, mỗi module build độc lập, không có build toolin
 
 ```
 ecomart/
-├── client/            # Nuxt 4 + Nuxt UI 4 + TypeScript + Zod 4
+├── client/            # Vue 3 + Vite 8 + Vue Router 5 + Nuxt UI 4 + TypeScript + Zod 4
 ├── server/            # Spring Boot 3.5 + Java 25 + PostgreSQL + Flyway
 ├── e2e/               # Playwright end-to-end
 ├── docker-compose.yml # chạy toàn bộ stack (profiles: prod / dev)
@@ -52,7 +52,7 @@ Xem chi tiết luồng dữ liệu, xác thực JWT, thanh toán tại **[ARCHIT
 ## Bắt đầu nhanh
 
 ### Yêu cầu
-- Node.js 20.19+ / 22.12+ (Nuxt 4)
+- Node.js 20.19+ / 22.12+ (Vite 8)
 - JDK 25 / Maven
 - Docker + Docker Compose (tùy chọn)
 
@@ -72,7 +72,8 @@ docker compose --profile prod up --build
 
 | Service | URL |
 |---------|-----|
-| Client | http://localhost:5173 |
+| Client (prod) | http://localhost:80 |
+| Client (dev) | http://localhost:5173 |
 | Server API | http://localhost:8080/api |
 | Database | localhost:5432 |
 
@@ -88,7 +89,7 @@ Profile `dev` tự reload khi sửa code: server restart nhờ DevTools + watche
 
 **Client** (`./client`):
 ```bash
-npm run dev        # http://localhost:5173; /api chuyển tiếp tới backend qua Nitro proxy
+npm run dev        # http://localhost:5173; /api chuyển tiếp tới backend qua Vite proxy
 npm run typecheck  # kiểm tra type
 npm test           # test đơn vị (Vitest)
 ```
@@ -113,7 +114,7 @@ Lưu ý: `mvn spring-boot:run` **không** tự đọc `.env` — cần nạp cá
 
 | Layer | Stack |
 |-------|-------|
-| Client | Nuxt 4, Nuxt UI 4, Vue 3.5, TypeScript, Zod 4, Tailwind CSS, Nitro proxy |
+| Client | Vue 3, Vite 8, Vue Router 5, Nuxt UI 4 (Vite plugin), TypeScript, Zod 4, Tailwind CSS, Axios |
 | Server | Spring Boot 3.5, Spring Security (JWT access + refresh), Spring Data JPA, Lombok, Flyway |
 | Database | PostgreSQL 18 |
 | Tích hợp | Chat từ khóa + RAG nội bộ, PayOS (thanh toán QR + webhook) |

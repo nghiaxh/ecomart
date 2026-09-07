@@ -7,16 +7,16 @@ Tài liệu mô tả cách hệ thống EcoMart vận hành: luồng dữ liệu
 EcoMart là ứng dụng **siêu thị trực tuyến** dạng client-server monorepo. Dữ liệu xuyên suốt theo ngữ cảnh **mua sắm tiện lợi**: sản phẩm đa dạng, đặt hàng nhanh và thanh toán linh hoạt.
 
 ```
-┌──────────────────┐  same-origin /api (Nitro proxy)   ┌──────────────────────┐
-│  Nuxt 4 client   │ ─────────────────────────────────▶ │  Spring Boot server  │
-│  (Vue + Nuxt UI) │ ◀───────────────────────────────── │  Java 25 + JPA       │
-└──────────────────┘    Authorization: Bearer (JWT)     └──────────┬───────────┘
-                                                                   │
-                                                   PostgreSQL (ddl-auto: update
-                                                   + Flyway, baseline-on-migrate)
+┌──────────────────┐  same-origin /api (Vite dev proxy / nginx)  ┌──────────────────────┐
+│  Vite SPA client │ ─────────────────────────────────────────▶ │  Spring Boot server  │
+│  (Vue 3 + Nuxt UI)│ ◀───────────────────────────────────────── │  Java 25 + JPA       │
+└──────────────────┘    Authorization: Bearer (JWT)              └──────────┬───────────┘
+                                                                            │
+                                                     PostgreSQL (ddl-auto: update
+                                                     + Flyway, baseline-on-migrate)
 ```
 
-- **client/** — Nuxt 4 + Nuxt UI 4 + TypeScript + Zod 4. Giao diện tiếng Việt. Có Nitro proxy `/api` ở `client/server/routes/api/[...].ts`, đọc target từ `runtimeConfig.apiTarget` (env `NUXT_API_TARGET`, mặc định `http://localhost:8080`). Nếu đặt `NUXT_PUBLIC_API_BASE`, client gọi thẳng backend qua CORS (profile `client-dev` làm vậy).
+- **client/** — Vue 3 + Vite 8 + Vue Router 5 + Nuxt UI 4 (qua standalone Vite plugin `@nuxt/ui/vite`) + Axios + TypeScript + Zod 4. SPA thuần, không SSR. Giao diện tiếng Việt. Không còn Nitro proxy: ở dev, Vite proxy `/api` tới `VITE_API_TARGET` (mặc định `http://localhost:8080`); ở prod, container nginx (nginx.conf) proxy `/api` tới service `server`. Nếu đặt `VITE_API_BASE`, client gọi thẳng backend qua CORS (bỏ proxy).
 - **server/** — Spring Boot 3.5 + Spring Security (JWT access + refresh) + Spring Data JPA. 14 controller, mỗi resource một controller → service → repository.
 - **PostgreSQL** — `ddl-auto: update` đồng bộ schema khi khởi động. Flyway đã bật (`baseline-on-migrate`, `locations: classpath:db/migration`) nhưng chưa có script migration thật.
 
@@ -28,9 +28,9 @@ Toàn bộ luồng login/đăng ký được làm thủ công:
 
 1. Client gọi `POST /api/auth/login` với `{ identifier, password }` (`identifier` là email **hoặc** số điện thoại), hoặc `POST /api/auth/register`, qua composable `useAuth()`.
 2. Server trả về `AuthResponse` gồm `token` (access JWT), `refreshToken`, `expiresIn` (giây) và thông tin user/role.
-3. Client lưu vào storage hai khóa: `ecomart_session` (JSON, chứa cả `refreshToken`) và `ecomart_token` (raw access token). Nếu chọn "Ghi nhớ đăng nhập" → `localStorage`, ngược lại → `sessionStorage`. Cả hai khóa và event `ecomart:unauthorized` do module `app/utils/session-storage.ts` sở hữu chung cho `useApi`/`useAuth`.
-4. Plugin `plugins/auth.client.ts` gọi `useAuth().restore()` khi khởi động để nạp lại phiên.
-5. **Mọi** request API đều đi qua `useApi()` (`client/app/composables/useApi.ts`), tự đính header `Authorization: Bearer <token>`. Khi gặp 401 (ngoài `/api/auth/**`): `useApi` chạy refresh **một lần** (single-flight, dùng chung `refreshInflight` cho mọi request song song), retry request; vẫn 401 thì xoá phiên và `navigateTo('/login')`.
+3. Client lưu vào storage hai khóa: `ecomart_session` (JSON, chứa cả `refreshToken`) và `ecomart_token` (raw access token). Nếu chọn "Ghi nhớ đăng nhập" → `localStorage`, ngược lại → `sessionStorage`. Cả hai khóa và event `ecomart:unauthorized` do module `src/utils/session-storage.ts` sở hữu chung cho `useApi`/`useAuth`.
+4. `main.ts` gọi `useAuth().restore()` khi khởi động để nạp lại phiên trước khi mount, đồng thời đăng ký listener `UNAUTHORIZED_EVENT` → `forceLogout()`.
+5. **Mọi** request API đều đi qua `useApi()` (`client/src/composables/useApi.ts`, bọc **Axios**), tự đính header `Authorization: Bearer <token>`. Khi gặp 401 (ngoài `/api/auth/**`): `useApi` chạy refresh **một lần** (single-flight, dùng chung `refreshInflight` cho mọi request song song), retry request; vẫn 401 thì xoá phiên, phát event unauthorized và `router.push('/login')`.
 6. Server: `JwtAuthenticationFilter` đọc/verify access token, dựng `Authentication`; `JwtTokenProvider` sinh/kiểm tra JWT; `SecurityConfig` tắt session (stateless), cho phép công khai các endpoint đọc và bắt buộc `authenticated()` với phần còn lại (`anyRequest().authenticated()`). Lỗi 401/403 trả về JSON tiếng Việt.
 7. **Refresh token xoay vòng (rotation)**: `POST /api/auth/refresh` nhận `refreshToken`, băm SHA-256 tra cứu trong bảng `refresh_tokens`, cấp access token mới **và** refresh token mới; token cũ bị đánh dấu đã thay (`replacedBy`) — dùng lại token cũ sẽ bị từ chối và thu hồi cả chuỗi. `POST /api/auth/logout` thu hồi refresh token của user.
 
@@ -41,10 +41,10 @@ Các endpoint công khai duy nhất (phần còn lại yêu cầu xác thực):
 - `POST /api/payments/payos/webhook`
 - `/error`
 
-**Bảo vệ route trên client** bằng middleware (chỉ là UX, không phải ranh giới bảo mật):
-- `middleware/auth.ts` — yêu cầu đã đăng nhập.
-- `middleware/admin.ts` — yêu cầu role `ADMIN`.
-- `middleware/customer.ts` — yêu cầu đã đăng nhập và không phải admin.
+**Bảo vệ route trên client** bằng global guard `beforeEach` trong `src/router/index.ts` (chỉ là UX, không phải ranh giới bảo mật). Guard đọc `meta` trên route:
+- `requiresAuth` — yêu cầu đã đăng nhập (`/account`).
+- `requiresAdmin` — yêu cầu role `ADMIN` (`/admin/**`).
+- `customerOnly` — yêu cầu đã đăng nhập và không phải admin (`/cart`, `/checkout`, `/orders`, `/chat`, `/payment-result`).
 
 ### 2. Duyệt và tìm sản phẩm
 
@@ -57,8 +57,8 @@ Các endpoint công khai duy nhất (phần còn lại yêu cầu xác thực):
 
 Giỏ hàng **không** lưu trong localStorage của trình duyệt; nó lưu trên server theo user (`Cart` + `CartItem` entities).
 
-- `useCart()` (`client/app/composables/useCart.ts`) điều khiển giỏ qua `GET/POST/PUT/DELETE /api/cart`. Thêm/sửa quá tồn kho trả 400 với message riêng: hết hàng (`"Sản phẩm đã hết hàng"`) hoặc còn ít (`"Số lượng vượt quá tồn kho, chỉ còn X"`).
-- Trạng thái giỏ được giữ bằng Nuxt `useState`, nạp lại mỗi khi đăng nhập.
+- `useCart()` (`client/src/composables/useCart.ts`) điều khiển giỏ qua `GET/POST/PUT/DELETE /api/cart`. Thêm/sửa quá tồn kho trả 400 với message riêng: hết hàng (`"Sản phẩm đã hết hàng"`) hoặc còn ít (`"Số lượng vượt quá tồn kho, chỉ còn X"`).
+- Trạng thái giỏ được giữ bằng module-level `ref` trong composable, nạp lại mỗi khi đăng nhập (watch `isLoggedIn`).
 - Chỉ hoạt động khi đã đăng nhập (`fetchCart` trả `null` nếu chưa login).
 
 ### 4. Đặt hàng và thanh toán
@@ -122,33 +122,36 @@ Migrations: `server/src/main/resources/db/migration/` (Flyway directories; hiệ
 ### Client (`client/`)
 
 ```
-app/
+src/
+  main.ts            bootstrap SPA: useAuth().restore(), listener UNAUTHORIZED_EVENT, mount #app
+  router/            khai báo route + global guard beforeEach (meta: requiresAuth / requiresAdmin / customerOnly)
+  App.vue            component gốc
   pages/             guest: index, login, register, products, products/[slug];
                      user: cart, checkout, orders, orders/[id], account, chat;
                      admin/: index, products, categories, orders, banners
   components/        ProductCard, FooterGlobal, ChatWidget, ChatThread, AuthShell, SectionHeader, Reveal,
                      UiImg, PaginationBar, OrderSummaryCard, AddressForm, AddressCard,
                      AddToCartButton, PasswordInput, ConfirmDialog
-  composables/       useApi (mọi request + auto-refresh), useAuth (phiên/JWT),
+  composables/       useApi (mọi request qua Axios + auto-refresh), useAuth (phiên/JWT),
                      useCart, useFormat, useStatusLabels, useFormErrors, useConfirm
   utils/             session-storage (sở hữu khóa ecomart_session/ecomart_token + event unauthorized)
   data/              home.ts (dữ liệu marketing tĩnh trang chủ)
-  layouts/           default (public, gồm FooterGlobal), admin (trang auth dùng layout: false)
-  middleware/        auth.ts (đã login), admin.ts (role ADMIN), customer.ts (đã login, không phải admin)
+  layouts/           default (public, gồm FooterGlobal), admin (auth dùng layout rỗng)
   schemas/           Zod validation — thông báo lỗi tiếng Việt (kèm form types suy ra từ schema)
   types/             TS interfaces phản ánh DTO của backend
-  plugins/           auth.client.ts — khôi phục phiên khi load (chạy trước middleware)
   assets/css/        main.css
-server/routes/api/[...].ts   Nitro proxy /api → backend (runtimeConfig.apiTarget)
+index.html           entry HTML (src/main.ts)
+vite.config.ts       plugin-vue + Nuxt UI (auto-imports Vue/vue-router/@vueuse + components) + alias @ + proxy /api
+nginx.conf           prod: serve dist/ + proxy /api → server
 ```
 
 ## Điểm quan trọng khi làm việc
 
-- **Đồng bộ types**: `client/app/types/index.ts` (TS) và `client/app/schemas/index.ts` (Zod) phải giữ song song với DTO backend. Thêm/sửa trường ở server → cập nhật cả hai.
+- **Đồng bộ types**: `client/src/types/index.ts` (TS) và `client/src/schemas/index.ts` (Zod) phải giữ song song với DTO backend. Thêm/sửa trường ở server → cập nhật cả hai.
 - **Flyway vs ddl-auto**: Flyway đã bật (`enabled`, `baseline-on-migrate: true`, `locations: classpath:db/migration`) nhưng thư mục migration còn trống — schema vẫn do `ddl-auto: update` quản lý (`JPA_DDL_AUTO` ghi đè mặc định). Khi thêm migration thật, đặt file trong `server/src/main/resources/db/migration`. Với DB có sẵn dữ liệu, tránh xoá/đổi tên cột đang được dùng.
-- **Mọi request qua `useApi()`**: không gọi `$fetch` trực tiếp trong page để đảm bảo header JWT luôn được đính và cơ chế auto-refresh hoạt động.
-- **Quyền ADMIN kiểm soát ở server**: `SecurityConfig` bắt buộc xác thực tại tầng HTTP (`anyRequest().authenticated()`), admin write dùng `@PreAuthorize("hasRole('ADMIN')")`, controller user-scoped dùng `@PreAuthorize("isAuthenticated()")`. Hết phiên/refresh lỗi → 401 (`UnauthorizedException`, chỉ ở `AuthService` + webhook PayOS chưa auth); đã login nhưng đụng tài nguyên người khác → 403 (`AccessDeniedException`). Middleware client chỉ là UX.
-- **Trang công khai dùng `useAsyncData`** (`index`, `products`, `products/[slug]` — SSR + SEO); trang đã xác thực/admin giữ fetch client (`onMounted`). Filter `products` đồng bộ 2 chiều với URL query.
+- **Mọi request qua `useApi()`**: không gọi Axios/`$fetch` trực tiếp trong page để đảm bảo header JWT luôn được đính và cơ chế auto-refresh hoạt động.
+- **Quyền ADMIN kiểm soát ở server**: `SecurityConfig` bắt buộc xác thực tại tầng HTTP (`anyRequest().authenticated()`), admin write dùng `@PreAuthorize("hasRole('ADMIN')")`, controller user-scoped dùng `@PreAuthorize("isAuthenticated()")`. Hết phiên/refresh lỗi → 401 (`UnauthorizedException`, chỉ ở `AuthService` + webhook PayOS chưa auth); đã login nhưng đụng tài nguyên người khác → 403 (`AccessDeniedException`). Route guard client chỉ là UX.
+- **Không SSR**: SPA thuần, mọi trang (kể cả trang công khai) fetch client-side trong `onMounted`. Filter `products` đồng bộ 2 chiều với URL query (`router.push`/`replace`).
 - **DataSeeder** (`config/DataSeeder.java`) idempotent theo slug/tên (DB đã seed vẫn nhận hàng mới khi boot lại): tạo admin `admin@ecomart.vn`, customer `customer@ecomart.vn`, danh mục (3 gốc + 7 lá), vật liệu, banner, ~45 sản phẩm mẫu (mỗi SP 1–2 ảnh WebP trong `client/public/images/products/`, ít nhất 2 SP hết hàng `stock = 0` để e2e `cart-robustness` chạy thật). Vật liệu seed map theo nhóm danh mục (rau → Lá chuối, củ quả/ngũ cốc → Giấy, ...). Mật khẩu demo mặc định `Admin@123` / `Customer@123`, ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`. Để reset dữ liệu demo, xoá volume `pgdata`.
 - **Ảnh sản phẩm/banner** là file tĩnh trong `client/public/images/` (`products/<slug>-<n>.webp`, `banners/`), seed trong `DataSeeder` trỏ đường dẫn tương đối `/images/...`. Không còn endpoint upload server — admin thêm ảnh bằng URL trong form.
 
@@ -174,7 +177,7 @@ Biến chỉ dùng trong `docker-compose.yml`:
 | Var | Ý nghĩa |
 |-----|---------|
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_PORT` | cấu hình service postgres |
-| `NUXT_API_TARGET` | nơi Nitro proxy chuyển `/api` tới (prod: `http://server:8080`) |
-| `NUXT_PUBLIC_API_BASE` | nếu đặt, client gọi thẳng backend qua CORS, bỏ proxy (`client-dev`) |
+| `VITE_API_TARGET` | nơi Vite proxy chuyển `/api` tới ở dev (mặc định `http://localhost:8080`; trong compose `client-dev`: `http://server-dev:8080`) |
+| `VITE_API_BASE` | nếu đặt, client gọi thẳng backend qua CORS, bỏ proxy |
 
-Chạy độc lập (dev): cần Postgres tại `localhost:5432` và nạp các biến từ `.env` cho `mvn spring-boot:run`. Hoặc chạy toàn bộ stack: `docker compose --profile prod up --build` (sản phẩm) hoặc `docker compose --profile dev up` (hot-reload, volume mount).
+Chạy độc lập (dev): cần Postgres tại `localhost:5432` và nạp các biến từ `.env` cho `mvn spring-boot:run`. Hoặc chạy toàn bộ stack: `docker compose --profile prod up --build` (sản phẩm, client ở cổng 80) hoặc `docker compose --profile dev up` (hot-reload, client ở cổng 5173).
