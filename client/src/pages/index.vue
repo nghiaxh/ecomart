@@ -107,7 +107,7 @@ const aboutPoints = homeAboutPoints
               <div class="absolute inset-0 bg-gradient-to-t from-emerald-900/35 to-transparent"></div>
             </div>
             <div class="p-5">
-              <h3 class="text-lg font-bold tracking-tight text-gray-800">{{ f.title }}</h3>
+              <h3 class="text-lg font-bold tracking-tight text-gray-700">{{ f.title }}</h3>
               <p class="mt-1.5 text-sm leading-relaxed text-gray-500">{{ f.desc }}</p>
             </div>
           </div>
@@ -167,7 +167,7 @@ const aboutPoints = homeAboutPoints
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
           <div class="mx-auto max-w-2xl text-center">
-            <h2 class="text-2xl font-extrabold tracking-tight text-gray-800">Cách đặt hàng</h2>
+            <h2 class="text-2xl font-extrabold tracking-tight text-gray-700">Cách đặt hàng</h2>
             <p class="mt-2 text-sm text-gray-500">Chỉ 4 bước đơn giản là mâm cơm xanh đã sẵn sàng</p>
           </div>
           <div class="relative mt-10">
@@ -187,7 +187,7 @@ const aboutPoints = homeAboutPoints
                     {{ i + 1 }}
                   </span>
                   <div>
-                    <h3 class="text-sm font-bold tracking-tight text-gray-800">{{ step.title }}</h3>
+                    <h3 class="text-sm font-bold tracking-tight text-gray-700">{{ step.title }}</h3>
                     <p class="mt-0.5 text-xs leading-relaxed text-gray-500">{{ step.desc }}</p>
                   </div>
                 </div>
@@ -223,7 +223,7 @@ const aboutPoints = homeAboutPoints
         <Reveal>
           <div class="mx-auto max-w-2xl text-center">
             <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">Về EcoMart</p>
-            <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-gray-800">Tươi sạch mỗi ngày, giá cả hợp lý</h2>
+            <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-gray-700">Tươi sạch mỗi ngày, giá cả hợp lý</h2>
             <p class="mx-auto mt-4 max-w-xl leading-relaxed text-gray-500">
               EcoMart cam kết mang đến sản phẩm có nguồn gốc rõ ràng, chất lượng đảm bảo với mức giá phù hợp.
               Đặt hàng nhanh chóng, giao tận nơi và thanh toán linh hoạt.
@@ -251,7 +251,7 @@ const aboutPoints = homeAboutPoints
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
           <div class="mb-8 text-center">
-            <h2 class="text-2xl font-extrabold tracking-tight text-gray-800">Khách hàng nói gì</h2>
+            <h2 class="text-2xl font-extrabold tracking-tight text-gray-700">Khách hàng nói gì</h2>
             <p class="mt-2 text-sm text-gray-500">Cảm nhận thực tế từ những người đã tin dùng EcoMart</p>
           </div>
           <div class="grid gap-6 md:grid-cols-3">
@@ -265,7 +265,7 @@ const aboutPoints = homeAboutPoints
                   class="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 font-bold text-emerald-700">{{
                     t.initial }}</span>
                 <div>
-                  <p class="text-sm font-semibold text-gray-800">{{ t.name }}</p>
+                  <p class="text-sm font-semibold text-gray-700">{{ t.name }}</p>
                   <p class="text-xs text-gray-400">{{ t.role }}</p>
                 </div>
               </div>

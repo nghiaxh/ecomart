@@ -48,7 +48,7 @@ onMounted(loadSessions)
 
 <template>
   <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-    <h1 class="mb-6 text-3xl font-extrabold text-gray-800">Chat hỗ trợ</h1>
+    <h1 class="mb-6 text-3xl font-extrabold text-gray-700">Chat hỗ trợ</h1>
 
     <div class="grid gap-6 lg:grid-cols-4">
       <!-- Sessions sidebar -->
@@ -62,7 +62,7 @@ onMounted(loadSessions)
             :class="currentSessionId === s.id ? 'bg-emerald-50 ring-1 ring-emerald-300' : 'hover:bg-gray-50'"
             @click="currentSessionId = s.id; messages = s.messages"
           >
-            <p class="line-clamp-1 text-sm font-medium text-gray-800">{{ s.title }}</p>
+            <p class="line-clamp-1 text-sm font-medium text-gray-700">{{ s.title }}</p>
             <p class="text-xs text-gray-400">{{ formatDate(s.createdAt) }}</p>
           </button>
           <p v-if="!sessions.length" class="py-4 text-center text-xs text-gray-400">Chưa có cuộc trò chuyện.</p>

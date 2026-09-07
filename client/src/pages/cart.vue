@@ -48,7 +48,7 @@ async function deleteItem(productId: number) {
 
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-    <h1 class="text-3xl font-extrabold text-gray-800">Giỏ hàng</h1>
+    <h1 class="text-3xl font-extrabold text-gray-700">Giỏ hàng</h1>
 
     <div v-if="loading" class="mt-8 grid gap-6 lg:grid-cols-3">
       <div class="space-y-4 lg:col-span-2">
@@ -66,7 +66,7 @@ async function deleteItem(productId: number) {
           <div class="flex flex-1 flex-col">
             <div class="flex items-start justify-between gap-2">
               <div>
-                <RouterLink :to="`/products/${item.productSlug}`" class="font-semibold text-gray-800 hover:text-emerald-700">{{ item.productName }}</RouterLink>
+                <RouterLink :to="`/products/${item.productSlug}`" class="font-semibold text-gray-700 hover:text-emerald-700">{{ item.productName }}</RouterLink>
               </div>
               <button class="text-gray-300 hover:text-red-500" :aria-label="`Xóa ${item.productName}`" @click="deleteItem(item.productId)">
                 <UIcon name="i-ph-trash" class="h-5 w-5" />

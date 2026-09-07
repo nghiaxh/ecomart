@@ -102,12 +102,12 @@ onMounted(load)
 <template>
   <div>
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-bold text-gray-800">Quản lý danh mục</h1>
+      <h1 class="text-xl font-bold text-gray-700">Quản lý danh mục</h1>
       <UButton color="primary" icon="i-ph-plus" label="Thêm danh mục" @click="openCreate" />
     </div>
 
     <div v-if="showForm" class="mb-6 rounded-2xl border border-emerald-100 bg-white p-6">
-      <h2 class="mb-4 font-bold text-gray-800">{{ editingId ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}</h2>
+      <h2 class="mb-4 font-bold text-gray-700">{{ editingId ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}</h2>
       <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
         <div>
           <label class="mb-1 block text-sm text-gray-500">Tên</label>
@@ -154,7 +154,7 @@ onMounted(load)
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
                   <UIcon v-if="c.icon && categoryIcon(c.icon) !== 'i-ph-tag-simple'" :name="categoryIcon(c.icon)" class="h-4 w-4 text-emerald-600" />
-                  <span class="font-medium text-gray-800">{{ c.name }}</span>
+                  <span class="font-medium text-gray-700">{{ c.name }}</span>
                 </div>
               </td>
               <td class="px-4 py-3 text-gray-500">{{ c.slug }}</td>

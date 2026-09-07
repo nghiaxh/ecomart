@@ -35,7 +35,7 @@ const cards = computed(() => [
         <span class="grid h-10 w-10 place-items-center rounded-xl bg-gray-50" :class="c.color">
           <UIcon :name="c.icon" class="h-5 w-5" />
         </span>
-        <p class="mt-4 text-2xl font-extrabold text-gray-800">{{ c.value }}</p>
+        <p class="mt-4 text-2xl font-extrabold text-gray-700">{{ c.value }}</p>
         <p class="text-sm text-gray-400">{{ c.label }}</p>
       </div>
     </div>
@@ -44,7 +44,7 @@ const cards = computed(() => [
       <RouterLink to="/admin/orders" class="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-6 transition hover:shadow-md">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="font-bold text-gray-800">Quản lý đơn hàng</h3>
+            <h3 class="font-bold text-gray-700">Quản lý đơn hàng</h3>
             <p class="mt-1 text-sm text-gray-500">Cập nhật trạng thái và xác nhận thanh toán</p>
           </div>
           <span class="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-600 text-white"><UIcon name="i-ph-arrow-right" class="h-6 w-6" /></span>
@@ -53,7 +53,7 @@ const cards = computed(() => [
       <RouterLink to="/admin/products" class="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-6 transition hover:shadow-md">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="font-bold text-gray-800">Quản lý sản phẩm</h3>
+            <h3 class="font-bold text-gray-700">Quản lý sản phẩm</h3>
             <p class="mt-1 text-sm text-gray-500">Thêm, sửa sản phẩm và chuyển bật/tắt</p>
           </div>
           <span class="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-600 text-white"><UIcon name="i-ph-arrow-right" class="h-6 w-6" /></span>

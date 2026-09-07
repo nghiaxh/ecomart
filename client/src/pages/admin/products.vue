@@ -134,12 +134,12 @@ watch(search, debouncedLoad)
 <template>
   <div>
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-bold text-gray-800">Quản lý sản phẩm</h1>
+      <h1 class="text-xl font-bold text-gray-700">Quản lý sản phẩm</h1>
       <UButton color="primary" icon="i-ph-plus" label="Thêm sản phẩm" @click="openCreate" />
     </div>
 
     <div v-if="showForm" class="mb-6 rounded-2xl border border-emerald-100 bg-white p-6">
-      <h2 class="mb-4 font-bold text-gray-800">{{ editingId ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h2>
+      <h2 class="mb-4 font-bold text-gray-700">{{ editingId ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h2>
       <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
         <div class="md:col-span-1">
           <label class="mb-1 block text-sm text-gray-500">Tên</label>
@@ -212,7 +212,7 @@ watch(search, debouncedLoad)
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
                 <UiImg :src="p.images?.[0]" :alt="p.name" img-class="h-10 w-10 rounded-lg object-cover" />
-                <span class="font-medium text-gray-800">{{ p.name }}</span>
+                <span class="font-medium text-gray-700">{{ p.name }}</span>
               </div>
             </td>
             <td class="px-4 py-3 text-gray-600">{{ formatVND(p.price) }}</td>

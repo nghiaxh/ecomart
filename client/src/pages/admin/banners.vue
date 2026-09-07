@@ -89,12 +89,12 @@ onMounted(load)
 <template>
   <div>
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-bold text-gray-800">Quản lý banner</h1>
+      <h1 class="text-xl font-bold text-gray-700">Quản lý banner</h1>
       <UButton color="primary" icon="i-ph-plus" label="Thêm banner" @click="openCreate" />
     </div>
 
     <div v-if="showForm" class="mb-6 rounded-2xl border border-emerald-100 bg-white p-6">
-      <h2 class="mb-4 font-bold text-gray-800">{{ editingId ? 'Chỉnh sửa banner' : 'Thêm banner mới' }}</h2>
+      <h2 class="mb-4 font-bold text-gray-700">{{ editingId ? 'Chỉnh sửa banner' : 'Thêm banner mới' }}</h2>
       <form class="grid gap-4 md:grid-cols-2" @submit.prevent="submit">
         <div>
           <label class="mb-1 block text-sm text-gray-500">Tiêu đề</label>
@@ -136,7 +136,7 @@ onMounted(load)
         <UiImg :src="b.imageUrl" :alt="b.title" img-class="h-40 w-full object-cover" />
         <div class="p-4">
           <div class="flex items-center justify-between">
-            <h3 class="font-bold text-gray-800">{{ b.title }}</h3>
+            <h3 class="font-bold text-gray-700">{{ b.title }}</h3>
             <UBadge :color="b.active ? 'success' : 'neutral'" :label="b.active ? 'Hiển thị' : 'Ẩn'" size="sm" />
           </div>
           <p v-if="b.subtitle" class="mt-1 text-sm text-gray-400">{{ b.subtitle }}</p>

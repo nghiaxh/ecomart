@@ -11,7 +11,7 @@ const { formatVND } = useFormat()
 
 <template>
   <div class="h-fit rounded-2xl border border-emerald-100 bg-white p-6 lg:sticky lg:top-20">
-    <h2 class="text-lg font-bold text-gray-800">
+    <h2 class="text-lg font-bold text-gray-700">
       <slot name="title">{{ title ?? 'Tóm tắt đơn hàng' }}</slot>
     </h2>
 

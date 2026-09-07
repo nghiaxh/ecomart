@@ -21,13 +21,14 @@
 }
 
 :root {
+  color-scheme: light;
   --ui-primary: var(--color-primary);
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background-color: #f8faf9;
-  color: #1a2e1f;
+  color: #33423a;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -104,4 +105,9 @@ button:disabled,
 .cat-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 28px -6px rgba(5, 150, 105, 0.18);
+}
+
+/* Skeleton loading placeholders stay light and clean */
+[role="alert"][aria-busy="true"] {
+  background-color: #eef1ef;
 }

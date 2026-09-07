@@ -42,7 +42,7 @@ function submit() {
           class="whitespace-pre-wrap rounded-2xl leading-relaxed"
           :class="[
             compact ? 'max-w-[80%] px-3 py-2 text-sm' : 'max-w-[70%] px-4 py-3 text-sm',
-            m.role === 'USER' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-800'
+            m.role === 'USER' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700'
           ]"
         >
           {{ m.content }}

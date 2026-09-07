@@ -34,7 +34,7 @@ const { formatVND, formatKg } = useFormat()
 
     <div class="p-4">
       <p class="text-xs text-gray-400">{{ product.categoryName }}</p>
-      <h3 class="mt-1 line-clamp-2 font-semibold text-gray-800 group-hover:text-emerald-700">{{ product.name }}</h3>
+      <h3 class="mt-1 line-clamp-2 font-semibold text-gray-700 group-hover:text-emerald-700">{{ product.name }}</h3>
       <p class="mt-1 text-xs text-gray-400">{{ formatKg(product.weight) }}</p>
       <div class="mt-2 flex items-end justify-between">
         <span class="text-base font-bold text-orange-600">{{ formatVND(product.price) }}</span>

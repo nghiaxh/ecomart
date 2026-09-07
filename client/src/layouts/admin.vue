@@ -43,7 +43,7 @@ const nav = [
 
     <div class="flex min-h-screen flex-1 flex-col">
       <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
-        <h1 class="text-lg font-bold text-gray-800">Bảng điều khiển</h1>
+        <h1 class="text-lg font-bold text-gray-700">Bảng điều khiển</h1>
       </header>
 
       <main class="flex-1 p-6">

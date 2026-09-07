@@ -24,7 +24,7 @@ const emit = defineEmits<{ select: [id: number] }>()
     />
     <div class="flex-1">
       <div class="flex items-center gap-2">
-        <span class="font-semibold text-gray-800">{{ address.receiverName }}</span>
+        <span class="font-semibold text-gray-700">{{ address.receiverName }}</span>
         <span class="text-sm text-gray-400">{{ address.receiverPhone }}</span>
         <span v-if="address.isDefault" class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">Mặc định</span>
       </div>

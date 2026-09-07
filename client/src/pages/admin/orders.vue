@@ -73,7 +73,7 @@ watch(statusFilter, () => { page.value = 0; load() })
 <template>
   <div>
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-bold text-gray-800">Quản lý đơn hàng</h1>
+      <h1 class="text-xl font-bold text-gray-700">Quản lý đơn hàng</h1>
       <div class="flex items-center gap-2">
         <USelect
           v-model="statusFilter"
@@ -90,7 +90,7 @@ watch(statusFilter, () => { page.value = 0; load() })
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-bold text-gray-800">Đơn #{{ o.id }}</span>
+              <span class="font-bold text-gray-700">Đơn #{{ o.id }}</span>
               <UBadge :color="orderStatus[o.status].color" :label="orderStatus[o.status].label" size="sm" />
               <UBadge :color="paymentStatus[o.payment.status].color" :label="paymentStatus[o.payment.status].label" size="sm" variant="soft" />
             </div>

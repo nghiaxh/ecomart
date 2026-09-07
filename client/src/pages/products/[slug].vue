@@ -164,7 +164,7 @@ onMounted(loadReviews)
 
       <!-- Info -->
       <div>
-        <h1 class="text-2xl font-extrabold text-gray-800 sm:text-3xl">{{ product.name }}</h1>
+        <h1 class="text-2xl font-extrabold text-gray-700 sm:text-3xl">{{ product.name }}</h1>
         <p class="mt-2 text-sm text-gray-400">{{ formatKg(product.weight) }} · Nguồn gốc: {{ product.origin || 'Việt Nam' }}</p>
 
         <!-- Price & stock highlight -->
@@ -224,11 +224,11 @@ onMounted(loadReviews)
     <div class="mt-12 border-t border-emerald-100 pt-8">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <h2 class="text-2xl font-extrabold text-gray-800">Đánh giá</h2>
+          <h2 class="text-2xl font-extrabold text-gray-700">Đánh giá</h2>
           <template v-if="reviewCount > 0">
             <div class="flex items-center gap-1.5 rounded-full bg-yellow-50 px-3 py-1">
               <UIcon name="i-ph-star-fill" class="h-4 w-4 text-yellow-400" />
-              <span class="text-sm font-bold text-gray-800">{{ avgRating.toFixed(1) }}</span>
+              <span class="text-sm font-bold text-gray-700">{{ avgRating.toFixed(1) }}</span>
             </div>
             <span class="text-sm text-gray-400">{{ reviewCount }} đánh giá</span>
           </template>

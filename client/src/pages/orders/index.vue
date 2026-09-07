@@ -30,7 +30,7 @@ onMounted(load)
 
 <template>
   <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-    <h1 class="text-3xl font-extrabold text-gray-800">Đơn hàng của tôi</h1>
+    <h1 class="text-3xl font-extrabold text-gray-700">Đơn hàng của tôi</h1>
 
     <div v-if="loading" class="mt-8 space-y-4">
       <USkeleton v-for="i in 3" :key="i" class="h-32 rounded-2xl" />
@@ -45,7 +45,7 @@ onMounted(load)
       >
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p class="font-bold text-gray-800">Đơn #{{ o.id }}</p>
+            <p class="font-bold text-gray-700">Đơn #{{ o.id }}</p>
             <p class="text-sm text-gray-400">{{ formatDate(o.createdAt) }}</p>
           </div>
           <div class="text-right">

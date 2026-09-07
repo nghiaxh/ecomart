@@ -18,7 +18,7 @@ const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'contact@ecomart.vn'
         </div>
 
         <div>
-          <h4 class="text-sm font-semibold text-gray-800">Sản phẩm</h4>
+          <h4 class="text-sm font-semibold text-gray-700">Sản phẩm</h4>
           <ul class="mt-2 space-y-1.5 text-sm text-gray-500">
             <li><RouterLink to="/products" class="hover:text-emerald-700">Tất cả sản phẩm</RouterLink></li>
             <li><RouterLink to="/products?category=rau-cu-sach" class="hover:text-emerald-700">Rau củ sạch</RouterLink></li>
@@ -27,7 +27,7 @@ const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'contact@ecomart.vn'
         </div>
 
         <div>
-          <h4 class="text-sm font-semibold text-gray-800">Tài khoản</h4>
+          <h4 class="text-sm font-semibold text-gray-700">Tài khoản</h4>
           <ul class="mt-2 space-y-1.5 text-sm text-gray-500">
             <li><RouterLink to="/account" class="hover:text-emerald-700">Tài khoản của tôi</RouterLink></li>
             <li><RouterLink to="/orders" class="hover:text-emerald-700">Đơn hàng</RouterLink></li>
@@ -35,7 +35,7 @@ const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'contact@ecomart.vn'
         </div>
 
         <div>
-          <h4 class="text-sm font-semibold text-gray-800">Hỗ trợ</h4>
+          <h4 class="text-sm font-semibold text-gray-700">Hỗ trợ</h4>
           <ul class="mt-2 space-y-1.5 text-sm text-gray-500">
             <li><RouterLink to="/chat" class="hover:text-emerald-700">Chat trợ giúp</RouterLink></li>
             <li><span>Hotline: {{ supportPhone }}</span></li>

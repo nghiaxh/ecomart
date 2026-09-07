@@ -46,7 +46,7 @@ onMounted(() => {
       <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-600">
         <UIcon name="i-ph-circle-notch" class="h-8 w-8 animate-spin" />
       </span>
-      <h1 class="mt-6 text-xl font-extrabold text-gray-800">Đang xác nhận thanh toán...</h1>
+      <h1 class="mt-6 text-xl font-extrabold text-gray-700">Đang xác nhận thanh toán...</h1>
       <p class="mt-2 text-sm text-gray-500">Vui lòng đợi trong giây lát, không tắt trang này.</p>
     </div>
 
@@ -54,7 +54,7 @@ onMounted(() => {
       <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-600">
         <UIcon name="i-ph-check-fat" class="h-8 w-8" />
       </span>
-      <h1 class="mt-6 text-2xl font-extrabold text-gray-800">Thanh toán thành công!</h1>
+      <h1 class="mt-6 text-2xl font-extrabold text-gray-700">Thanh toán thành công!</h1>
       <p class="mt-2 text-sm text-gray-500">Cảm ơn bạn. Hóa đơn của đơn hàng #{{ orderId }} đã được xác nhận.</p>
       <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
         <UButton color="primary" size="lg" to="/" icon="i-ph-house" label="Về trang chủ" />
@@ -66,7 +66,7 @@ onMounted(() => {
       <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-amber-100 text-amber-600">
         <UIcon name="i-ph-x-circle" class="h-8 w-8" />
       </span>
-      <h1 class="mt-6 text-2xl font-extrabold text-gray-800">Thanh toán đã bị hủy</h1>
+      <h1 class="mt-6 text-2xl font-extrabold text-gray-700">Thanh toán đã bị hủy</h1>
       <p class="mt-2 text-sm text-gray-500">Bạn chưa hoàn tất thanh toán. Đơn hàng vẫn được giữ lại trên hệ thống.</p>
       <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
         <UButton color="primary" size="lg" to="/cart" icon="i-ph-shopping-cart" label="Quay lại giỏ hàng" />
@@ -78,7 +78,7 @@ onMounted(() => {
       <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-red-100 text-red-600">
         <UIcon name="i-ph-warning-circle" class="h-8 w-8" />
       </span>
-      <h1 class="mt-6 text-2xl font-extrabold text-gray-800">Không thể xác nhận thanh toán</h1>
+      <h1 class="mt-6 text-2xl font-extrabold text-gray-700">Không thể xác nhận thanh toán</h1>
       <p class="mt-2 text-sm text-gray-500">
         {{ orderId ? 'Hệ thống chưa nhận được thông tin thanh toán. Bạn có thể thử lại hoặc xem đơn hàng sau.' : 'Thiếu thông tin thanh toán.' }}
       </p>

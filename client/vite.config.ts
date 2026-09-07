@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
       vue(),
       ...(mode === 'development' ? [vueDevTools()] : []),
       ui({
+        colorMode: false,
         autoImport: {
           imports: ['vue', 'vue-router', '@vueuse/core']
         },

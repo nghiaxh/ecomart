@@ -104,14 +104,14 @@ onMounted(() => {
 
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-    <h1 class="text-3xl font-extrabold text-gray-800">Thanh toán</h1>
+    <h1 class="text-3xl font-extrabold text-gray-700">Thanh toán</h1>
 
     <div class="mt-8 grid gap-8 lg:grid-cols-3">
       <div class="lg:col-span-2 space-y-6">
         <!-- Address -->
         <section class="rounded-2xl border border-emerald-100 bg-white p-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-800">Địa chỉ giao hàng</h2>
+            <h2 class="text-lg font-bold text-gray-700">Địa chỉ giao hàng</h2>
             <UButton color="primary" variant="soft" size="md" icon="i-ph-plus" label="Thêm mới" @click="showAddressForm = !showAddressForm" />
           </div>
 
@@ -139,13 +139,13 @@ onMounted(() => {
 
         <!-- Payment -->
         <section class="rounded-2xl border border-emerald-100 bg-white p-6">
-          <h2 class="text-lg font-bold text-gray-800">Phương thức thanh toán</h2>
+          <h2 class="text-lg font-bold text-gray-700">Phương thức thanh toán</h2>
           <div class="mt-4 grid gap-3 sm:grid-cols-2">
             <label class="flex items-center gap-3 rounded-xl border p-4 transition" :class="paymentMethod === 'COD' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'" >
               <input type="radio" v-model="paymentMethod" value="COD" class="accent-emerald-600" />
               <span class="grid h-9 w-9 place-items-center rounded-lg bg-emerald-100 text-emerald-700"><UIcon name="i-ph-money" class="h-5 w-5" /></span>
               <div>
-                <p class="font-semibold text-gray-800">COD</p>
+                <p class="font-semibold text-gray-700">COD</p>
                 <p class="text-xs text-gray-400">Thanh toán khi nhận hàng</p>
               </div>
             </label>
@@ -153,7 +153,7 @@ onMounted(() => {
               <input type="radio" v-model="paymentMethod" value="PAYOS" class="accent-emerald-600" />
               <span class="grid h-9 w-9 place-items-center rounded-lg bg-emerald-100 text-emerald-700"><UIcon name="i-ph-qr-code" class="h-5 w-5" /></span>
               <div>
-                <p class="font-semibold text-gray-800">PayOS QR</p>
+                <p class="font-semibold text-gray-700">PayOS QR</p>
                 <p class="text-xs text-gray-400">Quét mã chuyển khoản</p>
               </div>
             </label>
