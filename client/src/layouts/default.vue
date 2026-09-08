@@ -4,11 +4,20 @@ import { useCart } from '@/composables/useCart'
 const { isLoggedIn, isAdmin, session } = useAuth()
 const { itemCount } = useCart()
 
+const route = useRoute()
+
 const links = [
   { label: 'Trang chủ', to: '/' },
   { label: 'Sản phẩm', to: '/products' },
   { label: 'Về chúng tôi', to: '/#about' }
 ]
+
+function scrollHome() {
+  if (route.name === 'home' && !route.hash) {
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    window.scrollTo({ top: 0, behavior })
+  }
+}
 </script>
 
 <template>
@@ -16,12 +25,14 @@ const links = [
     <header class="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/90 backdrop-blur">
       <div class="mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         <RouterLink to="/" class="flex items-center gap-2">
-          <img src="/favicon.svg" alt="EcoMart" class="h-9 w-9 rounded-xl" />
-          <span class="text-xl font-extrabold tracking-tight text-emerald-800">EcoMart</span>
+          <img src="/favicon.svg" alt="EcoMart" class="h-8 w-8 rounded-xl" />
+          <span class="text-lg font-extrabold tracking-tight text-emerald-800">EcoMart</span>
         </RouterLink>
 
         <nav class="hidden items-center gap-8 md:flex">
-          <RouterLink v-for="link in links" :key="link.to" :to="link.to" class="text-sm font-medium text-gray-600 hover:text-emerald-700">
+          <RouterLink v-for="link in links" :key="link.to" :to="link.to"
+            class="text-sm font-medium text-gray-600 hover:text-emerald-700"
+            @click="scrollHome">
             {{ link.label }}
           </RouterLink>
         </nav>
@@ -61,6 +72,5 @@ const links = [
     </main>
 
     <FooterGlobal />
-    <ChatWidget />
   </div>
 </template>

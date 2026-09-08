@@ -21,7 +21,6 @@ public class DataSeeder implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final MaterialRepository materialRepository;
     private final ProductRepository productRepository;
-    private final BannerRepository bannerRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.seed.enabled:true}")
@@ -39,7 +38,6 @@ public class DataSeeder implements CommandLineRunner {
                       CategoryRepository categoryRepository,
                       MaterialRepository materialRepository,
                       ProductRepository productRepository,
-                      BannerRepository bannerRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
@@ -47,7 +45,6 @@ public class DataSeeder implements CommandLineRunner {
         this.categoryRepository = categoryRepository;
         this.materialRepository = materialRepository;
         this.productRepository = productRepository;
-        this.bannerRepository = bannerRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -57,7 +54,6 @@ public class DataSeeder implements CommandLineRunner {
         seedDemoUsers();
         seedCategories();
         seedMaterials();
-        seedBanners();
         seedProducts();
     }
 
@@ -167,25 +163,6 @@ public class DataSeeder implements CommandLineRunner {
             m.setName(name);
             m.setType(type);
             return materialRepository.save(m);
-        });
-    }
-
-    private void seedBanners() {
-        banner("Ưu đãi cuối tuần", "Giảm giá nhiều mặt hàng thiết yếu hàng ngày", "/images/banners/banner-1-uu-dai.webp", "/products?category=rau-cu-sach", 1);
-        banner("Hàng mới về", "Khám phá bộ sưu tập sản phẩm mới nhất", "/images/banners/banner-2-hang-moi.webp", "/products", 2);
-        banner("Trái cây tươi mỗi ngày", "Chọn lọc từ những vùng trồng uy tín", "/images/banners/banner-3-trai-cay.webp", "/products?category=trai-cay-tuoi", 3);
-    }
-
-    private void banner(String title, String subtitle, String image, String link, int order) {
-        bannerRepository.findByTitle(title).orElseGet(() -> {
-            Banner b = new Banner();
-            b.setTitle(title);
-            b.setSubtitle(subtitle);
-            b.setImageUrl(image);
-            b.setLinkUrl(link);
-            b.setDisplayOrder(order);
-            b.setActive(true);
-            return bannerRepository.save(b);
         });
     }
 

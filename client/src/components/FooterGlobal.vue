@@ -37,7 +37,6 @@ const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'contact@ecomart.vn'
         <div>
           <h4 class="text-sm font-semibold text-gray-700">Hỗ trợ</h4>
           <ul class="mt-2 space-y-1.5 text-sm text-gray-500">
-            <li><RouterLink to="/chat" class="hover:text-emerald-700">Chat trợ giúp</RouterLink></li>
             <li><span>Hotline: {{ supportPhone }}</span></li>
             <li><span>Email: {{ supportEmail }}</span></li>
           </ul>

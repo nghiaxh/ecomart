@@ -58,6 +58,19 @@ export const homeAboutPoints: string[] = [
   'Đóng gói thân thiện môi trường'
 ]
 
+export interface HomeBanner {
+  title: string
+  subtitle: string
+  imageUrl: string
+  linkUrl: string
+}
+
+export const homeBanners: HomeBanner[] = [
+  { title: 'Ưu đãi cuối tuần', subtitle: 'Giảm giá nhiều mặt hàng thiết yếu hàng ngày', imageUrl: '/images/banners/banner-1-uu-dai.webp', linkUrl: '/products?category=rau-cu-sach' },
+  { title: 'Hàng mới về', subtitle: 'Khám phá bộ sưu tập sản phẩm mới nhất', imageUrl: '/images/banners/banner-2-hang-moi.webp', linkUrl: '/products' },
+  { title: 'Trái cây tươi mỗi ngày', subtitle: 'Chọn lọc từ những vùng trồng uy tín', imageUrl: '/images/banners/banner-3-trai-cay.webp', linkUrl: '/products?category=trai-cay-tuoi' }
+]
+
 const categoryImageMap: Record<string, string> = {
   'rau-cu-sach': '/images/cat-vegetables.jpg',
   'trai-cay-tuoi': '/images/cat-fruits.jpg',

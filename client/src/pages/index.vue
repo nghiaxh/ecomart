@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import type { Banner, CategoryResponse, Product } from '@/types'
-import { categoryImage, homeAboutPoints, homeFeatures, homeStats, homeSteps, homeTestimonials } from '@/data/home'
+import type { CategoryResponse, Product } from '@/types'
+import { categoryImage, homeAboutPoints, homeBanners, homeFeatures, homeStats, homeSteps, homeTestimonials } from '@/data/home'
 import { useApi } from '@/composables/useApi'
 
 const { request } = useApi()
 const supportPhone = import.meta.env.VITE_SUPPORT_PHONE || '0900 000 000'
 
-const banners = ref<Banner[]>([])
+const banners = ref(homeBanners)
 const categories = ref<CategoryResponse[]>([])
 const products = ref<Product[]>([])
 const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const [b, c, p] = await Promise.all([
-      request<Banner[]>('/api/banners/active'),
+    const [c, p] = await Promise.all([
       request<CategoryResponse[]>('/api/categories'),
       request<Product[]>('/api/products/latest')
     ])
-    banners.value = b
     categories.value = c
     products.value = p
   } finally {
