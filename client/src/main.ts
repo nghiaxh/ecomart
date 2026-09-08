@@ -13,6 +13,10 @@ auth.restore()
 
 document.addEventListener(UNAUTHORIZED_EVENT, () => {
   auth.forceLogout()
+  const noAuthPage = ['/login', '/register'].includes(router.currentRoute.value.path)
+  if (!noAuthPage) {
+    router.push('/login')
+  }
 })
 
 app.use(router)

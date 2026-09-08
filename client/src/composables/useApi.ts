@@ -92,10 +92,6 @@ export const useApi = () => {
       if (error?.response?.status === 401) {
         clearSession()
         emitUnauthorized()
-        const noAuthPage = ['/login', '/register'].includes(useRouter().currentRoute.value.path)
-        if (!noAuthPage) {
-          useRouter().push('/login')
-        }
       }
       throw normalizeError(error)
     }

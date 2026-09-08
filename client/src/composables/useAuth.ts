@@ -7,6 +7,7 @@ import {
   saveSession
 } from '@/utils/session-storage'
 import { useApi } from '@/composables/useApi'
+import { router } from '@/router'
 
 export type Session = Pick<AuthResponse, 'token' | 'refreshToken' | 'id' | 'username' | 'email' | 'avatarUrl' | 'role'>
 
@@ -104,7 +105,7 @@ export const useAuth = () => {
         body: { refreshToken }
       }).catch(() => {})
     }
-    useRouter().push('/')
+    router.push('/')
   }
 
   const forceLogout = () => {
