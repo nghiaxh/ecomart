@@ -29,15 +29,15 @@ Toàn bộ luồng login/đăng ký được làm thủ công:
 1. Client gọi `POST /api/auth/login` với `{ identifier, password }` (`identifier` là email **hoặc** số điện thoại), hoặc `POST /api/auth/register`, qua composable `useAuth()`.
 2. Server trả về `AuthResponse` gồm `token` (access JWT), `refreshToken`, `expiresIn` (giây) và thông tin user/role.
 3. Client lưu vào storage hai khóa: `ecomart_session` (JSON, chứa cả `refreshToken`) và `ecomart_token` (raw access token). Nếu chọn "Ghi nhớ đăng nhập" → `localStorage`, ngược lại → `sessionStorage`. Cả hai khóa và event `ecomart:unauthorized` do module `src/utils/session-storage.ts` sở hữu chung cho `useApi`/`useAuth`.
-4. `main.ts` gọi `useAuth().restore()` khi khởi động để nạp lại phiên trước khi mount, đồng thời đăng ký listener `UNAUTHORIZED_EVENT` → `forceLogout()`.
-5. **Mọi** request API đều đi qua `useApi()` (`client/src/composables/useApi.ts`, bọc **Axios**), tự đính header `Authorization: Bearer <token>`. Khi gặp 401 (ngoài `/api/auth/**`): `useApi` chạy refresh **một lần** (single-flight, dùng chung `refreshInflight` cho mọi request song song), retry request; vẫn 401 thì xoá phiên, phát event unauthorized và `router.push('/login')`.
+4. `main.ts` gọi `useAuth().restore()` khi khởi động để nạp lại phiên trước khi mount, đồng thời đăng ký listener `UNAUTHORIZED_EVENT`: ngoài `forceLogout()` còn `router.push('/login')` (SPA, không reload) nếu chưa ở trang login/register.
+5. **Mọi** request API đều đi qua `useApi()` (`client/src/composables/useApi.ts`, bọc **Axios**), tự đính header `Authorization: Bearer <token>`. Khi gặp 401 (ngoài `/api/auth/**`): `useApi` chạy refresh **một lần** (single-flight, dùng chung `refreshInflight` cho mọi request song song), retry request; vẫn 401 thì xoá phiên và phát event unauthorized. Navigation về `/login` do listener trong `main.ts` xử lý, không nằm trong `useApi`.
 6. Server: `JwtAuthenticationFilter` đọc/verify access token, dựng `Authentication`; `JwtTokenProvider` sinh/kiểm tra JWT; `SecurityConfig` tắt session (stateless), cho phép công khai các endpoint đọc và bắt buộc `authenticated()` với phần còn lại (`anyRequest().authenticated()`). Lỗi 401/403 trả về JSON tiếng Việt.
 7. **Refresh token xoay vòng (rotation)**: `POST /api/auth/refresh` nhận `refreshToken`, băm SHA-256 tra cứu trong bảng `refresh_tokens`, cấp access token mới **và** refresh token mới; token cũ bị đánh dấu đã thay (`replacedBy`) — dùng lại token cũ sẽ bị từ chối và thu hồi cả chuỗi. `POST /api/auth/logout` thu hồi refresh token của user.
 
 Các endpoint công khai duy nhất (phần còn lại yêu cầu xác thực):
 
 - `POST /api/auth/**` — login, register, refresh, logout
-- `GET /api/products/**`, `/api/categories/**`, `/api/banners/active`, `/api/reviews`
+- `GET /api/products/**`, `/api/categories/**`, `/api/reviews`
 - `POST /api/payments/payos/webhook`
 - `/error`
 
@@ -48,7 +48,7 @@ Các endpoint công khai duy nhất (phần còn lại yêu cầu xác thực):
 
 ### 2. Duyệt và tìm sản phẩm
 
-- `pages/index.vue` (trang chủ) gọi song song `GET /api/banners/active`, `GET /api/categories`, `GET /api/products/latest`.
+- `pages/index.vue` (trang chủ) gọi song song `GET /api/categories`, `GET /api/products/latest`; banner đầu trang là nội dung tĩnh (`homeBanners` trong `data/home.ts`, ảnh trong `public/images/banners/`).
 - Trang danh mục/sản phẩm gọi `GET /api/products` với query params (filter theo `category` slug, tìm kiếm, sort) — phân trang dạng `PageResponse<T>`.
 - Danh mục có cấu trúc **cây** (parent/children) — `children` dùng để hiển thị danh mục con. Hiện có 3 danh mục gốc và 7 danh mục lá (gồm `Trái cây sấy`).
 - Sản phẩm mang `materials` (vật liệu + % thành phần, map icon/màu theo union `MaterialType`) và `images` (gallery 1–3 ảnh, `displayOrder == 0` là ảnh chính). Sản phẩm `stock == 0` vẫn hiển thị với badge "Hết hàng" và nút thêm giỏ bị vô hiệu (`AddToCartButton`).
@@ -100,14 +100,14 @@ controller/  14 controller, mỗi resource một controller mỏng (logic nằm 
 service/     nghiệp vụ chính, kiểm soát quyền và logic (chat + RAG ở ChatService/ChatBot,
              webhook PayOS ở PaymentService, phí ship + thống kê có typed config/DTO)
 domain/
-  entity/    JPA entities (User, Customer, Admin, Product, Category, Banner, Material,
+  entity/    JPA entities (User, Customer, Admin, Product, Category, Material,
              ProductImage, ProductMaterial, Cart, CartItem, Order, OrderItem, Payment,
              Review, Address, RefreshToken, Notification, ChatSession, ChatMessage, ...)
   enums/     UserRole, OrderStatus, PaymentMethod, PaymentStatus, MaterialType, ChatRole (chỉ USER/BOT), ...
 repository/  Spring Data JPA repositories (truy vấn tìm kiếm có kiểu qua @Query, không còn Specification string-path)
 dto/
   request/   record payloads vào (LoginRequest, RegisterRequest, RefreshTokenRequest,
-             CheckoutRequest, AddToCartRequest, ProductRequest, CategoryRequest, BannerRequest, ...)
+             CheckoutRequest, AddToCartRequest, ProductRequest, CategoryRequest, ...)
   response/  payloads ra (AuthResponse, ProductResponse, OrderResponse, PageResponse, AdminDashboardResponse, ...)
 security/    JwtTokenProvider, JwtAuthenticationFilter, SecurityConfig, CorsConfig, UserDetailsServiceImpl
 integration/
@@ -128,7 +128,7 @@ src/
   App.vue            component gốc
   pages/             guest: index, login, register, products, products/[slug];
                      user: cart, checkout, orders, orders/[id], account, chat;
-                     admin/: index, products, categories, orders, banners
+                     admin/: index, products, categories, orders, users
   components/        ProductCard, FooterGlobal, ChatWidget, ChatThread, AuthShell, SectionHeader, Reveal,
                      UiImg, PaginationBar, OrderSummaryCard, AddressForm, AddressCard,
                      AddToCartButton, PasswordInput, ConfirmDialog
@@ -152,8 +152,8 @@ nginx.conf           prod: serve dist/ + proxy /api → server
 - **Mọi request qua `useApi()`**: không gọi Axios/`$fetch` trực tiếp trong page để đảm bảo header JWT luôn được đính và cơ chế auto-refresh hoạt động.
 - **Quyền ADMIN kiểm soát ở server**: `SecurityConfig` bắt buộc xác thực tại tầng HTTP (`anyRequest().authenticated()`), admin write dùng `@PreAuthorize("hasRole('ADMIN')")`, controller user-scoped dùng `@PreAuthorize("isAuthenticated()")`. Hết phiên/refresh lỗi → 401 (`UnauthorizedException`, chỉ ở `AuthService` + webhook PayOS chưa auth); đã login nhưng đụng tài nguyên người khác → 403 (`AccessDeniedException`). Route guard client chỉ là UX.
 - **Không SSR**: SPA thuần, mọi trang (kể cả trang công khai) fetch client-side trong `onMounted`. Filter `products` đồng bộ 2 chiều với URL query (`router.push`/`replace`).
-- **DataSeeder** (`config/DataSeeder.java`) idempotent theo slug/tên (DB đã seed vẫn nhận hàng mới khi boot lại): tạo admin `admin@ecomart.vn`, customer `customer@ecomart.vn`, danh mục (3 gốc + 7 lá), vật liệu, banner, ~45 sản phẩm mẫu (mỗi SP 1–2 ảnh WebP trong `client/public/images/products/`, ít nhất 2 SP hết hàng `stock = 0` để e2e `cart-robustness` chạy thật). Vật liệu seed map theo nhóm danh mục (rau → Lá chuối, củ quả/ngũ cốc → Giấy, ...). Mật khẩu demo mặc định `Admin@123` / `Customer@123`, ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`. Để reset dữ liệu demo, xoá volume `pgdata`.
-- **Ảnh sản phẩm/banner** là file tĩnh trong `client/public/images/` (`products/<slug>-<n>.webp`, `banners/`), seed trong `DataSeeder` trỏ đường dẫn tương đối `/images/...`. Không còn endpoint upload server — admin thêm ảnh bằng URL trong form.
+- **DataSeeder** (`config/DataSeeder.java`) idempotent theo slug/tên (DB đã seed vẫn nhận hàng mới khi boot lại): tạo admin `admin@ecomart.vn`, customer `customer@ecomart.vn`, danh mục (3 gốc + 7 lá), vật liệu, ~45 sản phẩm mẫu (mỗi SP 1–2 ảnh WebP trong `client/public/images/products/`, ít nhất 2 SP hết hàng `stock = 0` để e2e `cart-robustness` chạy thật). Vật liệu seed map theo nhóm danh mục (rau → Lá chuối, củ quả/ngũ cốc → Giấy, ...). Mật khẩu demo mặc định `Admin@123` / `Customer@123`, ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`. Để reset dữ liệu demo, xoá volume `pgdata`.
+- **Ảnh sản phẩm/banner** là file tĩnh trong `client/public/images/` (`products/<slug>-<n>.webp`, `banners/`). Banner trang chủ là nội dung tĩnh (`homeBanners` trong `data/home.ts`, không còn API banner / bảng `banners`). Không có endpoint upload server — admin thêm ảnh bằng URL trong form.
 
 ## Môi trường và cấu hình
 

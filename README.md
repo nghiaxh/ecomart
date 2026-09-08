@@ -29,7 +29,7 @@ Nền tảng mua sắm thực phẩm trực tuyến với sản phẩm tươi s�
 
 ### Quản trị
 - Dashboard tổng quan
-- Quản lý sản phẩm, danh mục và banner
+- Quản lý sản phẩm, danh mục và người dùng
 - Quản lý đơn hàng và cập nhật trạng thái
 
 ## Kiến trúc
