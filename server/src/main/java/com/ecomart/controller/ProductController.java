@@ -8,6 +8,7 @@ import com.ecomart.dto.response.ProductResponse;
 import com.ecomart.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,11 +42,24 @@ public class ProductController {
                                                  @RequestParam(required = false) Long category,
                                                  @RequestParam(required = false) Double minPrice,
                                                  @RequestParam(required = false) Double maxPrice,
+                                                 @RequestParam(required = false) String sort,
                                                  @RequestParam(defaultValue = "false") boolean showAll,
                                                  @RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "12") int size) {
+        PageRequest pageRequest = pageRequest(page, size, sort);
         return productService.search(q, category, minPrice, maxPrice, showAll,
-                securityUtils.currentUserHasRole("ADMIN"), PageRequest.of(page, size));
+                securityUtils.currentUserHasRole("ADMIN"), pageRequest);
+    }
+
+    private PageRequest pageRequest(int page, int size, String sort) {
+        if (sort == null || sort.isBlank()) {
+            return PageRequest.of(page, size);
+        }
+        return switch (sort) {
+            case "price_asc" -> PageRequest.of(page, size, Sort.by("price").ascending());
+            case "price_desc" -> PageRequest.of(page, size, Sort.by("price").descending());
+            default -> PageRequest.of(page, size);
+        };
     }
 
     @GetMapping("/latest")

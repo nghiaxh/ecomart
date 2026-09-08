@@ -12,13 +12,32 @@ const toast = useToast()
 const size = 12
 let loadSeq = 0
 
+const PRICE_RANGES = [
+  { label: 'Tất cả giá', value: 'all' },
+  { label: 'Dưới 20.000 ₫', value: '0-20000' },
+  { label: '20.000 – 50.000 ₫', value: '20000-50000' },
+  { label: '50.000 – 100.000 ₫', value: '50000-100000' },
+  { label: 'Trên 100.000 ₫', value: '100000-' }
+]
+
+const SORT_OPTIONS = [
+  { label: 'Mặc định', value: 'default' },
+  { label: 'Giá thấp đến cao', value: 'price_asc' },
+  { label: 'Giá cao đến thấp', value: 'price_desc' }
+]
+
 const filters = reactive({
   q: (route.query.q as string) || '',
   category: (route.query.category as string) || '',
-  minPrice: (route.query.minPrice as string) || '',
-  maxPrice: (route.query.maxPrice as string) || ''
+  priceRange: (route.query.priceRange as string) || 'all',
+  sort: (route.query.sort as string) || 'default'
 })
 const page = ref(Number(route.query.page) || 0)
+
+function priceBounds(range: string): { min: string; max: string } {
+  const [min, max] = range.split('-')
+  return { min: min || '', max: max || '' }
+}
 
 function buildParams() {
   const params = new URLSearchParams()
@@ -29,8 +48,12 @@ function buildParams() {
     // chưa về thì bỏ qua để tránh 400 MethodArgumentTypeMismatch.
     if (cat) params.set('category', String(cat.id))
   }
-  if (filters.minPrice) params.set('minPrice', filters.minPrice)
-  if (filters.maxPrice) params.set('maxPrice', filters.maxPrice)
+  if (filters.priceRange && filters.priceRange !== 'all') {
+    const { min, max } = priceBounds(filters.priceRange)
+    if (min) params.set('minPrice', min)
+    if (max) params.set('maxPrice', max)
+  }
+  if (filters.sort && filters.sort !== 'default') params.set('sort', filters.sort)
   params.set('page', String(page.value))
   params.set('size', String(size))
   return params
@@ -41,8 +64,8 @@ function syncUrl() {
     query: {
       ...(filters.q ? { q: filters.q } : {}),
       ...(filters.category ? { category: filters.category } : {}),
-      ...(filters.minPrice ? { minPrice: filters.minPrice } : {}),
-      ...(filters.maxPrice ? { maxPrice: filters.maxPrice } : {}),
+      ...(filters.priceRange && filters.priceRange !== 'all' ? { priceRange: filters.priceRange } : {}),
+      ...(filters.sort && filters.sort !== 'default' ? { sort: filters.sort } : {}),
       ...(page.value ? { page: String(page.value) } : {})
     }
   })
@@ -110,14 +133,18 @@ function setCategory(slug?: string) {
 function clearFilters() {
   filters.q = ''
   filters.category = ''
-  filters.minPrice = ''
-  filters.maxPrice = ''
+  filters.priceRange = 'all'
+  filters.sort = 'default'
   applyFilters()
 }
 
 const debouncedApply = useDebounceFn(applyFilters, 500)
 
 watch(() => filters.q, debouncedApply)
+watch(() => [filters.priceRange, filters.sort], () => {
+  page.value = 0
+  load()
+})
 
 // Đồng bộ khi điều hướng bằng banner/footer/nút back-forward.
 watch(() => route.query.category, (slug) => {
@@ -169,8 +196,20 @@ onMounted(() => {
     <!-- Filters -->
     <div class="mb-8 grid gap-3 rounded-2xl border border-emerald-100 bg-white p-4 md:grid-cols-5">
       <UInput v-model="filters.q" icon="i-ph-magnifying-glass" placeholder="Tìm sản phẩm..." />
-      <UInput v-model="filters.minPrice" type="number" placeholder="Giá tối thiểu (₫)" class="md:col-span-1" />
-      <UInput v-model="filters.maxPrice" type="number" placeholder="Giá tối đa (₫)" class="md:col-span-1" />
+      <USelect
+        v-model="filters.priceRange"
+        :items="PRICE_RANGES"
+        label-key="label"
+        value-key="value"
+        placeholder="Khoảng giá"
+      />
+      <USelect
+        v-model="filters.sort"
+        :items="SORT_OPTIONS"
+        label-key="label"
+        value-key="value"
+        placeholder="Sắp xếp"
+      />
       <UButton color="primary" icon="i-ph-funnel" label="Lọc" @click="applyFilters" />
       <UButton color="neutral" variant="ghost" label="Bỏ lọc" @click="clearFilters" />
     </div>
