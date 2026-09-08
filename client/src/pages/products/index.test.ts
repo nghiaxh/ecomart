@@ -52,6 +52,7 @@ const global = {
       template: '<button @click="$emit(\'click\')">{{ label }}</button>'
     },
     UInput: { template: '<input />' },
+    USelect: { template: '<input />' },
     USkeleton: { template: '<div />' },
     UIcon: { template: '<div />' },
     ProductCard: {
@@ -73,6 +74,11 @@ async function clickFilter(wrapper: Awaited<ReturnType<typeof mount>>) {
   const filter = wrapper.findAll('button').find((b: { text: () => string }) => b.text().includes('Lọc'))
   expect(filter).toBeTruthy()
   await filter!.trigger('click')
+}
+
+function setFilters(wrapper: Awaited<ReturnType<typeof mount>>, patch: { priceRange?: string; sort?: string }) {
+  const vm = wrapper.vm as unknown as { filters: { priceRange: string; sort: string } }
+  Object.assign(vm.filters, patch)
 }
 
 describe('products index', () => {
@@ -136,5 +142,37 @@ describe('products index', () => {
     const calledUrl = requestMock.mock.calls.map((c: unknown[]) => String(c[0])).find((u: string) => u.startsWith('/api/products'))
     expect(calledUrl).toContain('category=1')
     expect(calledUrl).not.toContain('category=rau-cu-sach')
+  })
+
+  it('sends minPrice/maxPrice and sort when price range and sort are selected', async () => {
+    mockCatalog(productPage)
+    const wrapper = mount(ProductsIndex, { global })
+    await flushPromises()
+    requestMock.mockClear()
+
+    setFilters(wrapper, { priceRange: '20000-50000', sort: 'price_asc' })
+    await flushPromises()
+
+    const calledUrl = requestMock.mock.calls.map((c: unknown[]) => String(c[0])).find((u: string) => u.startsWith('/api/products'))
+    expect(calledUrl).toContain('minPrice=20000')
+    expect(calledUrl).toContain('maxPrice=50000')
+    expect(calledUrl).toContain('sort=price_asc')
+    expect(routerReplaceMock).toHaveBeenCalledWith(
+      { query: expect.objectContaining({ priceRange: '20000-50000', sort: 'price_asc' }) }
+    )
+  })
+
+  it('skips unbounded side of the selected price range', async () => {
+    mockCatalog(productPage)
+    const wrapper = mount(ProductsIndex, { global })
+    await flushPromises()
+    requestMock.mockClear()
+
+    setFilters(wrapper, { priceRange: '100000-' })
+    await flushPromises()
+
+    const calledUrl = requestMock.mock.calls.map((c: unknown[]) => String(c[0])).find((u: string) => u.startsWith('/api/products'))
+    expect(calledUrl).toContain('minPrice=100000')
+    expect(calledUrl).not.toContain('maxPrice')
   })
 })

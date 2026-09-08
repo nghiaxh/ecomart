@@ -1,23 +1,26 @@
 import { test, expect } from '@playwright/test'
 import { API_BASE, gotoReady } from './helpers'
 
-test('minPrice greater than maxPrice yields empty state, clear restores', async ({ page }) => {
+test('price range filter applies and clear restores', async ({ page }) => {
   await gotoReady(page, '/products')
   await expect(page.locator('a[href^="/products/"]').first()).toBeVisible()
 
-  await page.getByPlaceholder('Giá tối thiểu (₫)').fill('1000000')
-  await page.getByPlaceholder('Giá tối đa (₫)').fill('1000')
+  await page.getByRole('combobox').first().click()
+  await page.getByRole('option', { name: 'Trên 100.000 ₫' }).click()
   await page.getByRole('button', { name: 'Lọc', exact: true }).click()
-  await expect(page.getByText('Không tìm thấy sản phẩm phù hợp.')).toBeVisible()
+  await expect(page.getByText('Không tìm thấy sản phẩm phù hợp.')).toBeHidden()
+  expect(page.url()).toContain('priceRange=100000-')
 
   await page.getByRole('button', { name: 'Bỏ lọc' }).first().click()
   await expect(page.locator('a[href^="/products/"]').first()).toBeVisible()
 })
 
-test('negative price and text input do not crash the list', async ({ page }) => {
+test('sort by price dropdown updates URL and keeps the list working', async ({ page }) => {
   await gotoReady(page, '/products')
-  await page.getByPlaceholder('Giá tối thiểu (₫)').fill('-5')
+  await page.getByRole('combobox').nth(1).click()
+  await page.getByRole('option', { name: 'Giá cao đến thấp' }).click()
   await page.getByRole('button', { name: 'Lọc', exact: true }).click()
+  await expect(page.url()).toContain('sort=price_desc')
   await expect(
     page.locator('a[href^="/products/"]').first().or(page.getByText('Không tìm thấy sản phẩm phù hợp.'))
   ).toBeVisible()
