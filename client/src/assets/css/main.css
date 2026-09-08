@@ -32,10 +32,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 /* Scroll reveal */
 .reveal {
   opacity: 0;

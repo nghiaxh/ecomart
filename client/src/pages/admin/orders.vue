@@ -72,9 +72,9 @@ watch(statusFilter, () => { page.value = 0; load() })
 
 <template>
   <div>
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-bold text-gray-700">Quản lý đơn hàng</h1>
-      <div class="flex items-center gap-2">
+    <div class="mb-5 flex items-center justify-between gap-3">
+      <div v-if="!loading && orders.length" class="text-sm text-gray-500">Hiển thị <span class="font-semibold tabular-nums">{{ orders.length }}</span> đơn gần nhất</div>
+      <div class="ml-auto">
         <USelect
           v-model="statusFilter"
           :items="[{ label: 'Tất cả trạng thái', value: 'ALL' }, ...Object.entries(orderStatus).map(([k, v]) => ({ label: v.label, value: k }))]"
@@ -86,11 +86,11 @@ watch(statusFilter, () => { page.value = 0; load() })
     </div>
 
     <div class="space-y-4">
-      <div v-for="o in orders" :key="o.id" class="rounded-2xl border border-gray-200 bg-white p-5">
+      <div v-for="o in orders" :key="o.id" class="rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-gray-300">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-bold text-gray-700">Đơn #{{ o.id }}</span>
+              <span class="font-bold text-gray-700 tabular-nums">Đơn #{{ o.id }}</span>
               <UBadge :color="orderStatus[o.status].color" :label="orderStatus[o.status].label" size="sm" />
               <UBadge :color="paymentStatus[o.payment.status].color" :label="paymentStatus[o.payment.status].label" size="sm" variant="soft" />
             </div>
@@ -98,7 +98,7 @@ watch(statusFilter, () => { page.value = 0; load() })
             <p class="mt-1 text-xs text-gray-500">{{ o.address }}</p>
           </div>
           <div class="flex flex-col items-end gap-2">
-            <span class="text-lg font-bold text-emerald-700">{{ formatVND(o.total) }}</span>
+            <span class="text-lg font-bold text-emerald-700 tabular-nums">{{ formatVND(o.total) }}</span>
             <div class="flex gap-2">
               <USelect
                 :model-value="o.status"
@@ -115,7 +115,14 @@ watch(statusFilter, () => { page.value = 0; load() })
           </div>
         </div>
       </div>
-      <p v-if="(!loading && !orders.length) || loadError" class="py-16 text-center text-gray-400">Không có đơn hàng.</p>
+      <div v-if="!loading && !orders.length" class="rounded-2xl border border-dashed border-gray-200 py-16 text-center">
+        <UIcon name="i-ph-tray" class="mx-auto h-8 w-8 text-gray-300" />
+        <p class="mt-3 text-sm text-gray-400">Không có đơn hàng.</p>
+      </div>
+      <div v-if="loadError" class="rounded-2xl border border-dashed border-gray-200 py-16 text-center">
+        <UIcon name="i-ph-warning-circle" class="mx-auto h-8 w-8 text-gray-300" />
+        <p class="mt-3 text-sm text-gray-400">Không thể tải đơn hàng. Vui lòng thử lại.</p>
+      </div>
     </div>
 
     <PaginationBar

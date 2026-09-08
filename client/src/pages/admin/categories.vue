@@ -101,12 +101,11 @@ onMounted(load)
 
 <template>
   <div>
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-bold text-gray-700">Quản lý danh mục</h1>
+    <div class="mb-5 flex items-center justify-end">
       <UButton color="primary" icon="i-ph-plus" label="Thêm danh mục" @click="openCreate" />
     </div>
 
-    <div v-if="showForm" class="mb-6 rounded-2xl border border-emerald-100 bg-white p-6">
+    <div v-if="showForm" class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
       <h2 class="mb-4 font-bold text-gray-700">{{ editingId ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}</h2>
       <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
         <div>
@@ -139,7 +138,7 @@ onMounted(load)
 
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-left text-xs uppercase text-gray-400">
+        <thead class="sticky top-0 z-10 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
           <tr>
             <th class="px-4 py-3">Danh mục</th>
             <th class="px-4 py-3">Slug</th>
@@ -148,9 +147,9 @@ onMounted(load)
             <th class="px-4 py-3 text-right">Thao tác</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-100">
           <template v-for="c in categories" :key="c.id">
-            <tr class="border-t border-gray-100">
+            <tr class="transition hover:bg-gray-50/60">
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
                   <UIcon v-if="c.icon && categoryIcon(c.icon) !== 'i-ph-tag-simple'" :name="categoryIcon(c.icon)" class="h-4 w-4 text-emerald-600" />
@@ -167,7 +166,7 @@ onMounted(load)
                 </div>
               </td>
             </tr>
-            <tr v-for="child in c.children" :key="child.id" class="border-t border-gray-50 bg-gray-50/50">
+            <tr v-for="child in c.children" :key="child.id" class="bg-gray-50/40 transition hover:bg-gray-50/80">
               <td class="px-4 py-3 pl-8">
                 <span class="flex items-center gap-2 text-gray-700">
                   <UIcon name="i-ph-corner-down-right" class="h-4 w-4 text-emerald-500" />
@@ -184,6 +183,9 @@ onMounted(load)
               </td>
             </tr>
           </template>
+          <tr v-if="!loading && !categories.length">
+            <td colspan="5" class="px-4 py-16 text-center text-gray-400">Không có danh mục.</td>
+          </tr>
         </tbody>
       </table>
     </div>

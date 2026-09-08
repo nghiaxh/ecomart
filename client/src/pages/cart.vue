@@ -87,7 +87,7 @@ async function deleteItem(productId: number) {
       <!-- Summary -->
       <OrderSummaryCard :subtotal="cart.subtotal" :item-count="cart.itemCount" title="Tóm tắt đơn hàng">
         <template #actions>
-          <UButton to="/checkout" color="primary" size="lg" block icon="i-ph-arrow-right" label="Tiến hành thanh toán" />
+          <UButton to="/checkout" color="primary" size="lg" block label="Tiến hành thanh toán" />
           <UButton to="/products" color="neutral" variant="ghost" block class="mt-2" label="Tiếp tục mua sắm" />
         </template>
       </OrderSummaryCard>

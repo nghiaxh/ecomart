@@ -133,12 +133,12 @@ watch(search, debouncedLoad)
 
 <template>
   <div>
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-bold text-gray-700">Quản lý sản phẩm</h1>
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <UInput v-model="search" icon="i-ph-magnifying-glass" placeholder="Tìm sản phẩm..." class="w-full max-w-md" />
       <UButton color="primary" icon="i-ph-plus" label="Thêm sản phẩm" @click="openCreate" />
     </div>
 
-    <div v-if="showForm" class="mb-6 rounded-2xl border border-emerald-100 bg-white p-6">
+    <div v-if="showForm" class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
       <h2 class="mb-4 font-bold text-gray-700">{{ editingId ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h2>
       <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
         <div class="md:col-span-1">
@@ -192,13 +192,9 @@ watch(search, debouncedLoad)
       </form>
     </div>
 
-    <div class="mb-4 flex items-center gap-3">
-      <UInput v-model="search" icon="i-ph-magnifying-glass" placeholder="Tìm sản phẩm..." class="max-w-md" />
-    </div>
-
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-left text-xs uppercase text-gray-400">
+        <thead class="sticky top-0 z-10 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
           <tr>
             <th class="px-4 py-3">Sản phẩm</th>
             <th class="px-4 py-3">Giá</th>
@@ -207,16 +203,16 @@ watch(search, debouncedLoad)
             <th class="px-4 py-3 text-right">Thao tác</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="p in products" :key="p.id" class="border-t border-gray-100">
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="p in products" :key="p.id" class="transition hover:bg-gray-50/60">
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
                 <UiImg :src="p.images?.[0]" :alt="p.name" img-class="h-10 w-10 rounded-lg object-cover" />
                 <span class="font-medium text-gray-700">{{ p.name }}</span>
               </div>
             </td>
-            <td class="px-4 py-3 text-gray-600">{{ formatVND(p.price) }}</td>
-            <td class="px-4 py-3 text-gray-600">{{ p.stock }}</td>
+            <td class="px-4 py-3 text-gray-600 tabular-nums">{{ formatVND(p.price) }}</td>
+            <td class="px-4 py-3 text-gray-600 tabular-nums">{{ p.stock }}</td>
             <td class="px-4 py-3">
               <UBadge :color="p.active ? 'success' : 'neutral'" :label="p.active ? 'Bán' : 'Ẩn'" size="sm" />
             </td>
@@ -227,6 +223,9 @@ watch(search, debouncedLoad)
                 <UButton color="neutral" variant="ghost" icon="i-ph-trash" :loading="busyIds.has(p.id)" @click="remove(p)" />
               </div>
             </td>
+          </tr>
+          <tr v-if="!loading && !products.length">
+            <td colspan="5" class="px-4 py-16 text-center text-gray-400">Không có sản phẩm.</td>
           </tr>
         </tbody>
       </table>
