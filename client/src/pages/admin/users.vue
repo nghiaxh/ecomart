@@ -101,7 +101,7 @@ onMounted(load)
 </script>
 
 <template>
-  <div>
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
       <div class="flex flex-wrap items-center gap-2">
         <UInput v-model="search" placeholder="Tìm theo tên hoặc email..." icon="i-ph-magnifying-glass" class="w-64" @keyup.enter="toggleSearch" />

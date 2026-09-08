@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 import DefaultLayout from '@/layouts/default.vue'
-import AdminLayout from '@/layouts/admin.vue'
 
 import HomePage from '@/pages/index.vue'
 import LoginPage from '@/pages/login.vue'
@@ -44,19 +43,13 @@ const routes: RouteRecordRaw[] = [
       { path: 'account', name: 'account', component: AccountPage, meta: { requiresAuth: true } },
       { path: 'payment-result', name: 'payment-result', component: PaymentResultPage, meta: { customerOnly: true } },
       { path: 'orders', name: 'orders', component: OrdersIndexPage, meta: { customerOnly: true } },
-      { path: 'orders/:id', name: 'order-detail', component: OrderDetailPage, meta: { customerOnly: true } }
-    ]
-  },
-  {
-    path: '/admin',
-    component: AdminLayout,
-    meta: { requiresAdmin: true },
-    children: [
-      { path: '', name: 'admin', component: AdminDashboardPage, meta: { title: 'Tổng quan' } },
-      { path: 'products', name: 'admin-products', component: AdminProductsPage, meta: { title: 'Sản phẩm' } },
-      { path: 'categories', name: 'admin-categories', component: AdminCategoriesPage, meta: { title: 'Danh mục' } },
-      { path: 'orders', name: 'admin-orders', component: AdminOrdersPage, meta: { title: 'Đơn hàng' } },
-      { path: 'users', name: 'admin-users', component: AdminUsersPage, meta: { title: 'Người dùng' } }
+      { path: 'orders/:id', name: 'order-detail', component: OrderDetailPage, meta: { customerOnly: true } },
+
+      { path: 'admin', name: 'admin', component: AdminDashboardPage, meta: { requiresAdmin: true } },
+      { path: 'admin/products', name: 'admin-products', component: AdminProductsPage, meta: { requiresAdmin: true } },
+      { path: 'admin/categories', name: 'admin-categories', component: AdminCategoriesPage, meta: { requiresAdmin: true } },
+      { path: 'admin/orders', name: 'admin-orders', component: AdminOrdersPage, meta: { requiresAdmin: true } },
+      { path: 'admin/users', name: 'admin-users', component: AdminUsersPage, meta: { requiresAdmin: true } }
     ]
   }
 ]

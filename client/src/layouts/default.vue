@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuth } from '@/composables/useAuth'
 import { useCart } from '@/composables/useCart'
-const { isLoggedIn, isAdmin, session } = useAuth()
+const { isLoggedIn, isAdmin, session, logout } = useAuth()
 const { itemCount } = useCart()
 
 const route = useRoute()
@@ -10,6 +10,14 @@ const links = [
   { label: 'Trang chủ', to: '/' },
   { label: 'Sản phẩm', to: '/products' },
   { label: 'Về chúng tôi', to: '/#about' }
+]
+
+const adminLinks = [
+  { label: 'Tổng quan', to: '/admin' },
+  { label: 'Sản phẩm', to: '/admin/products' },
+  { label: 'Danh mục', to: '/admin/categories' },
+  { label: 'Đơn hàng', to: '/admin/orders' },
+  { label: 'Người dùng', to: '/admin/users' }
 ]
 
 function scrollHome() {
@@ -25,12 +33,11 @@ function scrollHome() {
     <header class="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/90 backdrop-blur">
       <div class="mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         <RouterLink to="/" class="flex items-center gap-2">
-          <img src="/favicon.svg" alt="EcoMart" class="h-8 w-8 rounded-xl" />
           <span class="text-lg font-extrabold tracking-tight text-emerald-800">EcoMart</span>
         </RouterLink>
 
         <nav class="hidden items-center gap-8 md:flex">
-          <RouterLink v-for="link in links" :key="link.to" :to="link.to"
+          <RouterLink v-for="link in (isAdmin ? adminLinks : links)" :key="link.to" :to="link.to"
             class="text-sm font-medium text-gray-600 hover:text-emerald-700"
             @click="scrollHome">
             {{ link.label }}
@@ -58,6 +65,14 @@ function scrollHome() {
               <UAvatar :src="session?.avatarUrl || undefined" :alt="session?.username" size="sm" />
               <span class="hidden text-sm font-medium sm:inline">{{ session?.username }}</span>
             </RouterLink>
+            <UButton
+              color="neutral"
+              variant="ghost"
+              square
+              icon="i-ph-sign-out"
+              aria-label="Đăng xuất"
+              @click="logout"
+            />
           </template>
           <template v-else>
             <UButton :to="'/login'" color="neutral" variant="soft" size="lg">Đăng nhập</UButton>
@@ -71,6 +86,6 @@ function scrollHome() {
       <RouterView />
     </main>
 
-    <FooterGlobal />
+    <FooterGlobal v-if="route.name === 'home'" />
   </div>
 </template>

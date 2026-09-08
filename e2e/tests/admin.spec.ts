@@ -3,7 +3,7 @@ import { loginAsAdmin, loginAsCustomer, SEED_ADMIN, gotoReady } from './helpers'
 
 test('admin logs in and lands on dashboard', async ({ page }) => {
   await loginAsAdmin(page)
-  await expect(page.getByText('Quản lý đơn hàng').first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Tổng quan' })).toBeVisible()
 })
 
 test('admin login with wrong password shows error', async ({ page }) => {

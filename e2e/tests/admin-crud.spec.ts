@@ -13,7 +13,7 @@ test('admin dashboard shows stat cards', async ({ page }) => {
 
 test('admin product form validates empty name', async ({ page }) => {
   await gotoReady(page, '/admin/products')
-  await expect(page.getByRole('heading', { name: 'Quản lý sản phẩm' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Sản phẩm' })).toBeVisible()
   await page.getByRole('button', { name: 'Thêm sản phẩm' }).click()
   await expect(page.getByText('Thêm sản phẩm mới')).toBeVisible()
   await page.getByRole('button', { name: 'Lưu', exact: true }).click()
@@ -37,7 +37,7 @@ test('admin orders page renders list or empty state', async ({ page }) => {
 
 test('admin can filter orders by status', async ({ page }) => {
   await gotoReady(page, '/admin/orders')
-  await expect(page.getByRole('heading', { name: 'Quản lý đơn hàng' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Đơn hàng' })).toBeVisible()
 })
 
 

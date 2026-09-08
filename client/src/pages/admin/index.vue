@@ -35,7 +35,7 @@ const quickLinks = [
 </script>
 
 <template>
-  <div class="space-y-8">
+  <div class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
     <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <USkeleton v-for="i in 4" :key="i" class="h-32 rounded-2xl" />
     </div>

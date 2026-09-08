@@ -71,7 +71,7 @@ watch(statusFilter, () => { page.value = 0; load() })
 </script>
 
 <template>
-  <div>
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <div class="mb-5 flex items-center justify-between gap-3">
       <div v-if="!loading && orders.length" class="text-sm text-gray-500">Hiển thị <span class="font-semibold tabular-nums">{{ orders.length }}</span> đơn gần nhất</div>
       <div class="ml-auto">
