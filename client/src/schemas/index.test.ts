@@ -6,8 +6,7 @@ import {
   reviewSchema,
   profileSchema,
   productSchema,
-  categorySchema,
-  bannerSchema
+  categorySchema
 } from './index'
 
 describe('loginSchema', () => {
@@ -97,15 +96,5 @@ describe('categorySchema', () => {
   it('rejects missing name/slug', () => {
     expect(categorySchema.safeParse({ name: '', slug: 'rau-cu' }).success).toBe(false)
     expect(categorySchema.safeParse({ name: 'Rau củ', slug: '' }).success).toBe(false)
-  })
-})
-
-describe('bannerSchema', () => {
-  it('accepts valid banner', () => {
-    expect(bannerSchema.safeParse({ title: 'Khuyến mãi', imageUrl: '/images/banner.jpg' }).success).toBe(true)
-  })
-  it('rejects missing title/image', () => {
-    expect(bannerSchema.safeParse({ title: '', imageUrl: '/images/banner.jpg' }).success).toBe(false)
-    expect(bannerSchema.safeParse({ title: 'Khuyến mãi', imageUrl: '' }).success).toBe(false)
   })
 })

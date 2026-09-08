@@ -50,13 +50,4 @@ test('viewing another user order id shows not-found state', async ({ authedPage:
   await expect(page.getByText('Không tìm thấy đơn hàng.')).toBeVisible({ timeout: 20_000 })
 })
 
-test('chat send failure does not hang the send button', async ({ authedPage: page }) => {
-  await page.route('**/api/chat/send', (route) => route.abort())
-  await gotoReady(page, '/chat')
-  await page.getByPlaceholder('Nhập tin nhắn...').fill('hello e2e')
-  await page.locator('form button[type="submit"]').click()
-  await expect(page.getByPlaceholder('Nhập tin nhắn...')).toBeVisible()
-  await page.unroute('**/api/chat/send')
-})
-
 

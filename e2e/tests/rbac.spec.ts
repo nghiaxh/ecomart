@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { API_BASE, loginAsAdmin, loginAsCustomer, gotoReady } from './helpers'
 
-const customerRoutes = ['/cart', '/checkout', '/orders', '/chat', '/account']
-const adminRoutes = ['/admin', '/admin/products', '/admin/orders', '/admin/categories', '/admin/banners']
+const customerRoutes = ['/cart', '/checkout', '/orders', '/account']
+const adminRoutes = ['/admin', '/admin/products', '/admin/orders', '/admin/categories', '/admin/users']
 
 test('guest is sent to login on customer routes', async ({ page }) => {
   test.setTimeout(180_000)
@@ -46,8 +46,6 @@ test('unauthenticated API calls to cart/orders are rejected', async ({ request }
   expect([401, 403]).toContain(cart.status())
   const orders = await request.get(`${API_BASE}/api/orders/mine?page=0&size=5`)
   expect([401, 403]).toContain(orders.status())
-  const chat = await request.get(`${API_BASE}/api/chat/sessions`)
-  expect([401, 403]).toContain(chat.status())
 })
 
 

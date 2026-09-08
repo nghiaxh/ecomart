@@ -96,7 +96,7 @@ export async function setAuthStorage(page: Page, auth: AuthPayload): Promise<voi
 
 /**
  * Register a brand-new isolated customer via API and land on `/` authenticated.
- * Preferred for write-flows (cart, checkout, orders, reviews, chat, account).
+ * Preferred for write-flows (cart, checkout, orders, reviews, account).
  */
 export async function loginAsNewCustomer(
   page: Page,
