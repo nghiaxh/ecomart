@@ -62,13 +62,12 @@ export const categorySchema = z.object({
   active: z.boolean().optional()
 })
 
-export const bannerSchema = z.object({
-  title: z.string().min(1, 'Vui lòng nhập tiêu đề'),
-  subtitle: z.string().optional(),
-  imageUrl: z.string().min(1, 'Vui lòng nhập URL hình ảnh'),
-  linkUrl: z.string().optional(),
-  displayOrder: z.coerce.number().optional(),
-  active: z.boolean().optional()
+export const createAdminSchema = z.object({
+  username: z.string().min(3, 'Tên đăng nhập tối thiểu 3 ký tự').max(50),
+  email: z.string().email('Email không hợp lệ'),
+  numberPhone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ'),
+  password: z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(100),
+  hireDate: z.string().optional()
 })
 
 export type LoginForm = z.infer<typeof loginSchema>
@@ -78,4 +77,4 @@ export type ReviewForm = z.infer<typeof reviewSchema>
 export type ProfileForm = z.infer<typeof profileSchema>
 export type ProductForm = z.infer<typeof productSchema>
 export type CategoryForm = z.infer<typeof categorySchema>
-export type BannerForm = z.infer<typeof bannerSchema>
+export type CreateAdminForm = z.infer<typeof createAdminSchema>

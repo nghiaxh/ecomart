@@ -3,7 +3,6 @@ export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'COMPLETED' | '
 export type PaymentMethod = 'PAYOS' | 'COD'
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED'
 export type NotificationType = 'ORDER'
-export type ChatRole = 'USER' | 'BOT'
 export type MaterialType = 'ORGANIC' | 'RECYCLED' | 'NATURAL' | 'SYNTHETIC'
 
 export interface AuthResponse {
@@ -86,16 +85,6 @@ export interface Cart {
   itemCount: number
 }
 
-export interface Banner {
-  id: number
-  title: string
-  subtitle?: string
-  imageUrl: string
-  linkUrl?: string
-  displayOrder: number
-  active: boolean
-}
-
 export interface Address {
   id: number
   label: string
@@ -156,31 +145,22 @@ export interface Review {
   createdAt: string
 }
 
-export interface ChatMessage {
-  id: number
-  role: ChatRole
-  content: string
-  createdAt: string
-}
-
-export interface ChatSession {
-  id: number
-  title: string
-  createdAt: string
-  messages: ChatMessage[]
-}
-
-export interface ChatResponse {
-  botMessage: string
-  sessionId: number
-  messages: ChatMessage[]
-}
-
 export interface AdminDashboard {
   productCount: number
   customerCount: number
   orderCount: number
   revenue: number
+}
+
+export interface UserSummary {
+  id: number
+  username: string
+  email: string
+  numberPhone: string
+  avatarUrl?: string
+  role: UserRole
+  isActive: boolean
+  createdAt: string
 }
 
 export interface ProductRequest {
@@ -206,11 +186,10 @@ export interface CategoryRequest {
   active: boolean
 }
 
-export interface BannerRequest {
-  title: string
-  subtitle?: string
-  imageUrl: string
-  linkUrl?: string
-  displayOrder?: number
-  active: boolean
+export interface CreateAdminRequest {
+  username: string
+  email: string
+  numberPhone: string
+  password: string
+  hireDate?: string
 }

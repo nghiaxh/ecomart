@@ -21,6 +21,11 @@ public final class Mapper {
                 user.getAvatarUrl(), user.getRole(), user.getCreatedAt());
     }
 
+    public static UserSummaryResponse toUserSummary(User user) {
+        return new UserSummaryResponse(user.getId(), user.getUsername(), user.getEmail(), user.getNumberPhone(),
+                user.getAvatarUrl(), user.getRole(), user.isActive(), user.getCreatedAt());
+    }
+
     public static ProductResponse toProduct(Product p) {
         List<String> images = p.getImages().stream()
                 .sorted((a, b) -> Integer.compare(a.getDisplayOrder(), b.getDisplayOrder()))
@@ -105,15 +110,6 @@ public final class Mapper {
                 n.getCreatedAt());
     }
 
-    public static BannerResponse toBanner(Banner b) {
-        return new BannerResponse(b.getId(), b.getTitle(), b.getSubtitle(), b.getImageUrl(), b.getLinkUrl(),
-                b.getDisplayOrder(), b.isActive());
-    }
-
-    public static ChatResponse.MessageResponse toChatMessage(ChatMessage m) {
-        return new ChatResponse.MessageResponse(m.getId(), m.getRole(), m.getContent(), m.getCreatedAt());
-    }
-
     public static <T> PageResponse<T> toPage(org.springframework.data.domain.Page<?> page, List<T> content) {
         return new PageResponse<>(content, page.getNumber(), page.getSize(),
                 page.getTotalElements(), page.getTotalPages());
@@ -163,17 +159,6 @@ public final class Mapper {
         category.setIcon(req.icon());
         category.setDisplayOrder(req.displayOrder() == null ? 0 : req.displayOrder());
         category.setActive(req.active());
-    }
-
-    public static void mergeBanner(Banner banner, BannerRequest req) {
-        banner.setTitle(req.title());
-        banner.setSubtitle(req.subtitle());
-        banner.setImageUrl(req.imageUrl());
-        banner.setLinkUrl(req.linkUrl());
-        banner.setDisplayOrder(req.displayOrder() == null ? 0 : req.displayOrder());
-        if (req.active() != null) {
-            banner.setActive(req.active());
-        }
     }
 
     public static void mergeAddress(Address address, AddressRequest req) {

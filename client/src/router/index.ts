@@ -9,7 +9,6 @@ import RegisterPage from '@/pages/register.vue'
 import CartPage from '@/pages/cart.vue'
 import CheckoutPage from '@/pages/checkout.vue'
 import AccountPage from '@/pages/account.vue'
-import ChatPage from '@/pages/chat.vue'
 import PaymentResultPage from '@/pages/payment-result.vue'
 import ProductsIndexPage from '@/pages/products/index.vue'
 import ProductDetailPage from '@/pages/products/[slug].vue'
@@ -19,7 +18,7 @@ import AdminDashboardPage from '@/pages/admin/index.vue'
 import AdminProductsPage from '@/pages/admin/products.vue'
 import AdminCategoriesPage from '@/pages/admin/categories.vue'
 import AdminOrdersPage from '@/pages/admin/orders.vue'
-import AdminBannersPage from '@/pages/admin/banners.vue'
+import AdminUsersPage from '@/pages/admin/users.vue'
 import { useAuth } from '@/composables/useAuth'
 
 const routes: RouteRecordRaw[] = [
@@ -43,7 +42,6 @@ const routes: RouteRecordRaw[] = [
       { path: 'cart', name: 'cart', component: CartPage, meta: { customerOnly: true } },
       { path: 'checkout', name: 'checkout', component: CheckoutPage, meta: { customerOnly: true } },
       { path: 'account', name: 'account', component: AccountPage, meta: { requiresAuth: true } },
-      { path: 'chat', name: 'chat', component: ChatPage, meta: { customerOnly: true } },
       { path: 'payment-result', name: 'payment-result', component: PaymentResultPage, meta: { customerOnly: true } },
       { path: 'orders', name: 'orders', component: OrdersIndexPage, meta: { customerOnly: true } },
       { path: 'orders/:id', name: 'order-detail', component: OrderDetailPage, meta: { customerOnly: true } }
@@ -54,18 +52,34 @@ const routes: RouteRecordRaw[] = [
     component: AdminLayout,
     meta: { requiresAdmin: true },
     children: [
-      { path: '', name: 'admin', component: AdminDashboardPage },
-      { path: 'products', name: 'admin-products', component: AdminProductsPage },
-      { path: 'categories', name: 'admin-categories', component: AdminCategoriesPage },
-      { path: 'orders', name: 'admin-orders', component: AdminOrdersPage },
-      { path: 'banners', name: 'admin-banners', component: AdminBannersPage }
+      { path: '', name: 'admin', component: AdminDashboardPage, meta: { title: 'Tổng quan' } },
+      { path: 'products', name: 'admin-products', component: AdminProductsPage, meta: { title: 'Sản phẩm' } },
+      { path: 'categories', name: 'admin-categories', component: AdminCategoriesPage, meta: { title: 'Danh mục' } },
+      { path: 'orders', name: 'admin-orders', component: AdminOrdersPage, meta: { title: 'Đơn hàng' } },
+      { path: 'users', name: 'admin-users', component: AdminUsersPage, meta: { title: 'Người dùng' } }
     ]
   }
 ]
 
+function smoothScroll(): 'auto' | 'smooth' {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+}
+
 export const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return { el: to.hash, behavior: smoothScroll(), top: 64 }
+    }
+    if (savedPosition) {
+      return savedPosition
+    }
+    if (to.name === 'home') {
+      return { top: 0, behavior: smoothScroll() }
+    }
+    return { top: 0 }
+  }
 })
 
 router.beforeEach((to) => {
