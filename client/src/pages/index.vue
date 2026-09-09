@@ -11,6 +11,7 @@ import { NButton, NCarousel, NSkeleton } from 'naive-ui'
 
 const { request } = useApi()
 const supportPhone = import.meta.env.VITE_SUPPORT_PHONE || '0900 000 000'
+const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'contact@ecomart.vn'
 
 const banners = ref(homeBanners)
 const categories = ref<CategoryResponse[]>([])
@@ -212,7 +213,7 @@ const aboutPoints = homeAboutPoints
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
           <div class="mx-auto max-w-2xl text-center">
-            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">Về EcoMart</p>
+            <p class="text-md font-semibold uppercase tracking-wide text-emerald-600">Về EcoMart</p>
             <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-gray-700">Tươi sạch mỗi ngày, giá cả hợp lý</h2>
             <p class="mx-auto mt-4 max-w-xl leading-relaxed text-gray-500">
               EcoMart cam kết mang đến sản phẩm có nguồn gốc rõ ràng, chất lượng đảm bảo với mức giá phù hợp.
@@ -238,8 +239,48 @@ const aboutPoints = homeAboutPoints
       </div>
     </section>
 
+    <!-- Contact -->
+    <section id="contact" class="py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <Reveal>
+          <div class="rounded-3xl border border-emerald-100 bg-white p-8 sm:p-10">
+            <div class="mx-auto max-w-2xl text-center">
+              <p class="text-md font-semibold uppercase tracking-wide text-emerald-600">Liên hệ</p>
+              <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-gray-700">Chúng tôi luôn sẵn sàng hỗ trợ</h2>
+              <p class="mx-auto mt-4 max-w-xl leading-relaxed text-gray-500">
+                Mọi thắc mắc về sản phẩm, đơn hàng hay góp ý, đừng ngần ngại liên hệ với EcoMart.
+              </p>
+            </div>
+            <div class="mt-8 grid gap-4 sm:grid-cols-3">
+              <div class="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50/60 p-6 text-center">
+                <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                  <UiIcon name="phone" size="20" />
+                </span>
+                <p class="text-sm font-semibold text-gray-700">Hotline</p>
+                <a :href="`tel:${supportPhone.replace(/\s/g, '')}`" class="text-sm font-medium text-emerald-700 hover:underline">{{ supportPhone }}</a>
+              </div>
+              <div class="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50/60 p-6 text-center">
+                <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                  <UiIcon name="envelope" size="20" />
+                </span>
+                <p class="text-sm font-semibold text-gray-700">Email</p>
+                <a :href="`mailto:${supportEmail}`" class="text-sm font-medium text-emerald-700 hover:underline">{{ supportEmail }}</a>
+              </div>
+              <div class="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50/60 p-6 text-center">
+                <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                  <UiIcon name="refresh" size="20" />
+                </span>
+                <p class="text-sm font-semibold text-gray-700">Giờ hỗ trợ</p>
+                <p class="text-sm text-gray-500">8:00 – 20:00 hằng ngày</p>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+
     <!-- Testimonials -->
-    <section class="bg-emerald-50/40 py-14">
+    <section class="py-14">
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
           <div class="mb-8 text-center">

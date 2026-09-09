@@ -1,13 +1,17 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useCart } from '@/composables/useCart'
+import { useApi } from '@/composables/useApi'
+import type { CategoryResponse } from '@/types'
 import FooterGlobal from '@/components/FooterGlobal.vue'
 import UiIcon from '@/components/UiIcon.vue'
-import { NAvatar, NButton } from 'naive-ui'
+import { NAvatar, NButton, NDropdown, type DropdownOption } from 'naive-ui'
 
 const { isLoggedIn, isAdmin, session } = useAuth()
 const { itemCount } = useCart()
+const { request } = useApi()
 
 const route = useRoute()
 const router = useRouter()
@@ -15,7 +19,8 @@ const router = useRouter()
 const links = [
   { label: 'Trang chủ', to: '/' },
   { label: 'Sản phẩm', to: '/products' },
-  { label: 'Về chúng tôi', to: '/#about' }
+  { label: 'Về chúng tôi', to: '/#about' },
+  { label: 'Liên hệ', to: '/#contact' }
 ]
 
 const adminLinks = [
@@ -25,6 +30,32 @@ const adminLinks = [
   { label: 'Người dùng', to: '/admin/users' },
   { label: 'Thống kê', to: '/admin/statistic' }
 ]
+
+const userLinks = computed(() =>
+  isLoggedIn.value && !isAdmin.value ? [...links, { label: 'Đơn hàng', to: '/orders' }] : links
+)
+
+const categoryOptions = ref<DropdownOption[]>([])
+
+onMounted(async () => {
+  if (isAdmin.value) return
+  try {
+    const categories = await request<CategoryResponse[]>('/api/categories')
+    categoryOptions.value = categories.map((c) => ({
+      label: c.name,
+      key: c.slug,
+      children: c.children?.length
+        ? c.children.map((ch) => ({ label: ch.name, key: ch.slug }))
+        : undefined
+    }))
+  } catch {
+    categoryOptions.value = []
+  }
+})
+
+function onCategorySelect(slug: string) {
+  router.push(`/products?category=${slug}`)
+}
 
 function scrollHome() {
   if (route.name === 'home' && !route.hash) {
@@ -42,12 +73,24 @@ function scrollHome() {
           <span class="text-lg font-extrabold tracking-tight text-emerald-800">EcoMart</span>
         </RouterLink>
 
-        <nav class="hidden items-center gap-8 md:flex justify-self-center">
-          <RouterLink v-for="link in (isAdmin ? adminLinks : links)" :key="link.to" :to="link.to"
+        <nav class="hidden items-center gap-6 lg:gap-8 md:flex justify-self-center">
+          <RouterLink v-for="link in (isAdmin ? adminLinks : userLinks)" :key="link.to" :to="link.to"
             class="text-sm font-medium text-gray-600 hover:text-emerald-700"
             @click="scrollHome">
             {{ link.label }}
           </RouterLink>
+          <NDropdown
+            v-if="!isAdmin"
+            :options="categoryOptions"
+            trigger="click"
+            placement="bottom"
+            @select="onCategorySelect"
+          >
+            <span class="flex cursor-pointer items-center gap-1 text-sm font-medium text-gray-600 hover:text-emerald-700">
+              Danh mục
+              <UiIcon name="caret-down" size="14" />
+            </span>
+          </NDropdown>
         </nav>
 
         <div class="flex items-center gap-1 justify-self-end">
