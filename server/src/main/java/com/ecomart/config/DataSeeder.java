@@ -1,8 +1,7 @@
 package com.ecomart.config;
 
 import com.ecomart.domain.entity.*;
-import com.ecomart.domain.enums.MaterialType;
-import com.ecomart.domain.enums.UserRole;
+import com.ecomart.domain.enums.*;
 import com.ecomart.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -10,7 +9,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Component
 public class DataSeeder implements CommandLineRunner {
@@ -18,10 +22,18 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
     private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
+    private final AddressRepository addressRepository;
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final PaymentRepository paymentRepository;
+    private final ReviewRepository reviewRepository;
+    private final NotificationRepository notificationRepository;
     private final CategoryRepository categoryRepository;
     private final MaterialRepository materialRepository;
     private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ShopProperties shopProperties;
 
     @Value("${app.seed.enabled:true}")
     private boolean seedEnabled;
@@ -35,17 +47,33 @@ public class DataSeeder implements CommandLineRunner {
     public DataSeeder(UserRepository userRepository,
                       CustomerRepository customerRepository,
                       CartRepository cartRepository,
+                      CartItemRepository cartItemRepository,
+                      AddressRepository addressRepository,
+                      OrderRepository orderRepository,
+                      OrderItemRepository orderItemRepository,
+                      PaymentRepository paymentRepository,
+                      ReviewRepository reviewRepository,
+                      NotificationRepository notificationRepository,
                       CategoryRepository categoryRepository,
                       MaterialRepository materialRepository,
                       ProductRepository productRepository,
-                      PasswordEncoder passwordEncoder) {
+                      PasswordEncoder passwordEncoder,
+                      ShopProperties shopProperties) {
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
         this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.addressRepository = addressRepository;
+        this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
+        this.paymentRepository = paymentRepository;
+        this.reviewRepository = reviewRepository;
+        this.notificationRepository = notificationRepository;
         this.categoryRepository = categoryRepository;
         this.materialRepository = materialRepository;
         this.productRepository = productRepository;
         this.passwordEncoder = passwordEncoder;
+        this.shopProperties = shopProperties;
     }
 
     @Override
@@ -55,51 +83,75 @@ public class DataSeeder implements CommandLineRunner {
         seedCategories();
         seedMaterials();
         seedProducts();
+        seedAddresses();
+        seedCartItems();
+        seedOrders();
+        seedReviews();
     }
+
+    // ---------------------------------------------------------------- users
 
     private void seedDemoUsers() {
         seedAdmin();
-        seedCustomer();
+        seedCustomers();
     }
 
     private void seedAdmin() {
-        if (!seedEnabled || userRepository.existsByUsername("admin")) {
+        admin("admin", "admin@ecomart.vn", "0900000000");
+        admin("admin2", "admin2@ecomart.vn", "0901000001");
+        admin("admin3", "admin3@ecomart.vn", "0901000002");
+        admin("admin4", "admin4@ecomart.vn", "0901000003");
+        admin("admin5", "admin5@ecomart.vn", "0901000004");
+    }
+
+    private void admin(String username, String email, String phone) {
+        if (!seedEnabled || userRepository.existsByUsername(username)) {
             return;
         }
         String password = seedAdminPassword != null && !seedAdminPassword.isBlank()
                 ? seedAdminPassword : "Admin@123";
-        Admin admin = new Admin();
-        admin.setUsername("admin");
-        admin.setEmail("admin@ecomart.vn");
-        admin.setNumberPhone("0900000000");
-        admin.setPasswordHash(passwordEncoder.encode(password));
-        admin.setRole(UserRole.ADMIN);
-        admin.setActive(true);
-        admin.setHireDate(java.time.LocalDate.now());
-        userRepository.save(admin);
+        Admin a = new Admin();
+        a.setUsername(username);
+        a.setEmail(email);
+        a.setNumberPhone(phone);
+        a.setPasswordHash(passwordEncoder.encode(password));
+        a.setRole(UserRole.ADMIN);
+        a.setActive(true);
+        a.setHireDate(LocalDate.now().minusDays(30L * (username.equals("admin") ? 400 : 100)));
+        userRepository.save(a);
     }
 
-    private void seedCustomer() {
-        if (!seedEnabled || userRepository.existsByUsername("customer")) {
+    private void seedCustomers() {
+        for (int i = 1; i <= 8; i++) {
+            customer("customer" + (i == 1 ? "" : i),
+                    "customer" + (i == 1 ? "" : i) + "@ecomart.vn",
+                    "090" + (1000000 + i));
+        }
+    }
+
+    private void customer(String username, String email, String phone) {
+        if (!seedEnabled || userRepository.existsByUsername(username)) {
             return;
         }
         String password = seedCustomerPassword != null && !seedCustomerPassword.isBlank()
                 ? seedCustomerPassword : "Customer@123";
-        Customer customer = new Customer();
-        customer.setUsername("customer");
-        customer.setEmail("customer@ecomart.vn");
-        customer.setNumberPhone("0901111111");
-        customer.setPasswordHash(passwordEncoder.encode(password));
-        customer.setRole(UserRole.CUSTOMER);
-        customer.setActive(true);
-        customer = customerRepository.save(customer);
+        Customer c = new Customer();
+        c.setUsername(username);
+        c.setEmail(email);
+        c.setNumberPhone(phone);
+        c.setPasswordHash(passwordEncoder.encode(password));
+        c.setRole(UserRole.CUSTOMER);
+        c.setActive(true);
+        c = customerRepository.save(c);
 
         Cart cart = new Cart();
-        cart.setCustomer(customer);
+        cart.setCustomer(c);
         cart = cartRepository.save(cart);
-        customer.setCart(cart);
-        customerRepository.save(customer);
+        c.setCart(cart);
+        customerRepository.save(c);
     }
+
+    // ----------------------------------------------------------- categories
 
     private void seedCategories() {
         Category rau = category("Rau củ sạch", "rau-cu-sach", "leaf", 1);
@@ -147,6 +199,8 @@ public class DataSeeder implements CommandLineRunner {
         });
     }
 
+    // ------------------------------------------------------------ materials
+
     private void seedMaterials() {
         material("Giấy", MaterialType.RECYCLED);
         material("Nhựa", MaterialType.SYNTHETIC);
@@ -165,6 +219,8 @@ public class DataSeeder implements CommandLineRunner {
             return materialRepository.save(m);
         });
     }
+
+    // ------------------------------------------------------------- products
 
     private record SeedProduct(String name, String slug, double price, int stock, double weight, String origin,
                                String categorySlug, String... images) {}
@@ -353,5 +409,336 @@ public class DataSeeder implements CommandLineRunner {
             case "trai-cay-say" -> "Túi vải";
             default -> "Giấy";
         };
+    }
+
+    // ------------------------------------------------------------ addresses
+
+    private record SeedAddress(String label, String street, String ward, String district, String city,
+                               String receiverName, String receiverPhone) {}
+
+    private void seedAddresses() {
+        List<Customer> customers = demoCustomers();
+        for (int i = 0; i < customers.size(); i++) {
+            Customer c = customers.get(i);
+            List<Address> existing = addressRepository.findByCustomerId(c.getId());
+            if (!existing.isEmpty() && existing.size() >= addressCountFor(i)) {
+                continue;
+            }
+            for (SeedAddress sa : addressesFor(i)) {
+                Address a = new Address();
+                a.setCustomer(c);
+                a.setLabel(sa.label());
+                a.setStreet(sa.street());
+                a.setWard(sa.ward());
+                a.setDistrict(sa.district());
+                a.setCity(sa.city());
+                a.setReceiverName(sa.receiverName());
+                a.setReceiverPhone(sa.receiverPhone());
+                a.setDefault(false);
+                addressRepository.save(a);
+            }
+            List<Address> saved = addressRepository.findByCustomerId(c.getId());
+            if (!saved.isEmpty()) {
+                saved.get(0).setDefault(true);
+                addressRepository.save(saved.get(0));
+            }
+        }
+    }
+
+    private List<Customer> demoCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        for (Customer c : customerRepository.findAll()) {
+            if (c.getUsername().matches("customer\\d?")) {
+                customers.add(c);
+            }
+        }
+        customers.sort((a, b) -> Integer.compare(customerIndex(a.getUsername()), customerIndex(b.getUsername())));
+        return customers;
+    }
+
+    private int customerIndex(String username) {
+        try {
+            return username.length() == 8 ? 1 : Integer.parseInt(username.substring(8));
+        } catch (NumberFormatException e) {
+            return 100;
+        }
+    }
+
+    private int addressCountFor(int i) {
+        return i == 0 ? 1 : 2;
+    }
+
+    private List<SeedAddress> addressesFor(int i) {
+        String[][] raw = {
+                {"Nhà", "12 Lê Lợi", "Phường Bến Nghé", "Quận 1", "TP.HCM"},
+                {"Cơ quan", "45 Trần Hưng Đạo", "Phường Cầu Ông Lãnh", "Quận 1", "TP.HCM"},
+                {"Nhà", "78 Đặng Văn Ngữ", "Phường Trung Tự", "Đống Đa", "Hà Nội"},
+                {"Nhà", "23 Bạch Đằng", "Phường Hải Châu 1", "Hải Châu", "Đà Nẵng"},
+                {"Nhà", "90 Hòa Bình", "Phường An Cư", "Ninh Kiều", "Cần Thơ"},
+                {"Nhà", "15 Nguyễn Trãi", "Phường Quang Trung", "Vinh", "Nghệ An"},
+                {"Nhà", "67 Phú Lợi", "Phường Phú Lợi", "Thủ Dầu Một", "Bình Dương"},
+                {"Nhà", "33 Võ Văn Tần", "Phường 6", "Quận 3", "TP.HCM"},
+        };
+        List<SeedAddress> list = new ArrayList<>();
+        String[] base = raw[i % raw.length];
+        list.add(new SeedAddress("Nhà", base[1], base[2], base[3], base[4],
+                receiverName(i), receiverPhone(i)));
+        if (i != 0) {
+            list.add(new SeedAddress("Cơ quan", "123 " + base[1], base[2], base[3], base[4],
+                    receiverName(i), receiverPhone(i)));
+        }
+        return list;
+    }
+
+    private String receiverName(int i) {
+        String[] names = {"Nguyễn Văn An", "Trần Thu Hà", "Lê Minh Khôi", "Phạm Ngọc Bích",
+                "Hoàng Đức Long", "Vũ Thị Lan", "Đặng Quang Huy", "Bùi Thanh Mai"};
+        return names[i % names.length];
+    }
+
+    private String receiverPhone(int i) {
+        return "09" + (800000000 + i);
+    }
+
+    // ------------------------------------------------------------ cart items
+
+    private void seedCartItems() {
+        List<Customer> customers = demoCustomers();
+        for (int i = 1; i < customers.size(); i++) {
+            Customer c = customers.get(i);
+            Cart cart = c.getCart();
+            if (cart == null || !cart.getItems().isEmpty()) {
+                continue;
+            }
+            List<Product> inStock = productRepository.findAll().stream()
+                    .filter(p -> p.isActive() && p.getStock() > 0)
+                    .toList();
+            if (inStock.isEmpty()) {
+                continue;
+            }
+            int itemCount = Math.min(2 + i % 4, inStock.size());
+            Random rnd = new Random(1000L + i);
+            java.util.Set<Long> picked = new java.util.HashSet<>();
+            int attempts = 0;
+            while (picked.size() < itemCount && attempts < 100) {
+                attempts++;
+                Product p = inStock.get(rnd.nextInt(inStock.size()));
+                if (!picked.add(p.getId())) {
+                    continue;
+                }
+                CartItem ci = new CartItem();
+                ci.setId(new CartItemId(cart.getId(), p.getId()));
+                ci.setCart(cart);
+                ci.setProduct(p);
+                ci.setQuantity(1 + rnd.nextInt(4));
+                cartItemRepository.save(ci);
+            }
+        }
+    }
+
+    // --------------------------------------------------------------- orders
+
+    private record OrderSpec(List<String> productSlugs, OrderStatus status, PaymentMethod method) {}
+
+    private void seedOrders() {
+        List<Customer> customers = demoCustomers().stream()
+                .filter(c -> !c.getUsername().equals("customer"))
+                .toList();
+        if (customers.isEmpty()) {
+            return;
+        }
+        long existing = customers.stream()
+                .mapToLong(c -> orderRepository.countByCustomerId(c.getId()))
+                .sum();
+        if (existing > 0) {
+            return;
+        }
+        List<OrderSpec> specs = orderSpecs();
+        if (specs.isEmpty()) {
+            return;
+        }
+        int cIdx = 0;
+        for (OrderSpec spec : specs) {
+            Customer c = customers.get(cIdx % customers.size());
+            cIdx++;
+            seedOrder(c, spec);
+        }
+    }
+
+    private void seedOrder(Customer customer, OrderSpec spec) {
+        if (orderRepository.countByCustomerId(customer.getId()) >= 20) {
+            return;
+        }
+        List<Address> addresses = addressRepository.findByCustomerId(customer.getId());
+        if (addresses.isEmpty()) {
+            return;
+        }
+        Address addr = addresses.get(0);
+        List<Product> products = new ArrayList<>();
+        for (String slug : spec.productSlugs()) {
+            productRepository.findBySlug(slug).ifPresent(products::add);
+        }
+        if (products.isEmpty()) {
+            return;
+        }
+        double subtotal = 0;
+        List<int[]> qty = new ArrayList<>();
+        Random rnd = new Random(5000L + customer.getId());
+        for (Product p : products) {
+            int q = 1 + rnd.nextInt(3);
+            qty.add(new int[]{products.indexOf(p), q});
+            subtotal += p.getPrice() * q;
+        }
+        double fee = shopProperties.shippingFee();
+        double total = subtotal + fee;
+
+        Order order = new Order();
+        order.setCustomer(customer);
+        order.setReceiverName(addr.getReceiverName());
+        order.setReceiverPhone(addr.getReceiverPhone());
+        order.setAddress(addr.getStreet() + ", " + addr.getWard() + ", " + addr.getDistrict() + ", " + addr.getCity());
+        order.setStatus(spec.status());
+        order.setSubtotal(subtotal);
+        order.setShippingFee(fee);
+        order.setTotal(total);
+        order.setNotes(rnd.nextInt(3) == 0 ? "Giao giờ hành chính" : null);
+        int daysAgo = 1 + rnd.nextInt(28);
+        order.setCreatedAt(Instant.now().minus(daysAgo, ChronoUnit.DAYS).minus(rnd.nextInt(86400), ChronoUnit.SECONDS));
+        order = orderRepository.save(order);
+
+        for (int[] entry : qty) {
+            Product p = products.get(entry[0]);
+            OrderItem oi = new OrderItem();
+            oi.setId(new OrderItemId(order.getId(), p.getId()));
+            oi.setOrder(order);
+            oi.setProduct(p);
+            oi.setProductNameSnapshot(p.getName());
+            oi.setQuantity(entry[1]);
+            oi.setUnitPrice(p.getPrice());
+            orderItemRepository.save(oi);
+            order.getItems().add(oi);
+        }
+
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setMethod(spec.method());
+        payment.setStatus(paymentStatusFor(spec));
+        payment.setAmount(total);
+        if (spec.method() == PaymentMethod.PAYOS) {
+            payment.setPayosOrderCode(String.valueOf(order.getId()));
+        }
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            payment.setPaidAt(order.getCreatedAt().plus(2, ChronoUnit.HOURS));
+        }
+        paymentRepository.save(payment);
+        order.setPayment(payment);
+        orderRepository.save(order);
+
+        notificationRepository.save(notification(customer,
+                "Đơn hàng #" + order.getId() + " đã được tạo",
+                "Đơn hàng của bạn với tổng giá trị " + Math.round(total) + "đ đã được ghi nhận.",
+                String.valueOf(order.getId()),
+                order.getCreatedAt()));
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            notificationRepository.save(notification(customer,
+                    "Thanh toán đơn hàng #" + order.getId() + " thành công",
+                    "Cảm ơn bạn! Thanh toán cho đơn hàng đã được hoàn tất.",
+                    String.valueOf(order.getId()),
+                    order.getCreatedAt().plus(3, ChronoUnit.HOURS)));
+        }
+    }
+
+    private PaymentStatus paymentStatusFor(OrderSpec spec) {
+        return switch (spec.status()) {
+            case COMPLETED -> PaymentStatus.PAID;
+            case SHIPPING -> spec.method() == PaymentMethod.PAYOS ? PaymentStatus.PAID : PaymentStatus.PENDING;
+            case CANCELLED -> spec.method() == PaymentMethod.PAYOS ? PaymentStatus.FAILED : PaymentStatus.CANCELLED;
+            default -> PaymentStatus.PENDING;
+        };
+    }
+
+    private Notification notification(User user, String title, String message, String referenceId, Instant createdAt) {
+        Notification n = new Notification();
+        n.setUser(user);
+        n.setTitle(title);
+        n.setMessage(message);
+        n.setType(NotificationType.ORDER);
+        n.setReferenceId(referenceId);
+        n.setCreatedAt(createdAt);
+        return n;
+    }
+
+    private List<OrderSpec> orderSpecs() {
+        List<Product> products = productRepository.findAll().stream()
+                .filter(p -> p.isActive() && p.getStock() > 0)
+                .toList();
+        int n = products.size();
+        if (n < 10) {
+            return List.of();
+        }
+        List<String> slugs = products.stream().map(Product::getSlug).toList();
+        // ~30 đơn, xoay vòng đủ 5 trạng thái + 2 phương thức, mỗi đơn 1-4 sản phẩm khác nhau
+        List<OrderSpec> specs = new ArrayList<>();
+        OrderStatus[] statuses = {OrderStatus.COMPLETED, OrderStatus.SHIPPING, OrderStatus.PENDING,
+                OrderStatus.CONFIRMED, OrderStatus.CANCELLED};
+        PaymentMethod[] methods = {PaymentMethod.PAYOS, PaymentMethod.COD};
+        int base = 0;
+        for (int i = 0; i < 30; i++) {
+            OrderStatus st = statuses[i % statuses.length];
+            PaymentMethod m = methods[(i * 7 + 3) % methods.length];
+            int itemCount = 1 + i % 4;
+            List<String> picked = new ArrayList<>();
+            int offset = base;
+            for (int k = 0; k < itemCount; k++) {
+                picked.add(slugs.get(offset % n));
+                offset += 3;
+            }
+            specs.add(new OrderSpec(picked, st, m));
+            base += 2;
+        }
+        return specs;
+    }
+
+    // -------------------------------------------------------------- reviews
+
+    private void seedReviews() {
+        List<Customer> customers = demoCustomers().stream()
+                .filter(c -> !c.getUsername().equals("customer"))
+                .toList();
+        if (customers.isEmpty()) {
+            return;
+        }
+        String[][] templates = {
+                {"4", "Sản phẩm tươi, chất lượng tốt. Đóng gói cẩn thận và giao nhanh."},
+                {"5", "Rất hài lòng với chất lượng. Giá cả hợp lý cho sản phẩm sạch như thế này."},
+                {"4", "Đóng gói bao bì thân thiện môi trường, đúng cam kết xanh của shop."},
+                {"5", "Tươi ngon, đúng nguồn gốc. Sẽ mua lại lần sau."},
+                {"3", "Sản phẩm ổn, nhưng lần này giao hơi chậm một chút."},
+                {"5", "Chất lượng tốt, ship nhanh, đóng gói kỹ. 10 điểm."},
+                {"4", "Hàng ngon, giá hơi cao nhưng xứng đáng với sản phẩm sạch."},
+                {"2", "Lần này hàng không được tươi như mọi khi, hy vọng shop cải thiện."},
+        };
+        List<Product> products = productRepository.findAll().stream()
+                .filter(Product::isActive)
+                .toList();
+        Random rnd = new Random(777L);
+        for (int pi = 0; pi < products.size(); pi++) {
+            Product p = products.get(pi);
+            for (int k = 0; k < 3; k++) {
+                Customer c = customers.get((pi * 2 + k) % customers.size());
+                if (reviewRepository.existsByCustomerIdAndProductId(c.getId(), p.getId())) {
+                    continue;
+                }
+                String[] t = templates[rnd.nextInt(templates.length)];
+                Review r = new Review();
+                r.setCustomer(c);
+                r.setProduct(p);
+                r.setRating(Integer.parseInt(t[0]));
+                r.setContent(t[1]);
+                r.setHidden(false);
+                r.setCreatedAt(Instant.now().minus(rnd.nextInt(27) + 1, ChronoUnit.DAYS));
+                reviewRepository.save(r);
+            }
+        }
     }
 }

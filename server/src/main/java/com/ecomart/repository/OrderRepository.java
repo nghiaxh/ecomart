@@ -35,6 +35,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Long sumTotalByStatusAndPaid(@Param("completed") OrderStatus completed,
                                  @Param("paid") PaymentStatus paid);
 
+    long countByCustomerId(Long customerId);
+
     @Query("SELECT o.createdAt AS createdAt, o.total AS total, o.status AS status, o.payment.status AS paymentStatus " +
             "FROM Order o " +
             "WHERE o.createdAt >= :since")
