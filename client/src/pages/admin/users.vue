@@ -1,16 +1,23 @@
 <script setup lang="ts">
-
-import type { UserSummary, PageResponse, CreateAdminRequest } from '@/types'
-import { createAdminSchema } from '@/schemas'
+import { ref, reactive, computed, h, onMounted } from 'vue'
+import { useToast } from '@/composables/useToast'
+import type { UserSummary, PageResponse, CreateUserRequest, UpdateUserRequest } from '@/types'
+import { createUserSchema, updateUserSchema } from '@/schemas'
 import { useApi } from '@/composables/useApi'
 import { useConfirm } from '@/composables/useConfirm'
 import { useFormErrors } from '@/composables/useFormErrors'
 import { useFormat } from '@/composables/useFormat'
+import { useAuth } from '@/composables/useAuth'
+import PaginationBar from '@/components/PaginationBar.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import type { DataTableColumns } from 'naive-ui'
+import { NAvatar, NButton, NDataTable, NInput, NModal, NSelect, NTag } from 'naive-ui'
 
 const { request } = useApi()
 const { errors, applyIssues, clearErrors } = useFormErrors()
 const { confirm } = useConfirm()
 const { formatDate } = useFormat()
+const { session } = useAuth()
 const toast = useToast()
 
 const users = ref<UserSummary[]>([])
@@ -21,9 +28,34 @@ const search = ref('')
 const loading = ref(false)
 const busyIds = ref<Set<number>>(new Set())
 
-const showCreateForm = ref(false)
+const roleOptions = [
+  { label: 'Khách hàng', value: 'CUSTOMER' },
+  { label: 'Quản trị', value: 'ADMIN' }
+]
+
+interface UserFormState {
+  username: string
+  email: string
+  numberPhone: string
+  password: string
+  role: 'CUSTOMER' | 'ADMIN'
+  hireDate: string
+}
+
+const showForm = ref(false)
+const editingId = ref<number | null>(null)
 const saving = ref(false)
-const createForm = reactive({ username: '', email: '', numberPhone: '', password: '', hireDate: '' })
+const form = reactive<UserFormState>({ username: '', email: '', numberPhone: '', password: '', role: 'CUSTOMER', hireDate: '' })
+
+const selfId = computed(() => session.value?.id ?? null)
+
+const formTitle = computed(() => editingId.value ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới')
+
+function resetForm() {
+  Object.assign(form, { username: '', email: '', numberPhone: '', password: '', role: 'CUSTOMER', hireDate: '' })
+  editingId.value = null
+  clearErrors()
+}
 
 async function load() {
   loading.value = true
@@ -37,7 +69,7 @@ async function load() {
     totalPages.value = data.totalPages
     totalElements.value = data.totalElements
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Không thể tải danh sách người dùng', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Không thể tải danh sách người dùng', life: 4000 })
   } finally {
     loading.value = false
   }
@@ -49,33 +81,67 @@ function toggleSearch() {
 }
 
 function openCreate() {
-  Object.assign(createForm, { username: '', email: '', numberPhone: '', password: '', hireDate: '' })
-  clearErrors()
-  showCreateForm.value = true
+  resetForm()
+  showForm.value = true
 }
 
-async function submitCreate() {
+function openEdit(u: UserSummary) {
+  Object.assign(form, {
+    username: u.username,
+    email: u.email,
+    numberPhone: u.numberPhone,
+    password: '',
+    role: u.role,
+    hireDate: ''
+  })
+  editingId.value = u.id
   clearErrors()
-  const result = createAdminSchema.safeParse(createForm)
+  showForm.value = true
+}
+
+function closeForm() {
+  showForm.value = false
+  resetForm()
+}
+
+async function submit() {
+  clearErrors()
+  const schema = editingId.value ? updateUserSchema : createUserSchema
+  const result = schema.safeParse(form)
   if (!result.success) {
     applyIssues(result.error)
     return
   }
   saving.value = true
   try {
-    const payload: CreateAdminRequest = {
-      username: createForm.username,
-      email: createForm.email,
-      numberPhone: createForm.numberPhone,
-      password: createForm.password,
-      hireDate: createForm.hireDate || undefined
+    if (editingId.value) {
+      const payload: UpdateUserRequest = {
+        username: form.username,
+        email: form.email,
+        numberPhone: form.numberPhone,
+        role: form.role,
+        password: form.password || undefined,
+        hireDate: form.hireDate || undefined
+      }
+      await request(`/api/admin/users/${editingId.value}`, { method: 'PUT', body: payload })
+      toast.add({ severity: 'success', summary: 'Đã cập nhật người dùng', life: 4000 })
+    } else {
+      const payload: CreateUserRequest = {
+        username: form.username,
+        email: form.email,
+        numberPhone: form.numberPhone,
+        password: form.password,
+        role: form.role,
+        hireDate: form.hireDate || undefined
+      }
+      await request('/api/admin/users', { method: 'POST', body: payload })
+      toast.add({ severity: 'success', summary: form.role === 'ADMIN' ? 'Đã tạo tài khoản quản trị' : 'Đã tạo tài khoản khách hàng', life: 4000 })
     }
-    await request('/api/admin/users/admin', { method: 'POST', body: payload })
-    toast.add({ title: 'Đã tạo tài khoản quản trị', color: 'success' })
-    showCreateForm.value = false
+    showForm.value = false
+    resetForm()
     await load()
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Không thể tạo tài khoản', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Không thể lưu người dùng', life: 4000 })
   } finally {
     saving.value = false
   }
@@ -88,14 +154,74 @@ async function toggleActive(u: UserSummary) {
   busyIds.value.add(u.id)
   try {
     await request(`/api/admin/users/${u.id}/toggle-active`, { method: 'PATCH' })
-    toast.add({ title: `Đã ${action} tài khoản`, color: 'success' })
+    toast.add({ severity: 'success', summary: `Đã ${action} tài khoản`, life: 4000 })
     await load()
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Không thể cập nhật', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Không thể cập nhật', life: 4000 })
   } finally {
     busyIds.value.delete(u.id)
   }
 }
+
+const isSelf = (u: UserSummary) => selfId.value === u.id
+
+const editingUser = computed(() => editingId.value === null
+  ? null
+  : users.value.find(u => u.id === editingId.value) ?? null)
+
+const editingSelf = computed(() => editingUser.value ? isSelf(editingUser.value) : false)
+
+function roleLabel(role: string) {
+  return role === 'ADMIN' ? 'Quản trị' : 'Khách hàng'
+}
+
+const columns = computed<DataTableColumns<UserSummary>>(() => [
+  {
+    key: 'user',
+    title: 'Người dùng',
+    render: (row) => h('div', { class: 'flex items-center gap-3' }, [
+      h(NAvatar, { src: row.avatarUrl || undefined, size: 36 }, { default: () => row.username.charAt(0).toUpperCase() }),
+      h('div', null, [
+        h('p', { class: 'font-medium text-gray-700' }, row.username),
+        h('p', { class: 'text-xs text-gray-400' }, row.email)
+      ])
+    ])
+  },
+  {
+    key: 'numberPhone',
+    title: 'Số điện thoại',
+    render: (row) => h('span', { class: 'text-gray-500 tabular-nums' }, row.numberPhone)
+  },
+  {
+    key: 'role',
+    title: 'Vai trò',
+    render: (row) => h(NTag, { type: row.role === 'ADMIN' ? 'default' : 'success' }, { default: () => roleLabel(row.role) })
+  },
+  {
+    key: 'isActive',
+    title: 'Trạng thái',
+    render: (row) => h(NTag, { type: row.isActive ? 'success' : 'default' }, { default: () => row.isActive ? 'Hoạt động' : 'Đã khóa' })
+  },
+  {
+    key: 'createdAt',
+    title: 'Ngày tạo',
+    render: (row) => h('span', { class: 'text-gray-500' }, formatDate(row.createdAt))
+  },
+  {
+    key: 'actions',
+    title: 'Thao tác',
+    render: (row) => h('div', { class: 'flex justify-end gap-1' }, [
+      h(NButton, { quaternary: true, size: 'small', onClick: () => openEdit(row) }, { icon: () => h(UiIcon, { name: 'pencil', size: 16 }), default: () => 'Sửa' }),
+      h(NButton, {
+        quaternary: true,
+        size: 'small',
+        loading: busyIds.value.has(row.id),
+        disabled: isSelf(row),
+        onClick: () => toggleActive(row)
+      }, { icon: () => h(UiIcon, { name: row.isActive ? 'lock' : 'lock-open', size: 16 }), default: () => row.isActive ? 'Khóa' : 'Mở khóa' })
+    ])
+  }
+])
 
 onMounted(load)
 </script>
@@ -104,96 +230,34 @@ onMounted(load)
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
       <div class="flex flex-wrap items-center gap-2">
-        <UInput v-model="search" placeholder="Tìm theo tên hoặc email..." icon="i-ph-magnifying-glass" class="w-64" @keyup.enter="toggleSearch" />
-        <UButton color="neutral" variant="soft" icon="i-ph-magnifying-glass" label="Tìm" @click="toggleSearch" />
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="w-64">
+            <NInput v-model:value="search" placeholder="Tìm theo tên hoặc email..." clearable @keyup.enter="toggleSearch">
+              <template #prefix><UiIcon name="search" size="16" /></template>
+            </NInput>
+          </div>
+          <NButton secondary @click="toggleSearch">
+            <template #icon><UiIcon name="search" size="16" /></template>
+            Tìm
+          </NButton>
+        </div>
         <p v-if="!loading && totalElements > 0" class="text-sm text-gray-400">Tổng <span class="font-semibold tabular-nums">{{ totalElements }}</span> người dùng</p>
       </div>
-      <UButton color="primary" icon="i-ph-plus" label="Tạo quản trị viên" @click="openCreate" />
-    </div>
-
-    <div v-if="showCreateForm" class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-      <h2 class="mb-4 font-bold text-gray-700">Tạo tài khoản quản trị viên</h2>
-      <form class="grid gap-4 md:grid-cols-2" @submit.prevent="submitCreate">
-        <div>
-          <label class="mb-1 block text-sm text-gray-500">Tên đăng nhập</label>
-          <UInput v-model="createForm.username" placeholder="vd: quanly1" />
-          <p v-if="errors.username" class="text-xs text-red-600">{{ errors.username }}</p>
-        </div>
-        <div>
-          <label class="mb-1 block text-sm text-gray-500">Email</label>
-          <UInput v-model="createForm.email" type="email" placeholder="quanly@ecomart.vn" />
-          <p v-if="errors.email" class="text-xs text-red-600">{{ errors.email }}</p>
-        </div>
-        <div>
-          <label class="mb-1 block text-sm text-gray-500">Số điện thoại</label>
-          <UInput v-model="createForm.numberPhone" placeholder="0900000000" />
-          <p v-if="errors.numberPhone" class="text-xs text-red-600">{{ errors.numberPhone }}</p>
-        </div>
-        <div>
-          <label class="mb-1 block text-sm text-gray-500">Mật khẩu</label>
-          <UInput v-model="createForm.password" type="password" placeholder="Tối thiểu 6 ký tự" />
-          <p v-if="errors.password" class="text-xs text-red-600">{{ errors.password }}</p>
-        </div>
-        <div>
-          <label class="mb-1 block text-sm text-gray-500">Ngày tuyển dụng (tùy chọn)</label>
-          <UInput v-model="createForm.hireDate" type="date" />
-        </div>
-        <div class="flex items-end justify-end gap-2">
-          <UButton color="neutral" variant="ghost" label="Hủy" @click="showCreateForm = false" />
-          <UButton type="submit" color="primary" label="Tạo tài khoản" :loading="saving" />
-        </div>
-      </form>
+      <NButton type="primary" @click="openCreate">
+        <template #icon><UiIcon name="plus" size="16" /></template>
+        Thêm người dùng
+      </NButton>
     </div>
 
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-      <table class="w-full text-sm">
-        <thead class="sticky top-0 z-10 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-          <tr>
-            <th class="px-4 py-3">Người dùng</th>
-            <th class="px-4 py-3">Số điện thoại</th>
-            <th class="px-4 py-3">Vai trò</th>
-            <th class="px-4 py-3">Trạng thái</th>
-            <th class="px-4 py-3">Ngày tạo</th>
-            <th class="px-4 py-3 text-right">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr v-for="u in users" :key="u.id" class="transition hover:bg-gray-50/60">
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <UAvatar :src="u.avatarUrl || undefined" :alt="u.username" size="sm" />
-                <div>
-                  <p class="font-medium text-gray-700">{{ u.username }}</p>
-                  <p class="text-xs text-gray-400">{{ u.email }}</p>
-                </div>
-              </div>
-            </td>
-            <td class="px-4 py-3 text-gray-500 tabular-nums">{{ u.numberPhone }}</td>
-            <td class="px-4 py-3">
-              <UBadge :color="u.role === 'ADMIN' ? 'slate' : 'emerald'" :label="u.role === 'ADMIN' ? 'Quản trị' : 'Khách hàng'" size="sm" />
-            </td>
-            <td class="px-4 py-3">
-              <UBadge :color="u.isActive ? 'success' : 'neutral'" :label="u.isActive ? 'Hoạt động' : 'Đã khóa'" size="sm" />
-            </td>
-            <td class="px-4 py-3 text-gray-500">{{ formatDate(u.createdAt) }}</td>
-            <td class="px-4 py-3">
-              <div class="flex justify-end">
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  :icon="u.isActive ? 'i-ph-lock-simple' : 'i-ph-lock-simple-open'"
-                  :label="u.isActive ? 'Khóa' : 'Mở khóa'"
-                  :loading="busyIds.has(u.id)"
-                  @click="toggleActive(u)"
-                />
-              </div>
-            </td>
-          </tr>
-          <tr v-if="!loading && !users.length">
-            <td colspan="6" class="px-4 py-16 text-center text-gray-400">Không tìm thấy người dùng.</td>
-          </tr>
-        </tbody>
-      </table>
+      <NDataTable :data="users" :columns="columns" :loading="loading" striped>
+        <template #empty>
+          <div v-if="!loading" class="flex flex-col items-center py-8 text-gray-400">
+            <UiIcon name="users" size="32" class="mb-2 text-gray-300" />
+            <p class="text-sm">Không tìm thấy người dùng.</p>
+          </div>
+        </template>
+      </NDataTable>
     </div>
 
     <PaginationBar
@@ -203,5 +267,51 @@ onMounted(load)
       @prev="page--; load()"
       @next="page++; load()"
     />
+
+    <NModal
+      v-model:show="showForm"
+      preset="card"
+      :title="formTitle"
+      :style="{ width: '720px', maxWidth: '95vw' }"
+    >
+      <form class="grid gap-4 md:grid-cols-2" @submit.prevent="submit">
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Tên đăng nhập</label>
+          <NInput v-model:value="form.username" placeholder="vd: quanly1" />
+          <p v-if="errors.username" class="text-xs text-red-600">{{ errors.username }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Email</label>
+          <NInput v-model:value="form.email" :input-props="{ type: 'email' }" placeholder="quanly@ecomart.vn" />
+          <p v-if="errors.email" class="text-xs text-red-600">{{ errors.email }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Số điện thoại</label>
+          <NInput v-model:value="form.numberPhone" placeholder="0900000000" />
+          <p v-if="errors.numberPhone" class="text-xs text-red-600">{{ errors.numberPhone }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Mật khẩu{{ editingId ? ' (để trống nếu không đổi)' : '' }}</label>
+          <NInput v-model:value="form.password" type="password" placeholder="Tối thiểu 6 ký tự" show-password-on="click" />
+          <p v-if="errors.password" class="text-xs text-red-600">{{ errors.password }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Vai trò</label>
+          <NSelect v-model:value="form.role" :options="roleOptions" :disabled="editingSelf" />
+          <p v-if="errors.role" class="text-xs text-red-600">{{ errors.role }}</p>
+          <p v-if="editingSelf" class="mt-1 text-xs text-gray-400">Không thể thay đổi vai trò của chính mình</p>
+        </div>
+        <div v-if="form.role === 'ADMIN'">
+          <label class="mb-1 block text-sm text-gray-500">Ngày tuyển dụng (tùy chọn)</label>
+          <NInput v-model:value="form.hireDate" :input-props="{ type: 'date' }" />
+        </div>
+      </form>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <NButton quaternary @click="closeForm">Hủy</NButton>
+          <NButton type="primary" :loading="saving" @click="submit">Lưu</NButton>
+        </div>
+      </template>
+    </NModal>
   </div>
 </template>

@@ -152,6 +152,25 @@ export interface AdminDashboard {
   revenue: number
 }
 
+export interface AdminDailyStat {
+  date: string
+  revenue: number
+  orderCount: number
+}
+
+export interface AdminTopProduct {
+  productId: number
+  name: string
+  quantity: number
+  revenue: number
+}
+
+export interface AdminStatistics {
+  revenueSeries: AdminDailyStat[]
+  ordersByStatus: Record<OrderStatus, number>
+  topProducts: AdminTopProduct[]
+}
+
 export interface UserSummary {
   id: number
   username: string
@@ -161,6 +180,24 @@ export interface UserSummary {
   role: UserRole
   isActive: boolean
   createdAt: string
+}
+
+export interface CreateUserRequest {
+  username: string
+  email: string
+  numberPhone: string
+  password: string
+  role: UserRole
+  hireDate?: string
+}
+
+export interface UpdateUserRequest {
+  username: string
+  email: string
+  numberPhone: string
+  role: UserRole
+  password?: string
+  hireDate?: string
 }
 
 export interface ProductRequest {
@@ -184,12 +221,4 @@ export interface CategoryRequest {
   icon?: string
   displayOrder?: number
   active: boolean
-}
-
-export interface CreateAdminRequest {
-  username: string
-  email: string
-  numberPhone: string
-  password: string
-  hireDate?: string
 }

@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -32,4 +34,47 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.status = :completed OR o.payment.status = :paid")
     Long sumTotalByStatusAndPaid(@Param("completed") OrderStatus completed,
                                  @Param("paid") PaymentStatus paid);
+
+    @Query("SELECT o.createdAt AS createdAt, o.total AS total, o.status AS status, o.payment.status AS paymentStatus " +
+            "FROM Order o " +
+            "WHERE o.createdAt >= :since")
+    List<OrderStatRow> orderStatsSince(@Param("since") Instant since);
+
+    @Query("SELECT o.status AS status, COUNT(o) AS count FROM Order o GROUP BY o.status")
+    List<StatusCountRow> countByStatus();
+
+    @Query("SELECT oi.product.id AS productId, " +
+            "COALESCE(MAX(oi.productNameSnapshot), '') AS name, " +
+            "SUM(oi.quantity) AS quantity, " +
+            "SUM(oi.quantity * oi.unitPrice) AS revenue " +
+            "FROM OrderItem oi " +
+            "GROUP BY oi.product.id " +
+            "ORDER BY quantity DESC")
+    List<TopProductRow> topProducts(Pageable pageable);
+
+    interface OrderStatRow {
+        Instant getCreatedAt();
+
+        double getTotal();
+
+        OrderStatus getStatus();
+
+        PaymentStatus getPaymentStatus();
+    }
+
+    interface StatusCountRow {
+        OrderStatus getStatus();
+
+        long getCount();
+    }
+
+    interface TopProductRow {
+        Long getProductId();
+
+        String getName();
+
+        long getQuantity();
+
+        double getRevenue();
+    }
 }

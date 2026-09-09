@@ -13,7 +13,7 @@ import ProductsIndexPage from '@/pages/products/index.vue'
 import ProductDetailPage from '@/pages/products/[slug].vue'
 import OrdersIndexPage from '@/pages/orders/index.vue'
 import OrderDetailPage from '@/pages/orders/[id].vue'
-import AdminDashboardPage from '@/pages/admin/index.vue'
+import AdminStatisticsPage from '@/pages/admin/statistic.vue'
 import AdminProductsPage from '@/pages/admin/products.vue'
 import AdminCategoriesPage from '@/pages/admin/categories.vue'
 import AdminOrdersPage from '@/pages/admin/orders.vue'
@@ -45,11 +45,11 @@ const routes: RouteRecordRaw[] = [
       { path: 'orders', name: 'orders', component: OrdersIndexPage, meta: { customerOnly: true } },
       { path: 'orders/:id', name: 'order-detail', component: OrderDetailPage, meta: { customerOnly: true } },
 
-      { path: 'admin', name: 'admin', component: AdminDashboardPage, meta: { requiresAdmin: true } },
       { path: 'admin/products', name: 'admin-products', component: AdminProductsPage, meta: { requiresAdmin: true } },
       { path: 'admin/categories', name: 'admin-categories', component: AdminCategoriesPage, meta: { requiresAdmin: true } },
       { path: 'admin/orders', name: 'admin-orders', component: AdminOrdersPage, meta: { requiresAdmin: true } },
-      { path: 'admin/users', name: 'admin-users', component: AdminUsersPage, meta: { requiresAdmin: true } }
+      { path: 'admin/users', name: 'admin-users', component: AdminUsersPage, meta: { requiresAdmin: true } },
+      { path: 'admin/statistic', name: 'admin-statistic', component: AdminStatisticsPage, meta: { requiresAdmin: true } }
     ]
   }
 ]
@@ -90,7 +90,7 @@ router.beforeEach((to) => {
   }
   if (to.meta.customerOnly) {
     if (!isLoggedIn.value) return { path: '/login' }
-    if (isAdmin.value) return { path: '/admin' }
+    if (isAdmin.value) return { path: '/admin/products' }
     return true
   }
   return true

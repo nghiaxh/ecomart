@@ -62,11 +62,21 @@ export const categorySchema = z.object({
   active: z.boolean().optional()
 })
 
-export const createAdminSchema = z.object({
+export const createUserSchema = z.object({
   username: z.string().min(3, 'Tên đăng nhập tối thiểu 3 ký tự').max(50),
   email: z.string().email('Email không hợp lệ'),
   numberPhone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ'),
   password: z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(100),
+  role: z.enum(['CUSTOMER', 'ADMIN']),
+  hireDate: z.string().optional()
+})
+
+export const updateUserSchema = z.object({
+  username: z.string().min(3, 'Tên đăng nhập tối thiểu 3 ký tự').max(50),
+  email: z.string().email('Email không hợp lệ'),
+  numberPhone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ'),
+  password: z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(100).optional().or(z.literal('')),
+  role: z.enum(['CUSTOMER', 'ADMIN']),
   hireDate: z.string().optional()
 })
 
@@ -77,4 +87,5 @@ export type ReviewForm = z.infer<typeof reviewSchema>
 export type ProfileForm = z.infer<typeof profileSchema>
 export type ProductForm = z.infer<typeof productSchema>
 export type CategoryForm = z.infer<typeof categorySchema>
-export type CreateAdminForm = z.infer<typeof createAdminSchema>
+export type CreateUserForm = z.infer<typeof createUserSchema>
+export type UpdateUserForm = z.infer<typeof updateUserSchema>
