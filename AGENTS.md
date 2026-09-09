@@ -6,7 +6,7 @@ Eco-friendly supermarket (siêu thị xanh). Client-server monorepo with no root
 
 - **client/** — Vue 3 + Vite 8 + Vue Router 5 + Axios + TS + Zod 4 + Tailwind CSS 4 (via `@tailwindcss/vite`), with **Naive UI 2.45** (native light theme, CSS-in-JS, no global registration — every component imported per file) + **xicons** (`@vicons/ionicons5`) rendered through the local `UiIcon` wrapper. SPA only, no SSR. App code in `src/` (`main.ts` + `App.vue` + `router/` + `layouts/` + `pages/` + `components/`, `composables/`, `types/`, `schemas/`, `data/`, `assets/`). **No auto-imports, no unplugin** — Vue core, `vue-router`, `@vueuse/core`, every Naive UI component, and local components/composables are imported explicitly per file. Toasts/dialogs are wrapped by `useToast` (`naive-ui` `useMessage`) and `useConfirm` (`naive-ui` `useDialog`) so call sites and unit tests stay unchanged (`vi.mock('@/composables/useToast')`). `App.vue` mounts `<NConfigProvider>` + `<NMessageProvider>` + `<NDialogProvider>` + `<NGlobalStyle>`; `main.ts` installs `@unhead/vue` head (`createHead`) and `useHead` is used per-page. Admin stats charts use Chart.js via `vue-chartjs`. UI text and Zod error messages are Vietnamese. Shared UI in `src/components/` (`UiImg`, `UiIcon`, `PaginationBar`, `OrderSummaryCard`, `AddressForm/Card`, `ProductCard`, `AddToCartButton`, `PasswordInput`, `AuthShell`, `FooterGlobal`, `Reveal`, `SectionHeader`); form errors via `useFormErrors`; status→`NTag` type mapping in `useStatusLabels` (`badgeType`); session keys owned by `src/utils/session-storage.ts`; static home content in `src/data/home.ts`.
 - **server/** — Java 25, Spring Boot 3.5, Maven, Lombok, Spring Data JPA, PostgreSQL, Flyway.
-- **Infra** — `docker-compose.yml` runs postgres and two profiles: `prod` (server + client) and `dev` (`server-dev` + `client-dev` with volume mounts). Single `.env` at repo root holds every secret. Note: plain `mvn spring-boot:run` does **not** read `.env` — load the vars yourself or use compose.
+- **Infra** — `docker-compose.yml` runs postgres and two profiles: `prod` (server + client) and `dev` (`server-dev` + `client-dev` with volume mounts). Dev hot-reloads **internally** — no Compose `--watch`/`develop.watch`: `server-dev` reloads via `dev-reload.sh` (see Gotchas), `client-dev` is a Vite HMR dev server. Single `.env` at repo root holds every secret. Note: plain `mvn spring-boot:run` does **not** read `.env` — load the vars yourself or use compose.
 
 ### Key wiring (not obvious from filenames)
 
@@ -30,11 +30,11 @@ Must run inside `client/` or `server/` (no workspace root scripts).
 **Server** (`./server`):
 - `mvn spring-boot:run` (needs Postgres at `localhost:5432` and env vars — see JWT/PAYOS keys in `.env`; not auto-loaded)
 - `mvn package` / `mvn test` (JUnit + Testcontainers; tests need Docker, `src/test/resources/application.yml` disables Flyway and uses `create-drop`)
-- Or dev via compose: `docker compose --profile dev up --watch` (postgres + `server-dev` with `m2-cache`; rebuild-on-edit via Compose `develop.watch`)
+- Or dev via compose: `docker compose --profile dev up --build` (postgres + `server-dev` with `m2-cache`; source edits reload in-container via `dev-reload.sh` — no `--watch` needed)
 
 **Full stack** (repo root):
 - Prod: `docker compose --profile prod up --build`
-- Dev: `docker compose --profile dev up --watch`
+- Dev: `docker compose --profile dev up --build`
 - Plain `docker compose up --build` only starts postgres (server/client run under profiles). Server env names in compose match `application.yml`: `SPRING_DATASOURCE_URL`/`_USERNAME`/`_PASSWORD`, `JWT_SECRET`, `JWT_ACCESS_EXPIRATION`, `JWT_REFRESH_EXPIRATION`, `PAYOS_*`, `SEED_*`, `CLIENT_URL`.
 
 ## Gotchas
@@ -46,6 +46,7 @@ Must run inside `client/` or `server/` (no workspace root scripts).
 - **Authorization is enforced server-side**: `SecurityConfig` permits only public reads (POST `/api/auth/**`, GET products/categories/reviews, POST PayOS `/webhook`); everything else is `authenticated()`. Expired/invalid session is 401 (`UnauthorizedException`, auth flows only); touching another user's resource is 403 (`AccessDeniedException`). Admin write endpoints use `@PreAuthorize("hasRole('ADMIN')")`; user-scoped controllers use `@PreAuthorize("isAuthenticated()")`. Client route guards are UX only, not a security boundary.
 - **No Google OAuth** — `GOOGLE_CLIENT_ID` is declared in `application.yml` but not bound or used. Do not reference it as a working feature.
 - **Testing is expected**: client Vitest, server JUnit + Testcontainers, `e2e/` Playwright. Don't leave docs bumping their features without touching tests.
-- **Seeds are idempotent** (guard by slug/name): booting twice adds new rows without wiping. At least two products have `stock = 0`, so `e2e/tests/cart-robustness.spec.ts` runs for real instead of skipping.
+- **Seeds are idempotent** (guard by slug/name): booting twice adds new rows without wiping. Seed creates a full demo dataset (5 admins, 8 customers, addresses, carts, 30 orders + payments, 132 reviews, notifications) so the admin dashboard/stats have data. At least two products have `stock = 0`, so `e2e/tests/cart-robustness.spec.ts` runs for real instead of skipping.
+- **Server dev reload = in-container poller, not DevTools restart or Compose watch**: `SPRING_DEVTOOLS_RESTART_ENABLED=false`; `dev-reload.sh` polls `src/**` every 2s, runs `mvn clean compile` (clean is required — Lombok/JDK25 breaks on stale `target/classes`), then kills and relaunches `mvn spring-boot:run -Dspring-boot.run.fork=false` (~2 min/cycle). `develop.watch` was removed on purpose (Compose can't watch paths that are already bind mounts); don't reintroduce it. spring-boot-devtools stays in the pom (`runtime` + `optional`) but is excluded from prod jars.
 - **Out-of-stock UX**: `AddToCartButton` disables at `stock === 0`; `ProductCard` shows the badge. Never reintroduce a hardcoded "Miễn phí" shipping line — the summary card says "Tính khi đặt hàng" (fee lives server-side in `ShopProperties`).
 - Phone validation is unified: `^(0|\+84)[0-9]{9,10}$` in Zod schemas and `ProfileUpdateRequest`.
