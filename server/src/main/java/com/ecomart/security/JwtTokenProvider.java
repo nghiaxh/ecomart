@@ -25,11 +25,11 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(JwtProperties properties) {
         if (properties.secret() == null || properties.secret().isBlank()) {
-            throw new IllegalStateException("JWT_SECRET chưa được cấu hình. Vui lòng đặt biến môi trường JWT_SECRET.");
+            throw new IllegalStateException("JWT_SECRET is not configured. Please set the JWT_SECRET environment variable.");
         }
         byte[] secretBytes = properties.secret().getBytes(StandardCharsets.UTF_8);
         if (secretBytes.length < 32) {
-            throw new IllegalStateException("JWT_SECRET phải dài tối thiểu 32 ký tự.");
+            throw new IllegalStateException("JWT_SECRET must be at least 32 characters long.");
         }
         this.secretKey = Keys.hmacShaKeyFor(secretBytes);
         this.accessExpirationMs = properties.accessExpirationMs();
@@ -63,7 +63,7 @@ public class JwtTokenProvider {
             }
             return hex.toString();
         } catch (NoSuchAlgorithmException ex) {
-            throw new IllegalStateException("Thiếu thuật toán SHA-256", ex);
+            throw new IllegalStateException("SHA-256 algorithm not available", ex);
         }
     }
 
@@ -79,7 +79,7 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (Exception ex) {
-            throw new UnauthorizedException("Token không hợp lệ hoặc đã hết hạn");
+            throw new UnauthorizedException("Token is invalid or has expired");
         }
     }
 

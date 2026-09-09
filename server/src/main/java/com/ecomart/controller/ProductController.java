@@ -101,6 +101,6 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public MessageResponse delete(@PathVariable Long id) {
         productService.delete(id);
-        return new MessageResponse("Đã xóa sản phẩm");
+        return new MessageResponse("Product deleted");
     }
 }

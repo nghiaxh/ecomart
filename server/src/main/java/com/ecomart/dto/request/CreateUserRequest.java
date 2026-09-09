@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public record CreateUserRequest(
         @NotBlank @Size(min = 3, max = 50) String username,
         @NotBlank @Email String email,
-        @NotBlank @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$", message = "Số điện thoại không hợp lệ") String numberPhone,
+        @NotBlank @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$", message = "Invalid phone number") String numberPhone,
         @NotBlank @Size(min = 6, max = 100) String password,
         @NotNull UserRole role,
         LocalDate hireDate

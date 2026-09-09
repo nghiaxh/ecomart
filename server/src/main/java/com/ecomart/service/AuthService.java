@@ -54,10 +54,10 @@ public class AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new BadRequestException("Email đã được sử dụng");
+            throw new BadRequestException("Email is already in use");
         }
         if (userRepository.existsByUsername(request.username())) {
-            throw new BadRequestException("Tên đăng nhập đã tồn tại");
+            throw new BadRequestException("Username already exists");
         }
 
         Customer customer = new Customer();
@@ -85,7 +85,7 @@ public class AuthService {
                 (org.springframework.security.core.userdetails.User) auth.getPrincipal();
         String email = principal.getUsername();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("Email hoặc mật khẩu không đúng"));
+                .orElseThrow(() -> new BadRequestException("Invalid email or password"));
         return issueTokenPair(user);
     }
 
@@ -93,18 +93,18 @@ public class AuthService {
     public AuthResponse refresh(RefreshTokenRequest request) {
         String hash = JwtTokenProvider.sha256Hex(request.refreshToken().trim());
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hash)
-                .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại"));
+                .orElseThrow(() -> new UnauthorizedException("Session has expired, please log in again"));
         if (stored.getRevokedAt() != null) {
             revokeAllForUser(stored.getUser().getId());
-            throw new UnauthorizedException("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+            throw new UnauthorizedException("Session has expired, please log in again");
         }
         if (stored.getExpiresAt().isBefore(Instant.now())) {
             refreshTokenRepository.delete(stored);
-            throw new UnauthorizedException("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+            throw new UnauthorizedException("Session has expired, please log in again");
         }
         User user = stored.getUser();
         if (!user.isActive()) {
-            throw new UnauthorizedException("Tài khoản đã bị khóa");
+            throw new UnauthorizedException("Account has been locked");
         }
         stored.setRevokedAt(Instant.now());
         AuthResponse response = issueTokenPair(user);

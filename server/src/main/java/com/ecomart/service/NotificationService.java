@@ -43,7 +43,7 @@ public class NotificationService {
     public void markRead(Long userId, Long notificationId) {
         Notification n = notificationRepository.findById(notificationId)
                 .filter(notif -> notif.getUser().getId().equals(userId))
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông báo"));
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
         n.setRead(true);
         notificationRepository.save(n);
     }

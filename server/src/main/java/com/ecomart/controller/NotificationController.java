@@ -41,12 +41,12 @@ public class NotificationController {
     @PatchMapping("/{id}/read")
     public MessageResponse markRead(@PathVariable Long id) {
         notificationService.markRead(securityUtils.currentUserId(), id);
-        return new MessageResponse("Đã đánh dấu đã đọc");
+        return new MessageResponse("Marked as read");
     }
 
     @PatchMapping("/read-all")
     public MessageResponse markAllRead() {
         notificationService.markAllRead(securityUtils.currentUserId());
-        return new MessageResponse("Đã đánh dấu tất cả đã đọc");
+        return new MessageResponse("All marked as read");
     }
 }

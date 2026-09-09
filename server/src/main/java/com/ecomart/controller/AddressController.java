@@ -55,6 +55,6 @@ public class AddressController {
     @DeleteMapping("/{id}")
     public MessageResponse delete(@PathVariable Long id) {
         addressService.delete(id);
-        return new MessageResponse("Đã xóa địa chỉ");
+        return new MessageResponse("Address deleted");
     }
 }

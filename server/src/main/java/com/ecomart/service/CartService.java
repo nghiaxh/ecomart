@@ -41,12 +41,12 @@ public class CartService {
     public CartResponse add(AddToCartRequest request) {
         Cart cart = getCart();
         Product product = productRepository.findById(request.productId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         if (!product.isActive()) {
-            throw new BadRequestException("Sản phẩm đã ngừng kinh doanh");
+            throw new BadRequestException("Product has been discontinued");
         }
         if (product.getStock() == 0) {
-            throw new BadRequestException("Sản phẩm đã hết hàng");
+            throw new BadRequestException("Product is out of stock");
         }
         cart.getItems().size();
         CartItem item = cart.getItems().stream()
@@ -63,7 +63,7 @@ public class CartService {
                 });
         int newQuantity = item.getQuantity() + request.quantity();
         if (newQuantity > product.getStock()) {
-            throw new BadRequestException("Số lượng vượt quá tồn kho, chỉ còn " + product.getStock());
+            throw new BadRequestException("Quantity exceeds available stock, only " + product.getStock() + " left");
         }
         item.setQuantity(newQuantity);
         return Mapper.toCart(cart);
@@ -76,17 +76,17 @@ public class CartService {
         CartItem item = cart.getItems().stream()
                 .filter(ci -> ci.getId().getProductId().equals(productId))
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không có trong giỏ hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product is not in the cart"));
         if (quantity <= 0) {
             cart.getItems().remove(item);
             return Mapper.toCart(cart);
         }
         Product product = item.getProduct();
         if (product.getStock() == 0) {
-            throw new BadRequestException("Sản phẩm đã hết hàng");
+            throw new BadRequestException("Product is out of stock");
         }
         if (quantity > product.getStock()) {
-            throw new BadRequestException("Số lượng vượt quá tồn kho, chỉ còn " + product.getStock());
+            throw new BadRequestException("Quantity exceeds available stock, only " + product.getStock() + " left");
         }
         item.setQuantity(quantity);
         return Mapper.toCart(cart);
@@ -97,7 +97,7 @@ public class CartService {
         Cart cart = getCart();
         boolean removed = cart.getItems().removeIf(ci -> ci.getId().getProductId().equals(productId));
         if (!removed) {
-            throw new ResourceNotFoundException("Sản phẩm không có trong giỏ hàng");
+            throw new ResourceNotFoundException("Product is not in the cart");
         }
         return Mapper.toCart(cart);
     }
@@ -106,8 +106,8 @@ public class CartService {
         User user = securityUtils.currentUser();
         if (user instanceof Customer customer) {
             return cartRepository.findByCustomerId(customer.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giỏ hàng"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         }
-        throw new org.springframework.security.access.AccessDeniedException("Chỉ khách hàng mới có giỏ hàng");
+        throw new org.springframework.security.access.AccessDeniedException("Only customers have carts");
     }
 }

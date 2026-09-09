@@ -20,11 +20,11 @@ public class SecurityUtils {
     public User currentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !(auth.getPrincipal() instanceof UserDetails)) {
-            throw new UnauthorizedException("Vui lòng đăng nhập");
+            throw new UnauthorizedException("Authentication required");
         }
         UserDetails details = (UserDetails) auth.getPrincipal();
         return userRepository.findByEmail(details.getUsername())
-                .orElseThrow(() -> new UnauthorizedException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
     }
 
     public Long currentUserId() {

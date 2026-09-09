@@ -56,6 +56,6 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     public MessageResponse delete(@PathVariable Long id) {
         categoryService.delete(id);
-        return new MessageResponse("Đã xóa danh mục");
+        return new MessageResponse("Category deleted");
     }
 }

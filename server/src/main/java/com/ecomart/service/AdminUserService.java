@@ -77,10 +77,10 @@ public class AdminUserService {
 
         UserRole newRole = request.role();
         if (newRole == null) {
-            throw new BadRequestException("Vai trò không hợp lệ");
+            throw new BadRequestException("Invalid role");
         }
         if (id.equals(currentUserId) && newRole != user.getRole()) {
-            throw new BadRequestException("Không thể thay đổi vai trò của chính mình");
+            throw new BadRequestException("Cannot change your own role");
         }
 
         boolean sameRole = user.getRole() == newRole;
@@ -102,7 +102,7 @@ public class AdminUserService {
     public UserSummaryResponse toggleActive(Long id, Long currentUserId) {
         User user = getById(id);
         if (id.equals(currentUserId)) {
-            throw new BadRequestException("Không thể vô hiệu hóa tài khoản của chính mình");
+            throw new BadRequestException("Cannot deactivate your own account");
         }
         user.setActive(!user.isActive());
         return Mapper.toUserSummary(userRepository.save(user));
@@ -176,10 +176,10 @@ public class AdminUserService {
 
     private void assertUnique(String username, String email) {
         if (userRepository.existsByUsername(username)) {
-            throw new BadRequestException("Tên đăng nhập đã tồn tại");
+            throw new BadRequestException("Username already exists");
         }
         if (userRepository.existsByEmail(email)) {
-            throw new BadRequestException("Email đã tồn tại");
+            throw new BadRequestException("Email already exists");
         }
     }
 
@@ -187,17 +187,17 @@ public class AdminUserService {
         userRepository.findByUsername(username)
                 .filter(u -> !u.getId().equals(id))
                 .ifPresent(u -> {
-                    throw new BadRequestException("Tên đăng nhập đã tồn tại");
+                    throw new BadRequestException("Username already exists");
                 });
         userRepository.findByEmail(email)
                 .filter(u -> !u.getId().equals(id))
                 .ifPresent(u -> {
-                    throw new BadRequestException("Email đã tồn tại");
+                    throw new BadRequestException("Email already exists");
                 });
     }
 
     private User getById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }

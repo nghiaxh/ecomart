@@ -36,7 +36,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponse getBySlug(String slug) {
         Category category = categoryRepository.findBySlug(slug)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         return Mapper.toCategory(category);
     }
 
@@ -44,7 +44,7 @@ public class CategoryService {
     public CategoryResponse create(CategoryRequest request) {
         String slug = resolveSlug(request);
         if (categoryRepository.existsBySlug(slug)) {
-            throw new BadRequestException("Slug danh mục đã tồn tại");
+            throw new BadRequestException("Category slug already exists");
         }
         Category category = new Category();
         Mapper.mergeCategory(category, request, resolveParent(request), slug);
@@ -54,12 +54,12 @@ public class CategoryService {
     @Transactional
     public CategoryResponse update(Long id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         String slug = request.slug() == null || request.slug().isBlank()
                 ? category.getSlug()
                 : resolveSlug(request);
         if (!slug.equals(category.getSlug()) && categoryRepository.existsBySlug(slug)) {
-            throw new BadRequestException("Slug danh mục đã tồn tại");
+            throw new BadRequestException("Category slug already exists");
         }
         Mapper.mergeCategory(category, request, resolveParent(request), slug);
         return Mapper.toCategory(categoryRepository.save(category));
@@ -68,13 +68,13 @@ public class CategoryService {
     @Transactional
     public void delete(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Không tìm thấy danh mục");
+            throw new ResourceNotFoundException("Category not found");
         }
         if (!categoryRepository.findByParentId(id).isEmpty()) {
-            throw new BadRequestException("Không thể xóa danh mục có danh mục con");
+            throw new BadRequestException("Cannot delete a category that has child categories");
         }
         if (productRepository.existsByCategoryId(id)) {
-            throw new BadRequestException("Không thể xóa danh mục đang chứa sản phẩm");
+            throw new BadRequestException("Cannot delete a category that contains products");
         }
         categoryRepository.deleteById(id);
     }
@@ -84,7 +84,7 @@ public class CategoryService {
             return null;
         }
         return categoryRepository.findById(req.parentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục cha"));
+                .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
     }
 
     private String resolveSlug(CategoryRequest req) {

@@ -24,7 +24,7 @@ public record ProductRequest(
         List<@Valid ProductMaterialRequest> materials) {
 
     public record ProductImageRequest(
-            @NotBlank @Pattern(regexp = "^(https?://|/).*", message = "Đường dẫn ảnh không hợp lệ") String url,
+            @NotBlank @Pattern(regexp = "^(https?://|/).*", message = "Invalid image URL") String url,
             boolean primary,
             Integer displayOrder) {}
 

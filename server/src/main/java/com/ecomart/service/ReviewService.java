@@ -36,9 +36,9 @@ public class ReviewService {
     public ReviewResponse create(ReviewRequest request) {
         Customer customer = (Customer) securityUtils.currentUser();
         Product product = productRepository.findById(request.productId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         if (reviewRepository.existsByCustomerIdAndProductId(customer.getId(), product.getId())) {
-            throw new BadRequestException("Bạn đã đánh giá sản phẩm này");
+            throw new BadRequestException("You have already reviewed this product");
         }
         Review review = new Review();
         review.setCustomer(customer);
@@ -52,7 +52,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public List<ReviewResponse> listForProduct(Long productId, boolean includeHidden) {
         if (includeHidden && !securityUtils.currentUserHasRole("ADMIN")) {
-            throw new AccessDeniedException("Bạn không có quyền xem đánh giá đã ẩn");
+            throw new AccessDeniedException("You do not have permission to view hidden reviews");
         }
         List<Review> reviews = includeHidden
                 ? reviewRepository.findByProductIdOrderByCreatedAtDesc(productId)
@@ -63,7 +63,7 @@ public class ReviewService {
     @Transactional
     public ReviewResponse toggleHidden(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá"));
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
         review.setHidden(!review.isHidden());
         return Mapper.toReview(reviewRepository.save(review));
     }

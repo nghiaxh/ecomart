@@ -36,7 +36,7 @@ public class ProfileService {
         if (request.username() != null && !request.username().isBlank()
                 && !request.username().equals(user.getUsername())) {
             if (userRepository.existsByUsername(request.username())) {
-                throw new BadRequestException("Tên đăng nhập đã tồn tại");
+                throw new BadRequestException("Username already exists");
             }
             user.setUsername(request.username());
         }
@@ -48,7 +48,7 @@ public class ProfileService {
         }
         if (request.newPassword() != null && !request.newPassword().isBlank()) {
             if (request.currentPassword() == null || !passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
-                throw new BadRequestException("Mật khẩu hiện tại không đúng");
+                throw new BadRequestException("Current password is incorrect");
             }
             user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         }

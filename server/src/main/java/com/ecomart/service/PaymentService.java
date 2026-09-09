@@ -33,18 +33,18 @@ public class PaymentService {
         String signature = body == null ? null : (String) body.get("signature");
 
         if (data == null || data.get("orderCode") == null) {
-            throw new BadRequestException("Dữ liệu webhook không hợp lệ");
+            throw new BadRequestException("Webhook data is invalid");
         }
         if (!payOSClient.verifySignature(data, signature)) {
-            throw new UnauthorizedException("Chữ ký PayOS không hợp lệ");
+            throw new UnauthorizedException("PayOS signature is invalid");
         }
         long orderId;
         try {
             orderId = Long.parseLong(String.valueOf(data.get("orderCode")));
         } catch (NumberFormatException ex) {
-            throw new BadRequestException("Mã đơn hàng không hợp lệ");
+            throw new BadRequestException("Order code is invalid");
         }
         orderService.confirmPayment(orderId);
-        return new MessageResponse("Thanh toán đã được xác nhận");
+        return new MessageResponse("Payment has been confirmed");
     }
 }

@@ -23,13 +23,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(identifier)
                 .or(() -> userRepository.findByEmail(identifier))
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return toUserDetails(user);
     }
 
     public UserDetails loadUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return toUserDetails(user);
     }
 

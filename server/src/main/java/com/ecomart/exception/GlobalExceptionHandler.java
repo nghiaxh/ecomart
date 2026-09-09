@@ -36,12 +36,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiError> handleBadCredentials(BadCredentialsException ex, HttpServletRequest req) {
-        return build(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng", req);
+        return build(HttpStatus.UNAUTHORIZED, "Invalid email or password", req);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
-        return build(HttpStatus.FORBIDDEN, "Bạn không có quyền truy cập", req);
+        return build(HttpStatus.FORBIDDEN, "Access denied", req);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(fe -> fe.getField() + " " + fe.getDefaultMessage())
-                .orElse("Dữ liệu không hợp lệ");
+                .orElse("Invalid data");
         return build(HttpStatus.BAD_REQUEST, message, req);
     }
 
@@ -60,28 +60,28 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.beans.TypeMismatchException.class)
     public ResponseEntity<ApiError> handleTypeMismatch(org.springframework.beans.TypeMismatchException ex, HttpServletRequest req) {
-        return build(HttpStatus.BAD_REQUEST, "Dữ liệu không hợp lệ", req);
+        return build(HttpStatus.BAD_REQUEST, "Invalid data", req);
     }
 
     @ExceptionHandler({IllegalArgumentException.class, NoSuchElementException.class})
     public ResponseEntity<ApiError> handleBadArgument(Exception ex, HttpServletRequest req) {
-        return build(HttpStatus.BAD_REQUEST, "Dữ liệu không hợp lệ", req);
+        return build(HttpStatus.BAD_REQUEST, "Invalid data", req);
     }
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<ApiError> handleOptimisticLock(OptimisticLockingFailureException ex, HttpServletRequest req) {
-        return build(HttpStatus.CONFLICT, "Dữ liệu đã được cập nhật bởi người khác, vui lòng thử lại", req);
+        return build(HttpStatus.CONFLICT, "Data has been modified by another user, please try again", req);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest req) {
-        return build(HttpStatus.CONFLICT, "Dữ liệu đã tồn tại hoặc không hợp lệ", req);
+        return build(HttpStatus.CONFLICT, "Data already exists or is invalid", req);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(Exception ex, HttpServletRequest req) {
         log.error("Unhandled exception on {} {}", req.getMethod(), req.getRequestURI(), ex);
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Đã xảy ra lỗi máy chủ", req);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", req);
     }
 
     private ResponseEntity<ApiError> build(HttpStatus status, String message, HttpServletRequest req) {
