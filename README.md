@@ -8,7 +8,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169e1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Zod](https://img.shields.io/badge/Zod-4.5-3e67b1?logo=zod&logoColor=white)](https://zod.dev)
 [![Docker](https://img.shields.io/badge/Docker%20Compose-2496ed?logo=docker&logoColor=white)](https://www.docker.com)
-[![Nuxt UI](https://img.shields.io/badge/Nuxt%20UI-4.11-48bb78?logo=nuxtdotjs&logoColor=white)](https://ui.nuxt.com)
+[![PrimeVue](https://img.shields.io/badge/PrimeVue-4.5-10b981?logo=primevue&logoColor=white)](https://primevue.org)
 [![Vitest](https://img.shields.io/badge/Vitest-4.1-FCC72B?logo=vitest&logoColor=black)](https://vitest.dev)
 [![Playwright](https://img.shields.io/badge/Playwright-1.62-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
 [![Testcontainers](https://img.shields.io/badge/Testcontainers-1.21-2496ED)](https://java.testcontainers.org)
@@ -38,7 +38,7 @@ Monorepo client-server, mỗi module build độc lập, không có build toolin
 
 ```
 ecomart/
-├── client/            # Vue 3 + Vite 8 + Vue Router 5 + Nuxt UI 4 + TypeScript + Zod 4
+├── client/            # Vue 3 + Vite 8 + Vue Router 5 + PrimeVue 4 + TypeScript + Zod 4
 ├── server/            # Spring Boot 3.5 + Java 25 + PostgreSQL + Flyway
 ├── e2e/               # Playwright end-to-end
 ├── docker-compose.yml # chạy toàn bộ stack (profiles: prod / dev)
@@ -114,7 +114,7 @@ Lưu ý: `mvn spring-boot:run` **không** tự đọc `.env` — cần nạp cá
 
 | Layer | Stack |
 |-------|-------|
-| Client | Vue 3, Vite 8, Vue Router 5, Nuxt UI 4 (Vite plugin), TypeScript, Zod 4, Tailwind CSS, Axios |
+| Client | Vue 3, Vite 8, Vue Router 5, PrimeVue 4 (Aura), TypeScript, Zod 4, Tailwind CSS, Axios |
 | Server | Spring Boot 3.5, Spring Security (JWT access + refresh), Spring Data JPA, Lombok, Flyway |
 | Database | PostgreSQL 18 |
 | Tích hợp | Chat từ khóa + RAG nội bộ, PayOS (thanh toán QR + webhook) |

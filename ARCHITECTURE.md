@@ -9,14 +9,14 @@ EcoMart là ứng dụng **siêu thị trực tuyến** dạng client-server mon
 ```
 ┌──────────────────┐  same-origin /api (Vite dev proxy / nginx)  ┌──────────────────────┐
 │  Vite SPA client │ ─────────────────────────────────────────▶ │  Spring Boot server  │
-│  (Vue 3 + Nuxt UI)│ ◀───────────────────────────────────────── │  Java 25 + JPA       │
+│  (Vue 3 + PrimeVue)│ ◀───────────────────────────────────────── │  Java 25 + JPA       │
 └──────────────────┘    Authorization: Bearer (JWT)              └──────────┬───────────┘
                                                                             │
                                                      PostgreSQL (ddl-auto: update
                                                      + Flyway, baseline-on-migrate)
 ```
 
-- **client/** — Vue 3 + Vite 8 + Vue Router 5 + Nuxt UI 4 (qua standalone Vite plugin `@nuxt/ui/vite`) + Axios + TypeScript + Zod 4. SPA thuần, không SSR. Giao diện tiếng Việt. Không còn Nitro proxy: ở dev, Vite proxy `/api` tới `VITE_API_TARGET` (mặc định `http://localhost:8080`); ở prod, container nginx (nginx.conf) proxy `/api` tới service `server`. Nếu đặt `VITE_API_BASE`, client gọi thẳng backend qua CORS (bỏ proxy).
+- **client/** — Vue 3 + Vite 8 + Vue Router 5 + PrimeVue 4.5 (Aura preset, theo `@primevue/themes`, license MIT) + Axios + TypeScript + Zod 4. SPA thuần, không SSR. Giao diện tiếng Việt. Không còn Nitro proxy: ở dev, Vite proxy `/api` tới `VITE_API_TARGET` (mặc định `http://localhost:8080`); ở prod, container nginx (nginx.conf) proxy `/api` tới service `server`. Nếu đặt `VITE_API_BASE`, client gọi thẳng backend qua CORS (bỏ proxy).
 - **server/** — Spring Boot 3.5 + Spring Security (JWT access + refresh) + Spring Data JPA. 14 controller, mỗi resource một controller → service → repository.
 - **PostgreSQL** — `ddl-auto: update` đồng bộ schema khi khởi động. Flyway đã bật (`baseline-on-migrate`, `locations: classpath:db/migration`) nhưng chưa có script migration thật.
 
@@ -141,7 +141,7 @@ src/
   types/             TS interfaces phản ánh DTO của backend
   assets/css/        main.css
 index.html           entry HTML (src/main.ts)
-vite.config.ts       plugin-vue + Nuxt UI (auto-imports Vue/vue-router/@vueuse + components) + alias @ + proxy /api
+vite.config.ts       plugin-vue + alias @ + proxy /api (import tường minh mọi thứ, không auto-import)
 nginx.conf           prod: serve dist/ + proxy /api → server
 ```
 
