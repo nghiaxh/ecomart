@@ -10,7 +10,7 @@ let pendingFetch: Promise<Cart | null> | null = null
 
 export const useCart = () => {
   const { request } = useApi()
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, isAdmin } = useAuth()
   const toast = useToast()
 
   const itemCount = computed(() => cart.value?.itemCount ?? 0)
@@ -35,8 +35,8 @@ export const useCart = () => {
     return pendingFetch
   }
 
-  watch(isLoggedIn, (loggedIn) => {
-    if (loggedIn) {
+  watch([isLoggedIn, isAdmin], ([loggedIn, admin]) => {
+    if (loggedIn && !admin) {
       fetchCart()
     } else {
       cart.value = null
