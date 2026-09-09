@@ -303,7 +303,7 @@ onMounted(load)
         </div>
         <div v-if="form.role === 'ADMIN'">
           <label class="mb-1 block text-sm text-gray-500">Ngày tuyển dụng (tùy chọn)</label>
-          <NInput v-model:value="form.hireDate" :input-props="{ type: 'date' }" />
+          <NInput v-model:value="form.hireDate" :input-props="{ type: 'date' }" placeholder="yyyy-mm-dd" />
         </div>
       </form>
       <template #footer>

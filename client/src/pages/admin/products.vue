@@ -215,12 +215,12 @@ watch(search, debouncedLoad)
       <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
         <div>
           <label class="mb-1 block text-sm text-gray-500">Tên</label>
-          <NInput v-model:value="form.name" />
+          <NInput v-model:value="form.name" placeholder="vd: Rau muống sạch" />
           <p v-if="errors.name" class="text-xs text-red-600">{{ errors.name }}</p>
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Slug</label>
-          <NInput v-model:value="form.slug" />
+          <NInput v-model:value="form.slug" placeholder="vd: rau-muong-sach" />
           <p v-if="errors.slug" class="text-xs text-red-600">{{ errors.slug }}</p>
         </div>
         <div>
@@ -230,21 +230,21 @@ watch(search, debouncedLoad)
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Giá (₫)</label>
-          <NInputNumber v-model:value="form.price" :min="0" :show-button="false" />
+          <NInputNumber v-model:value="form.price" :min="0" :show-button="false" placeholder="vd: 15000" />
           <p v-if="errors.price" class="text-xs text-red-600">{{ errors.price }}</p>
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Tồn kho</label>
-          <NInputNumber v-model:value="form.stock" :min="0" :show-button="false" />
+          <NInputNumber v-model:value="form.stock" :min="0" :show-button="false" placeholder="vd: 100" />
           <p v-if="errors.stock" class="text-xs text-red-600">{{ errors.stock }}</p>
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Khối lượng (kg)</label>
-          <NInputNumber v-model:value="form.weight" :min="0" :show-button="false" />
+          <NInputNumber v-model:value="form.weight" :min="0" :show-button="false" placeholder="vd: 1" />
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Xuất xứ</label>
-          <NInput v-model:value="form.origin" />
+          <NInput v-model:value="form.origin" placeholder="vd: Lâm Đồng" />
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Hình ảnh URL</label>
@@ -252,7 +252,7 @@ watch(search, debouncedLoad)
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Mô tả</label>
-          <NInput v-model:value="form.description" type="textarea" :rows="3" />
+          <NInput v-model:value="form.description" type="textarea" :rows="3" placeholder="Mô tả ngắn về sản phẩm" />
         </div>
         <div class="flex items-center gap-2 md:col-span-3">
           <NCheckbox v-model:checked="form.active">Đang bán</NCheckbox>
