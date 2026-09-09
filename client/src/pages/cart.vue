@@ -57,8 +57,6 @@ async function deleteItem(productId: number) {
 
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-    <h1 class="text-3xl font-extrabold text-gray-700">Giỏ hàng</h1>
-
     <div v-if="loading" class="mt-8 grid gap-6 lg:grid-cols-3">
       <div class="space-y-4 lg:col-span-2">
         <NSkeleton v-for="i in 2" :key="i" class="h-28 rounded-2xl" />
@@ -109,10 +107,12 @@ async function deleteItem(productId: number) {
     <div v-else class="py-24 text-center">
       <UiIcon name="shopping-cart" size="48" class="mx-auto mb-4 block text-emerald-200" />
       <p class="text-gray-500">Giỏ hàng của bạn đang trống.</p>
-      <NButton type="primary" size="large" class="mt-4" @click="router.push('/products')">
-        <template #icon><UiIcon name="shopping-bag" /></template>
-        Mua sắm ngay
-      </NButton>
+      <div class="mt-4">
+        <NButton type="primary" size="large" @click="router.push('/products')">
+          <template #icon><UiIcon name="shopping-bag" /></template>
+          Mua sắm ngay
+        </NButton>
+      </div>
     </div>
   </div>
 </template>
