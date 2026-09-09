@@ -11,7 +11,9 @@ import com.ecomart.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class CategoryService {
@@ -40,11 +42,12 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
-        if (categoryRepository.existsBySlug(request.slug())) {
+        String slug = resolveSlug(request);
+        if (categoryRepository.existsBySlug(slug)) {
             throw new BadRequestException("Slug danh mục đã tồn tại");
         }
         Category category = new Category();
-        Mapper.mergeCategory(category, request, resolveParent(request));
+        Mapper.mergeCategory(category, request, resolveParent(request), slug);
         return Mapper.toCategory(categoryRepository.save(category));
     }
 
@@ -52,7 +55,13 @@ public class CategoryService {
     public CategoryResponse update(Long id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
-        Mapper.mergeCategory(category, request, resolveParent(request));
+        String slug = request.slug() == null || request.slug().isBlank()
+                ? category.getSlug()
+                : resolveSlug(request);
+        if (!slug.equals(category.getSlug()) && categoryRepository.existsBySlug(slug)) {
+            throw new BadRequestException("Slug danh mục đã tồn tại");
+        }
+        Mapper.mergeCategory(category, request, resolveParent(request), slug);
         return Mapper.toCategory(categoryRepository.save(category));
     }
 
@@ -76,5 +85,17 @@ public class CategoryService {
         }
         return categoryRepository.findById(req.parentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục cha"));
+    }
+
+    private String resolveSlug(CategoryRequest req) {
+        if (req.slug() != null && !req.slug().isBlank()) {
+            return req.slug().trim().toLowerCase(Locale.ROOT);
+        }
+        String raw = Normalizer.normalize(req.name().toLowerCase(Locale.ROOT), Normalizer.Form.NFD)
+                .replace('\u0111', 'd')
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("(^-|-$)", "");
+        return raw.isBlank() ? "danh-muc" : raw;
     }
 }

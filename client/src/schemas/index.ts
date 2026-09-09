@@ -55,7 +55,7 @@ export const productSchema = z.object({
 
 export const categorySchema = z.object({
   name: z.string().min(1, 'Vui lòng nhập tên'),
-  slug: z.string().min(1, 'Vui lòng nhập slug'),
+  slug: z.string().optional(),
   parentId: z.coerce.number().optional().nullable(),
   icon: z.string().optional(),
   displayOrder: z.coerce.number().optional(),

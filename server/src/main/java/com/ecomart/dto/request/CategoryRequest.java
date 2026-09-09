@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 public record CategoryRequest(
         Long parentId,
         @NotBlank String name,
-        @NotBlank String slug,
+        String slug,
         String icon,
         Integer displayOrder,
         @NotNull Boolean active) {

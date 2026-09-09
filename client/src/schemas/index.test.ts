@@ -93,8 +93,10 @@ describe('categorySchema', () => {
   it('accepts valid category', () => {
     expect(categorySchema.safeParse({ name: 'Rau củ', slug: 'rau-cu', parentId: null }).success).toBe(true)
   })
-  it('rejects missing name/slug', () => {
+  it('accepts category without slug', () => {
+    expect(categorySchema.safeParse({ name: 'Rau củ', parentId: null }).success).toBe(true)
+  })
+  it('rejects missing name', () => {
     expect(categorySchema.safeParse({ name: '', slug: 'rau-cu' }).success).toBe(false)
-    expect(categorySchema.safeParse({ name: 'Rau củ', slug: '' }).success).toBe(false)
   })
 })

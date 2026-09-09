@@ -217,7 +217,7 @@ export interface ProductRequest {
 export interface CategoryRequest {
   parentId?: number
   name: string
-  slug: string
+  slug?: string
   icon?: string
   displayOrder?: number
   active: boolean

@@ -150,12 +150,10 @@ public final class Mapper {
         return pm;
     }
 
-    public static void mergeCategory(Category category, CategoryRequest req, Category parent) {
-        if (parent != null) {
-            category.setParent(parent);
-        }
+    public static void mergeCategory(Category category, CategoryRequest req, Category parent, String slug) {
+        category.setParent(parent);
         category.setName(req.name());
-        category.setSlug(req.slug());
+        category.setSlug(slug);
         category.setIcon(req.icon());
         category.setDisplayOrder(req.displayOrder() == null ? 0 : req.displayOrder());
         category.setActive(req.active());
