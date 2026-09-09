@@ -10,7 +10,7 @@ const { formatVND, formatKg } = useFormat()
 <template>
   <RouterLink
     :to="`/products/${product.slug}`"
-    class="group block overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-900/5"
+    class="group block overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-900/5"
   >
     <div class="relative aspect-[4/3] overflow-hidden bg-gray-50">
       <UiImg
