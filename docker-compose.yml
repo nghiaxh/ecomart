@@ -91,16 +91,7 @@ services:
         condition: service_healthy
     volumes:
       - m2-cache:/root/.m2
-    develop:
-      watch:
-        - action: rebuild
-          path: ./server/src
-          ignore:
-            - target/
-        - action: rebuild
-          path: ./server/pom.xml
-        - action: rebuild
-          path: ./server/Dockerfile.dev
+      - ./server:/app
     networks:
       - ecomart
 
