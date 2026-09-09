@@ -58,7 +58,7 @@ const aboutPoints = homeAboutPoints
             EcoMart mang đến rau củ, trái cây, thực phẩm tươi sạch và đầy đủ cho mọi bữa ăn của gia đình bạn.
           </p>
           <div class="mt-8 flex flex-wrap items-center gap-3">
-            <NButton size="large" type="success" class="border-0!" @click="$router.push('/products')">
+            <NButton size="large" type="primary" @click="$router.push('/products')">
               <template #icon><UiIcon name="shopping-bag" /></template>
               Mua sắm ngay
             </NButton>
@@ -293,7 +293,7 @@ const aboutPoints = homeAboutPoints
                 Đăng ký tài khoản miễn phí để nhận ưu đãi và đặt hàng thực phẩm tươi sạch mỗi ngày.
               </p>
             </div>
-            <NButton size="large" class="mt-6 bg-white! text-emerald-700! border-0!" @click="$router.push('/products')">
+            <NButton size="large" type="primary" class="mt-6" @click="$router.push('/products')">
               <template #icon><UiIcon name="shopping-bag" /></template>
               Mua sắm ngay
             </NButton>

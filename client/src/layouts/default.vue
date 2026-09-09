@@ -37,12 +37,12 @@ function scrollHome() {
 <template>
   <div class="flex min-h-screen flex-col">
     <header class="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/90 backdrop-blur">
-      <div class="mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-        <RouterLink to="/" class="flex items-center gap-2">
+      <div class="mx-auto grid h-16 grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6">
+        <RouterLink to="/" class="flex items-center gap-2 justify-self-start">
           <span class="text-lg font-extrabold tracking-tight text-emerald-800">EcoMart</span>
         </RouterLink>
 
-        <nav class="hidden items-center gap-8 md:flex">
+        <nav class="hidden items-center gap-8 md:flex justify-self-center">
           <RouterLink v-for="link in (isAdmin ? adminLinks : links)" :key="link.to" :to="link.to"
             class="text-sm font-medium text-gray-600 hover:text-emerald-700"
             @click="scrollHome">
@@ -50,7 +50,7 @@ function scrollHome() {
           </RouterLink>
         </nav>
 
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 justify-self-end">
           <NButton
             v-if="isLoggedIn && !isAdmin"
             quaternary
