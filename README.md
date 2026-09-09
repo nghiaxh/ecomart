@@ -8,7 +8,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169e1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Zod](https://img.shields.io/badge/Zod-4.5-3e67b1?logo=zod&logoColor=white)](https://zod.dev)
 [![Docker](https://img.shields.io/badge/Docker%20Compose-2496ed?logo=docker&logoColor=white)](https://www.docker.com)
-[![PrimeVue](https://img.shields.io/badge/PrimeVue-4.5-10b981?logo=primevue&logoColor=white)](https://primevue.org)
+[![Naive UI](https://img.shields.io/badge/Naive%20UI-2.45-18a058)](https://www.naiveui.com)
 [![Vitest](https://img.shields.io/badge/Vitest-4.1-FCC72B?logo=vitest&logoColor=black)](https://vitest.dev)
 [![Playwright](https://img.shields.io/badge/Playwright-1.62-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
 [![Testcontainers](https://img.shields.io/badge/Testcontainers-1.21-2496ED)](https://java.testcontainers.org)
@@ -24,13 +24,12 @@ Nền tảng mua sắm thực phẩm trực tuyến với sản phẩm tươi s�
 - Chi tiết sản phẩm với gallery nhiều ảnh, đánh giá từ người dùng, badge "Hết hàng" khi hết tồn kho
 - Giỏ hàng và thanh toán: **PayOS QR** hoặc **COD**
 - Lịch sử đơn hàng, theo dõi và hủy đơn
-- **Chat hỗ trợ** (từ khóa + RAG nội bộ) tư vấn mua sắm
-- Hệ thống thông báo
+- Trang chủ có phần liên hệ / hotline hỗ trợ
 
 ### Quản trị
-- Dashboard tổng quan
-- Quản lý sản phẩm, danh mục và người dùng
-- Quản lý đơn hàng và cập nhật trạng thái
+- Dashboard tổng quan và trang thống kê bán hàng (Chart.js)
+- Quản lý sản phẩm, danh mục, đơn hàng
+- Quản lý người dùng: tạo, sửa, vô hiệu hóa tài khoản
 
 ## Kiến trúc
 
@@ -38,13 +37,13 @@ Monorepo client-server, mỗi module build độc lập, không có build toolin
 
 ```
 ecomart/
-├── client/            # Vue 3 + Vite 8 + Vue Router 5 + PrimeVue 4 + TypeScript + Zod 4
+├── client/            # Vue 3 + Vite 8 + Vue Router 5 + Naive UI + TypeScript + Zod 4
 ├── server/            # Spring Boot 3.5 + Java 25 + PostgreSQL + Flyway
 ├── e2e/               # Playwright end-to-end
 ├── docker-compose.yml # chạy toàn bộ stack (profiles: prod / dev)
 ├── .env               # cấu hình bí mật
 ├── .gitignore
-└── ARCHITECTURE.md    # tài liệu kiến trúc chi tiết
+├── ARCHITECTURE.md    # tài liệu kiến trúc chi tiết
 ```
 
 Xem chi tiết luồng dữ liệu, xác thực JWT, thanh toán tại **[ARCHITECTURE.md](ARCHITECTURE.md)**.
@@ -103,7 +102,7 @@ Lưu ý: `mvn spring-boot:run` **không** tự đọc `.env` — cần nạp cá
 
 ## Tài khoản demo
 
-`DataSeeder` tạo dữ liệu mẫu idempotent theo slug/tên (DB đã seed vẫn nhận hàng mới khi boot lại, không cần xoá volume), với mật khẩu demo (mặc định bên dưới, có thể ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`). Tắt bằng `SEED_ENABLED=false`, reset bằng cách xoá volume `pgdata`. Seed gồm ~45 sản phẩm (mỗi SP 1–3 ảnh), 7 danh mục lá và ít nhất 2 sản phẩm hết hàng để kiểm thử luồng hết hàng.
+`DataSeeder` tạo dữ liệu mẫu idempotent theo slug/tên (DB đã seed vẫn nhận hàng mới khi boot lại, không cần xoá volume), với mật khẩu demo (mặc định bên dưới, có thể ghi đè qua `SEED_ADMIN_PASSWORD` / `SEED_CUSTOMER_PASSWORD`). Tắt bằng `SEED_ENABLED=false`, reset bằng cách xoá volume `pgdata`. Seed gồm 44 sản phẩm (mỗi SP 1–3 ảnh), 3 danh mục gốc + 7 danh mục lá (kèm icon) và 2 sản phẩm hết hàng để kiểm thử luồng hết hàng.
 
 | Vai trò | Email | Mật khẩu |
 |---------|-------|----------|
@@ -114,10 +113,10 @@ Lưu ý: `mvn spring-boot:run` **không** tự đọc `.env` — cần nạp cá
 
 | Layer | Stack |
 |-------|-------|
-| Client | Vue 3, Vite 8, Vue Router 5, PrimeVue 4 (Aura), TypeScript, Zod 4, Tailwind CSS, Axios |
+| Client | Vue 3, Vite 8, Vue Router 5, Naive UI, TypeScript, Zod 4, Tailwind CSS, Axios, Chart.js |
 | Server | Spring Boot 3.5, Spring Security (JWT access + refresh), Spring Data JPA, Lombok, Flyway |
 | Database | PostgreSQL 18 |
-| Tích hợp | Chat từ khóa + RAG nội bộ, PayOS (thanh toán QR + webhook) |
+| Tích hợp | PayOS (thanh toán QR + webhook) |
 | Hạ tầng | Docker Compose (profiles prod/dev) |
 | Kiểm thử | Vitest (client), JUnit + Testcontainers (server), Playwright (e2e) |
 
