@@ -15,7 +15,7 @@ vi.mock('@/composables/useAuth', () => ({
   useAuth: () => authMock
 }))
 
-vi.mock('@nuxt/ui/composables/useToast', () => ({
+vi.mock('@/composables/useToast', () => ({
   useToast: () => ({ add: toastMock })
 }))
 
@@ -70,6 +70,6 @@ describe('useCart', () => {
     requestMock.mockRejectedValue({ data: { message: 'Hết hàng' } })
     const { add } = useCart()
     await expect(add(1, 2)).rejects.toBeTruthy()
-    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ color: 'error' }))
+    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }))
   })
 })

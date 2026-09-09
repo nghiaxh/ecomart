@@ -16,7 +16,7 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ replace: routerReplaceMock })
 }))
 
-vi.mock('@nuxt/ui/composables/useToast', () => ({
+vi.mock('@/composables/useToast', () => ({
   useToast: () => ({ add: toastMock })
 }))
 
@@ -47,14 +47,6 @@ const productPage = {
 
 const global = {
   stubs: {
-    UButton: {
-      props: ['label'],
-      template: '<button @click="$emit(\'click\')">{{ label }}</button>'
-    },
-    UInput: { template: '<input />' },
-    USelect: { template: '<input />' },
-    USkeleton: { template: '<div />' },
-    UIcon: { template: '<div />' },
     ProductCard: {
       props: ['product'],
       template: '<div>{{ product.name }}</div>'
@@ -109,10 +101,10 @@ describe('products index', () => {
     await clickFilter(wrapper)
 
     await vi.waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ color: 'error' }))
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }))
     })
     expect(toastMock).toHaveBeenCalledWith(
-      expect.objectContaining({ title: expect.stringMatching(/Không thể tải sản phẩm|Lỗi máy chủ/) })
+      expect.objectContaining({ summary: expect.stringMatching(/Không thể tải sản phẩm|Lỗi máy chủ/) })
     )
     expect(wrapper.text()).toContain('Rau ngót')
     expect(wrapper.text()).not.toContain('Không tìm thấy sản phẩm phù hợp.')

@@ -9,11 +9,16 @@ vi.mock('@/composables/useApi', () => ({
   useApi: () => ({ request: requestMock })
 }))
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({ push: routerPushMock })
-}))
+vi.mock('vue-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-router')>()
+  return {
+    ...(actual as Record<string, unknown>),
+    useRouter: () => ({ push: routerPushMock })
+  }
+})
 
 import { useAuth } from './useAuth'
+import { router } from '@/router'
 
 describe('useAuth', () => {
   beforeEach(() => {
@@ -64,13 +69,14 @@ describe('useAuth', () => {
   })
 
   it('logout clears both storages and navigates home', () => {
+    const pushSpy = vi.spyOn(router, 'push').mockImplementation(() => Promise.resolve())
     const { setSession, logout, isLoggedIn } = useAuth()
     setSession({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' }, { remember: true })
     logout()
     expect(isLoggedIn.value).toBe(false)
     expect(localStorage.getItem('ecomart_token')).toBeNull()
     expect(sessionStorage.getItem('ecomart_token')).toBeNull()
-    expect(routerPushMock).toHaveBeenCalledWith('/')
+    expect(pushSpy).toHaveBeenCalledWith('/')
   })
 
   it('login calls request and stores in sessionStorage by default', async () => {

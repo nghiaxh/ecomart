@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test'
 import { loginAsAdmin, loginAsCustomer, SEED_ADMIN, gotoReady } from './helpers'
 
-test('admin logs in and lands on dashboard', async ({ page }) => {
+test('admin logs in and lands on the first admin section', async ({ page }) => {
   await loginAsAdmin(page)
-  await expect(page.getByRole('link', { name: 'Tổng quan' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Sản phẩm' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Thống kê' })).toBeVisible()
 })
 
 test('admin login with wrong password shows error', async ({ page }) => {
@@ -21,7 +22,7 @@ test('customer hitting admin route is redirected away', async ({ page }) => {
 })
 
 test('guest hitting admin route is sent to login', async ({ page }) => {
-  await gotoReady(page, '/admin')
+  await gotoReady(page, '/admin/statistic')
   await expect(page).toHaveURL('/login')
 })
 

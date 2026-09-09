@@ -5,8 +5,8 @@ test.beforeEach(async ({ page }) => {
   await loginAsAdmin(page)
 })
 
-test('admin dashboard shows stat cards', async ({ page }) => {
-  await gotoReady(page, '/admin')
+test('admin statistics page shows stat cards', async ({ page }) => {
+  await gotoReady(page, '/admin/statistic')
   await expect(page.getByText('Sản phẩm').first()).toBeVisible()
   await expect(page.getByText('Đơn hàng').first()).toBeVisible()
 })

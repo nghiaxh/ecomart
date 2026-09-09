@@ -132,8 +132,8 @@ export async function loginAsAdmin(
   await gotoReady(page, '/login')
   await page.locator('#login-identifier').fill(identifier)
   await page.locator('#login-password').fill(password)
-  await page.getByRole('button', { name: 'Đăng nhập' }).click()
-  await expect(page).toHaveURL('/admin')
+await page.getByRole('button', { name: 'Đăng nhập' }).click()
+  await expect(page).toHaveURL('/admin/products')
 }
 
 export async function clearAuth(page: Page): Promise<void> {

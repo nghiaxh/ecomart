@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { API_BASE, loginAsAdmin, loginAsCustomer, gotoReady } from './helpers'
 
 const customerRoutes = ['/cart', '/checkout', '/orders', '/account']
-const adminRoutes = ['/admin', '/admin/products', '/admin/orders', '/admin/categories', '/admin/users']
+const adminRoutes = ['/admin/products', '/admin/orders', '/admin/categories', '/admin/users', '/admin/statistic']
 
 test('guest is sent to login on customer routes', async ({ page }) => {
   test.setTimeout(180_000)
