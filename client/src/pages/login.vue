@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { useToast } from '@nuxt/ui/composables/useToast'
+import { reactive, ref } from 'vue'
+import { useToast } from '@/composables/useToast'
 import { useRouter } from 'vue-router'
 import { loginSchema } from '@/schemas'
 import { useAuth } from '@/composables/useAuth'
+import PasswordInput from '@/components/PasswordInput.vue'
+import AuthShell from '@/components/AuthShell.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import { NButton, NCheckbox, NInput } from 'naive-ui'
 
 const router = useRouter()
 const { login } = useAuth()
@@ -16,7 +21,7 @@ async function submit() {
   const result = loginSchema.safeParse(form)
   if (!result.success) {
     for (const issue of result.error.issues) {
-      toast.add({ title: issue.message, color: 'error', icon: 'i-ph-warning' })
+      toast.add({ severity: 'error', summary: issue.message, life: 4000 })
     }
     return
   }
@@ -24,12 +29,12 @@ async function submit() {
   try {
     const data = await login(form.identifier, form.password, { remember: remember.value })
     if (data.role === 'ADMIN') {
-      router.push('/admin')
+      router.push('/admin/products')
     } else {
       router.push('/')
     }
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Đăng nhập thất bại', color: 'error', icon: 'i-ph-warning' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Đăng nhập thất bại', life: 4000 })
   } finally {
     loading.value = false
   }
@@ -41,15 +46,16 @@ async function submit() {
     <form class="w-full space-y-4" novalidate @submit.prevent="submit">
       <div>
         <label for="login-identifier" class="mb-1.5 block text-sm font-medium text-gray-700">Tên đăng nhập hoặc email</label>
-        <UInput
+        <NInput
           id="login-identifier"
-          v-model="form.identifier"
+          v-model:value="form.identifier"
           autocomplete="username"
           placeholder="Nhập tên đăng nhập hoặc email"
-          icon="i-ph-user"
-          size="lg"
+          size="large"
           class="w-full"
-        />
+        >
+          <template #prefix><UiIcon name="user" size="18" /></template>
+        </NInput>
       </div>
       <div class="mb-6">
         <label for="login-password" class="mb-1.5 block text-sm font-medium text-gray-700">Mật khẩu</label>
@@ -58,14 +64,16 @@ async function submit() {
           v-model="form.password"
           autocomplete="current-password"
           placeholder="Nhập mật khẩu"
-          icon="i-ph-lock"
-          size="lg"
+          icon="lock"
+          size="large"
         />
       </div>
       <div class="flex items-center justify-between">
-        <UCheckbox v-model="remember" label="Ghi nhớ đăng nhập"/>
+        <NCheckbox v-model:checked="remember">
+          <label class="text-sm text-gray-700">Ghi nhớ đăng nhập</label>
+        </NCheckbox>
       </div>
-      <UButton type="submit" color="primary" size="xl" block :loading="loading" label="Đăng nhập" class="mt-2" />
+      <NButton type="primary" size="large" attr-type="submit" :loading="loading" block class="mt-2">Đăng nhập</NButton>
     </form>
 
     <p class="mt-6 text-center text-sm text-gray-500">

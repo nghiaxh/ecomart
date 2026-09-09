@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const supportPhone = import.meta.env.VITE_SUPPORT_PHONE || '0900 000 000'
 const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'contact@ecomart.vn'
+const favicon = '/favicon.svg'
 </script>
 
 <template>
@@ -9,7 +10,7 @@ const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'contact@ecomart.vn'
       <div class="grid gap-6 md:grid-cols-4">
         <div>
           <div class="flex items-center gap-2">
-            <img src="/favicon.svg" alt="EcoMart" class="h-7 w-7 rounded-lg" />
+            <img :src="favicon" alt="EcoMart" class="h-7 w-7 rounded-lg" />
             <span class="text-base font-extrabold text-emerald-800">EcoMart</span>
           </div>
           <p class="mt-2 text-sm leading-relaxed text-gray-500">

@@ -1,13 +1,20 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import type { Order, PageResponse } from '@/types'
 import { useApi } from '@/composables/useApi'
 import { useFormat } from '@/composables/useFormat'
 import { useStatusLabels } from '@/composables/useStatusLabels'
+import UiImg from '@/components/UiImg.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import PaginationBar from '@/components/PaginationBar.vue'
+import { NButton, NSkeleton, NTag } from 'naive-ui'
 
 const { request } = useApi()
 const { formatVND, formatDate } = useFormat()
-const { orderStatus, paymentStatus } = useStatusLabels()
+const { orderStatus, paymentStatus, badgeType } = useStatusLabels()
 
+const router = useRouter()
 const orders = ref<Order[]>([])
 const page = ref(0)
 const totalPages = ref(0)
@@ -37,7 +44,7 @@ onMounted(load)
     </div>
 
     <div v-if="loading" class="mt-8 space-y-4">
-      <USkeleton v-for="i in 3" :key="i" class="h-36 rounded-2xl" />
+      <NSkeleton v-for="i in 3" :key="i" class="h-36 rounded-2xl" />
     </div>
 
     <div v-else-if="orders.length" class="mt-8 space-y-4">
@@ -50,7 +57,7 @@ onMounted(load)
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <span class="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
-              <UIcon name="i-ph-receipt" class="h-5 w-5" />
+              <UiIcon name="receipt" size="18" />
             </span>
             <div>
               <p class="font-bold text-gray-700">Đơn #{{ o.id }}</p>
@@ -61,11 +68,11 @@ onMounted(load)
             <div class="text-right">
               <p class="font-bold text-emerald-700">{{ formatVND(o.total) }}</p>
               <div class="mt-1 flex items-center justify-end gap-2">
-                <UBadge :color="orderStatus[o.status].color" :label="orderStatus[o.status].label" size="sm" />
-                <UBadge :color="paymentStatus[o.payment.status].color" :label="paymentStatus[o.payment.status].label" size="sm" variant="soft" />
+                <NTag :type="badgeType[orderStatus[o.status].color]">{{ orderStatus[o.status].label }}</NTag>
+                <NTag :type="badgeType[paymentStatus[o.payment.status].color]">{{ paymentStatus[o.payment.status].label }}</NTag>
               </div>
             </div>
-            <UIcon name="i-ph-caret-right" class="h-5 w-5 text-gray-300 transition group-hover:text-emerald-500" />
+            <UiIcon name="caret-right" size="18" class="text-gray-300 transition group-hover:text-emerald-500" />
           </div>
         </div>
 
@@ -81,11 +88,14 @@ onMounted(load)
 
     <div v-else class="py-24 text-center">
       <span class="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-full bg-emerald-50">
-        <UIcon name="i-ph-receipt" class="h-10 w-10 text-emerald-300" />
+        <UiIcon name="receipt" size="40" class="text-emerald-300" />
       </span>
       <p class="text-lg font-semibold text-gray-600">Bạn chưa có đơn hàng nào</p>
       <p class="mt-1 text-sm text-gray-400">Hãy bắt đầu mua sắm các sản phẩm tươi ngon nhé!</p>
-      <UButton to="/products" color="primary" class="mt-6" label="Mua sắm ngay" icon="i-ph-shopping-bag" />
+      <NButton type="primary" size="large" class="mt-6" @click="router.push('/products')">
+        <template #icon><UiIcon name="shopping-bag" size="18" /></template>
+        Mua sắm ngay
+      </NButton>
     </div>
 
     <PaginationBar

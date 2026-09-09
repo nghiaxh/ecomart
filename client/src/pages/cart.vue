@@ -1,11 +1,20 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useToast } from '@/composables/useToast'
 import { useCart } from '@/composables/useCart'
 import { useConfirm } from '@/composables/useConfirm'
 import { useFormat } from '@/composables/useFormat'
+import UiImg from '@/components/UiImg.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import OrderSummaryCard from '@/components/OrderSummaryCard.vue'
+import { NButton, NSkeleton } from 'naive-ui'
+import { useRouter } from 'vue-router'
+
 const { cart, fetchCart, updateQuantity, remove } = useCart()
 const { formatVND } = useFormat()
 const { confirm } = useConfirm()
 const toast = useToast()
+const router = useRouter()
 const loading = ref(true)
 const busyProductIds = ref<Set<number>>(new Set())
 
@@ -37,7 +46,7 @@ async function deleteItem(productId: number) {
   busyProductIds.value.add(productId)
   try {
     await remove(productId)
-    toast.add({ title: 'Đã xóa sản phẩm khỏi giỏ hàng', icon: 'i-ph-check-circle', color: 'success' })
+    toast.add({ severity: 'success', summary: 'Đã xóa sản phẩm khỏi giỏ hàng', life: 4000 })
   } catch {
     await fetchCart()
   } finally {
@@ -52,9 +61,9 @@ async function deleteItem(productId: number) {
 
     <div v-if="loading" class="mt-8 grid gap-6 lg:grid-cols-3">
       <div class="space-y-4 lg:col-span-2">
-        <USkeleton v-for="i in 2" :key="i" class="h-28 rounded-2xl" />
+        <NSkeleton v-for="i in 2" :key="i" class="h-28 rounded-2xl" />
       </div>
-      <USkeleton class="h-64 rounded-2xl" />
+      <NSkeleton class="h-64 rounded-2xl" />
     </div>
 
     <div v-else-if="cart && cart.items.length" class="mt-8 grid gap-8 lg:grid-cols-3">
@@ -69,14 +78,18 @@ async function deleteItem(productId: number) {
                 <RouterLink :to="`/products/${item.productSlug}`" class="font-semibold text-gray-700 hover:text-emerald-700">{{ item.productName }}</RouterLink>
               </div>
               <button class="text-gray-300 hover:text-red-500" :aria-label="`Xóa ${item.productName}`" @click="deleteItem(item.productId)">
-                <UIcon name="i-ph-trash" class="h-5 w-5" />
+                <UiIcon name="trash" size="20" />
               </button>
             </div>
             <div class="mt-auto flex items-center justify-between pt-3">
               <div class="flex items-center rounded-lg border border-emerald-200">
-                <UButton color="neutral" variant="ghost" icon="i-ph-minus" size="md" :disabled="item.quantity <= 1 || busyProductIds.has(item.productId)" :loading="busyProductIds.has(item.productId)" @click="changeQuantity(item.productId, item.quantity - 1)" />
+                <NButton quaternary size="small" :disabled="item.quantity <= 1 || busyProductIds.has(item.productId)" :loading="busyProductIds.has(item.productId)" @click="changeQuantity(item.productId, item.quantity - 1)">
+                  <template #icon><UiIcon name="minus" size="16" /></template>
+                </NButton>
                 <span class="w-8 text-center text-sm font-semibold">{{ item.quantity }}</span>
-                <UButton color="neutral" variant="ghost" icon="i-ph-plus" size="md" :disabled="item.quantity >= item.stock || busyProductIds.has(item.productId)" :loading="busyProductIds.has(item.productId)" @click="changeQuantity(item.productId, item.quantity + 1)" />
+                <NButton quaternary size="small" :disabled="item.quantity >= item.stock || busyProductIds.has(item.productId)" :loading="busyProductIds.has(item.productId)" @click="changeQuantity(item.productId, item.quantity + 1)">
+                  <template #icon><UiIcon name="plus" size="16" /></template>
+                </NButton>
               </div>
               <span class="font-bold text-emerald-700">{{ formatVND(item.price * item.quantity) }}</span>
             </div>
@@ -87,16 +100,19 @@ async function deleteItem(productId: number) {
       <!-- Summary -->
       <OrderSummaryCard :subtotal="cart.subtotal" :item-count="cart.itemCount" title="Tóm tắt đơn hàng">
         <template #actions>
-          <UButton to="/checkout" color="primary" size="lg" block label="Tiến hành thanh toán" />
-          <UButton to="/products" color="neutral" variant="ghost" block class="mt-2" label="Tiếp tục mua sắm" />
+          <NButton type="primary" size="large" block @click="router.push('/checkout')">Tiến hành thanh toán</NButton>
+          <NButton quaternary size="large" block class="mt-2" @click="router.push('/products')">Tiếp tục mua sắm</NButton>
         </template>
       </OrderSummaryCard>
     </div>
 
     <div v-else class="py-24 text-center">
-      <UIcon name="i-ph-shopping-cart" class="mx-auto mb-4 h-16 w-16 text-emerald-200" />
+      <UiIcon name="shopping-cart" size="48" class="mx-auto mb-4 block text-emerald-200" />
       <p class="text-gray-500">Giỏ hàng của bạn đang trống.</p>
-      <UButton to="/products" color="primary" class="mt-4" label="Mua sắm ngay" icon="i-ph-shopping-bag" />
+      <NButton type="primary" size="large" class="mt-4" @click="router.push('/products')">
+        <template #icon><UiIcon name="shopping-bag" /></template>
+        Mua sắm ngay
+      </NButton>
     </div>
   </div>
 </template>

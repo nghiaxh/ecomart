@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import type { CategoryResponse, Product } from '@/types'
 import { categoryImage, homeAboutPoints, homeBanners, homeFeatures, homeStats, homeSteps, homeTestimonials } from '@/data/home'
 import { useApi } from '@/composables/useApi'
+import Reveal from '@/components/Reveal.vue'
+import SectionHeader from '@/components/SectionHeader.vue'
+import ProductCard from '@/components/ProductCard.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import { NButton, NCarousel, NSkeleton } from 'naive-ui'
 
 const { request } = useApi()
 const supportPhone = import.meta.env.VITE_SUPPORT_PHONE || '0900 000 000'
@@ -41,7 +47,7 @@ const aboutPoints = homeAboutPoints
         <div class="max-w-2xl">
           <p
             class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white">
-            <UIcon name="i-ph-storefront" class="h-4 w-4" />
+            <UiIcon name="shop" size="18" />
             Thực phẩm tươi và đa dạng
           </p>
           <h1
@@ -52,10 +58,10 @@ const aboutPoints = homeAboutPoints
             EcoMart mang đến rau củ, trái cây, thực phẩm tươi sạch và đầy đủ cho mọi bữa ăn của gia đình bạn.
           </p>
           <div class="mt-8 flex flex-wrap items-center gap-3">
-            <UButton to="/products" color="neutral" size="xl" class="bg-white! px-7! text-emerald-700!"
-              icon="i-ph-shopping-bag">
+            <NButton size="large" type="success" class="border-0!" @click="$router.push('/products')">
+              <template #icon><UiIcon name="shopping-bag" /></template>
               Mua sắm ngay
-            </UButton>
+            </NButton>
           </div>
         </div>
       </div>
@@ -77,10 +83,9 @@ const aboutPoints = homeAboutPoints
     <!-- Banner carousel -->
     <section v-if="banners.length" class="mx-auto max-w-7xl px-4 pt-12 sm:px-6">
       <Reveal>
-        <UCarousel v-slot="{ item }" loop arrows dots :autoplay="{ delay: 5000 }" :items="banners"
-          :ui="{ item: 'basis-full' }">
-          <RouterLink :to="item.linkUrl || '/products'"
-            class="group relative block h-64 overflow-hidden rounded-3xl ring-1 ring-emerald-900/5 sm:h-72">
+        <NCarousel autoplay :interval="5000" :loop="true" show-arrow show-dots>
+          <RouterLink v-for="item in banners" :key="item.title" :to="item.linkUrl || '/products'"
+            class="group relative block mx-2 h-64 overflow-hidden rounded-3xl ring-1 ring-emerald-900/5 sm:h-72">
             <img :src="item.imageUrl" :alt="item.title" loading="lazy"
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
@@ -89,7 +94,7 @@ const aboutPoints = homeAboutPoints
               <p v-if="item.subtitle" class="mt-1 text-sm text-white/80">{{ item.subtitle }}</p>
             </div>
           </RouterLink>
-        </UCarousel>
+        </NCarousel>
       </Reveal>
     </section>
 
@@ -203,7 +208,7 @@ const aboutPoints = homeAboutPoints
           <SectionHeader title="Sản phẩm mới" />
 
           <div v-if="loading" class="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <USkeleton v-for="i in 4" :key="i" class="h-80 rounded-2xl" />
+            <NSkeleton v-for="i in 4" :key="i" class="h-80 rounded-2xl" />
           </div>
           <div v-else-if="products.length" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             <ProductCard v-for="p in products" :key="p.id" :product="p" />
@@ -226,19 +231,21 @@ const aboutPoints = homeAboutPoints
               EcoMart cam kết mang đến sản phẩm có nguồn gốc rõ ràng, chất lượng đảm bảo với mức giá phù hợp.
               Đặt hàng nhanh chóng, giao tận nơi và thanh toán linh hoạt.
             </p>
-            <ul class="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <ul class="my-8 flex flex-wrap items-center justify-center gap-3">
               <li
                 v-for="item in aboutPoints"
                 :key="item"
                 class="flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm text-gray-700">
                 <span class="grid h-5 w-5 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                  <UIcon name="i-ph-check" class="h-3.5 w-3.5" />
+                  <UiIcon name="check" size="14" />
                 </span>
                 {{ item }}
               </li>
             </ul>
-            <UButton to="/products" color="primary" label="Khám phá sản phẩm" size="lg" class="mt-8"
-              icon="i-ph-shopping-bag" />
+            <NButton type="primary" size="large" class="mt-8" @click="$router.push('/products')">
+              <template #icon><UiIcon name="shopping-bag" /></template>
+              Khám phá sản phẩm
+            </NButton>
           </div>
         </Reveal>
       </div>
@@ -255,7 +262,7 @@ const aboutPoints = homeAboutPoints
           <div class="grid gap-6 md:grid-cols-3">
             <div v-for="t in testimonials" :key="t.name" class="rounded-2xl border border-emerald-100 bg-white p-6">
               <div class="flex gap-0.5">
-                <UIcon v-for="s in 5" :key="s" name="i-ph-star-fill" class="h-4 w-4 text-yellow-400" />
+                <UiIcon v-for="s in 5" :key="s" name="star-fill" size="18" class="text-yellow-400" />
               </div>
               <p class="mt-3 leading-relaxed text-gray-600">“{{ t.content }}”</p>
               <div class="mt-4 flex items-center gap-3">
@@ -278,18 +285,18 @@ const aboutPoints = homeAboutPoints
       <Reveal>
         <div
           class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-emerald-800 px-6 py-12 text-center sm:px-12">
-          <UIcon name="i-ph-leaf" class="pointer-events-none absolute -left-10 -top-10 h-40 w-40 text-white/10"
-            aria-hidden="true" />
-          <UIcon name="i-ph-leaf" class="pointer-events-none absolute -bottom-12 -right-12 h-52 w-52 text-white/10"
-            aria-hidden="true" />
-          <h2 class="text-2xl font-extrabold text-white sm:text-3xl">Bắt đầu mua sắm xanh cùng EcoMart</h2>
-          <p class="mx-auto mt-3 max-w-xl text-emerald-50">
-            Đăng ký tài khoản miễn phí để nhận ưu đãi và đặt hàng thực phẩm tươi sạch mỗi ngày.
-          </p>
-          <UButton to="/products" color="neutral" size="lg" class="mt-6 bg-white! text-emerald-700!"
-            icon="i-ph-shopping-bag">
-            Mua sắm ngay
-          </UButton>
+          <UiIcon name="sun" size="96" class="pointer-events-none absolute -left-10 -top-10 text-white/10" aria-hidden="true" />
+          <UiIcon name="sun" size="160" class="pointer-events-none absolute -bottom-12 -right-12 text-white/10" aria-hidden="true" />
+            <div>
+              <h2 class="text-2xl font-extrabold text-white sm:text-3xl">Bắt đầu mua sắm xanh cùng EcoMart</h2>
+              <p class="mx-auto mt-3 max-w-xl text-emerald-50">
+                Đăng ký tài khoản miễn phí để nhận ưu đãi và đặt hàng thực phẩm tươi sạch mỗi ngày.
+              </p>
+            </div>
+            <NButton size="large" class="mt-6 bg-white! text-emerald-700! border-0!" @click="$router.push('/products')">
+              <template #icon><UiIcon name="shopping-bag" /></template>
+              Mua sắm ngay
+            </NButton>
       </div>
     </Reveal>
     </section>

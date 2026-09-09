@@ -1,34 +1,20 @@
 @import "tailwindcss";
-@import "@nuxt/ui";
 
 @theme {
   --font-sans: 'Inter', system-ui, sans-serif;
-  --color-primary-50: #ecfdf5;
-  --color-primary-100: #d1fae5;
-  --color-primary-200: #a7f3d0;
-  --color-primary-300: #6ee7b7;
-  --color-primary-400: #34d399;
-  --color-primary-500: #10b981;
-  --color-primary-600: #059669;
-  --color-primary-700: #047857;
-  --color-primary-800: #065f46;
-  --color-primary-900: #064e3b;
-  --color-primary-950: #022c22;
-}
-
-@theme inline {
-  --color-primary: var(--color-primary-600);
 }
 
 :root {
   color-scheme: light;
-  --ui-primary: var(--color-primary);
+}
+
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #f8faf9;
-  color: #33423a;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -67,13 +53,6 @@ body {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-::-webkit-scrollbar-thumb {
-  background: #c8d8c9;
-  border-radius: 8px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #9fbfa1;
-}
 
 /* Utility */
 .text-balance {
@@ -100,10 +79,4 @@ button:disabled,
 }
 .cat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 28px -6px rgba(5, 150, 105, 0.18);
-}
-
-/* Skeleton loading placeholders stay light and clean */
-[role="alert"][aria-busy="true"] {
-  background-color: #eef1ef;
 }

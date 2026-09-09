@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useIntersectionObserver } from '@vueuse/core'
+
 const props = withDefaults(defineProps<{ delay?: number }>(), { delay: 0 })
 
 const el = ref<HTMLElement | null>(null)

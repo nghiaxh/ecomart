@@ -1,10 +1,16 @@
 <script setup lang="ts">
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useCart } from '@/composables/useCart'
-const { isLoggedIn, isAdmin, session, logout } = useAuth()
+import FooterGlobal from '@/components/FooterGlobal.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import { NAvatar, NButton } from 'naive-ui'
+
+const { isLoggedIn, isAdmin, session } = useAuth()
 const { itemCount } = useCart()
 
 const route = useRoute()
+const router = useRouter()
 
 const links = [
   { label: 'Trang chủ', to: '/' },
@@ -13,11 +19,11 @@ const links = [
 ]
 
 const adminLinks = [
-  { label: 'Tổng quan', to: '/admin' },
   { label: 'Sản phẩm', to: '/admin/products' },
   { label: 'Danh mục', to: '/admin/categories' },
   { label: 'Đơn hàng', to: '/admin/orders' },
-  { label: 'Người dùng', to: '/admin/users' }
+  { label: 'Người dùng', to: '/admin/users' },
+  { label: 'Thống kê', to: '/admin/statistic' }
 ]
 
 function scrollHome() {
@@ -45,38 +51,30 @@ function scrollHome() {
         </nav>
 
         <div class="flex items-center gap-1">
-          <UButton
+          <NButton
             v-if="isLoggedIn && !isAdmin"
-            color="neutral"
-            variant="ghost"
-            square
+            quaternary
             aria-label="Giỏ hàng"
-            :to="isLoggedIn ? '/cart' : '/login'"
             class="relative"
+            @click="router.push(isLoggedIn ? '/cart' : '/login')"
           >
-            <UIcon name="i-ph-shopping-cart" class="h-5 w-5" />
+            <template #icon><UiIcon name="shopping-cart" size="22" /></template>
             <span v-if="itemCount > 0" class="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold text-white">
               {{ itemCount }}
             </span>
-          </UButton>
+          </NButton>
 
           <template v-if="isLoggedIn">
             <RouterLink to="/account" class="flex items-center gap-2 rounded-lg p-1 hover:bg-emerald-50">
-              <UAvatar :src="session?.avatarUrl || undefined" :alt="session?.username" size="sm" />
+              <NAvatar round :src="session?.avatarUrl || undefined" size="medium">
+                {{ session?.username?.charAt(0)?.toUpperCase() || undefined }}
+              </NAvatar>
               <span class="hidden text-sm font-medium sm:inline">{{ session?.username }}</span>
             </RouterLink>
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              icon="i-ph-sign-out"
-              aria-label="Đăng xuất"
-              @click="logout"
-            />
           </template>
           <template v-else>
-            <UButton :to="'/login'" color="neutral" variant="soft" size="lg">Đăng nhập</UButton>
-            <UButton :to="'/register'" color="primary" size="lg" class="ml-1">Đăng ký</UButton>
+            <NButton quaternary size="small" @click="router.push('/login')">Đăng nhập</NButton>
+            <NButton type="primary" size="small" class="ml-1" @click="router.push('/register')">Đăng ký</NButton>
           </template>
         </div>
       </div>

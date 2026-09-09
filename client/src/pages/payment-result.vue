@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { useToast } from '@nuxt/ui/composables/useToast'
-import { useRoute } from 'vue-router'
+import { computed, ref, onMounted } from 'vue'
+import { useToast } from '@/composables/useToast'
+import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
+import UiIcon from '@/components/UiIcon.vue'
+import { NButton } from 'naive-ui'
 
 const route = useRoute()
+const router = useRouter()
 const { request } = useApi()
 const toast = useToast()
 
@@ -27,7 +31,7 @@ async function confirmPayment() {
     state.value = 'success'
   } catch (error: any) {
     state.value = 'failed'
-    toast.add({ title: error?.data?.message || 'Không thể xác nhận thanh toán', color: 'error' })
+    toast.add({ severity: 'error', summary: error?.data?.message || 'Không thể xác nhận thanh toán', life: 4000 })
   }
 }
 
@@ -44,7 +48,7 @@ onMounted(() => {
   <div class="mx-auto max-w-xl px-4 py-20 sm:px-6">
     <div v-if="state === 'processing'" class="rounded-2xl border border-emerald-100 bg-white p-10 text-center">
       <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-600">
-        <UIcon name="i-ph-circle-notch" class="h-8 w-8 animate-spin" />
+        <UiIcon name="spinner" size="40" class="animate-spin" />
       </span>
       <h1 class="mt-6 text-xl font-extrabold text-gray-700">Đang xác nhận thanh toán...</h1>
       <p class="mt-2 text-sm text-gray-500">Vui lòng đợi trong giây lát, không tắt trang này.</p>
@@ -52,39 +56,57 @@ onMounted(() => {
 
     <div v-else-if="state === 'success'" class="rounded-2xl border border-emerald-100 bg-white p-10 text-center">
       <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-600">
-        <UIcon name="i-ph-check-fat" class="h-8 w-8" />
+        <UiIcon name="check-circle" size="40" />
       </span>
       <h1 class="mt-6 text-2xl font-extrabold text-gray-700">Thanh toán thành công!</h1>
       <p class="mt-2 text-sm text-gray-500">Cảm ơn bạn. Hóa đơn của đơn hàng #{{ orderId }} đã được xác nhận.</p>
       <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-        <UButton color="primary" size="lg" to="/" icon="i-ph-house" label="Về trang chủ" />
-        <UButton color="secondary" size="lg" :to="`/orders/${orderId}`" icon="i-ph-receipt" label="Xem hóa đơn" />
+        <NButton type="primary" size="large" @click="router.push('/')">
+          <template #icon><UiIcon name="home" size="18" /></template>
+          Về trang chủ
+        </NButton>
+        <NButton secondary size="large" @click="router.push(`/orders/${orderId}`)">
+          <template #icon><UiIcon name="receipt" size="18" /></template>
+          Xem hóa đơn
+        </NButton>
       </div>
     </div>
 
     <div v-else-if="state === 'cancelled'" class="rounded-2xl border border-amber-100 bg-white p-10 text-center">
       <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-amber-100 text-amber-600">
-        <UIcon name="i-ph-x-circle" class="h-8 w-8" />
+        <UiIcon name="times-circle" size="40" />
       </span>
       <h1 class="mt-6 text-2xl font-extrabold text-gray-700">Thanh toán đã bị hủy</h1>
       <p class="mt-2 text-sm text-gray-500">Bạn chưa hoàn tất thanh toán. Đơn hàng vẫn được giữ lại trên hệ thống.</p>
       <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-        <UButton color="primary" size="lg" to="/cart" icon="i-ph-shopping-cart" label="Quay lại giỏ hàng" />
-        <UButton v-if="orderId" color="secondary" size="lg" :to="`/orders/${orderId}`" icon="i-ph-receipt" label="Xem đơn hàng" />
+        <NButton type="primary" size="large" @click="router.push('/cart')">
+          <template #icon><UiIcon name="shopping-cart" size="18" /></template>
+          Quay lại giỏ hàng
+        </NButton>
+        <NButton v-if="orderId" secondary size="large" @click="router.push(`/orders/${orderId}`)">
+          <template #icon><UiIcon name="receipt" size="18" /></template>
+          Xem đơn hàng
+        </NButton>
       </div>
     </div>
 
     <div v-else class="rounded-2xl border border-red-100 bg-white p-10 text-center">
       <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-red-100 text-red-600">
-        <UIcon name="i-ph-warning-circle" class="h-8 w-8" />
+        <UiIcon name="exclamation-circle" size="40" />
       </span>
       <h1 class="mt-6 text-2xl font-extrabold text-gray-700">Không thể xác nhận thanh toán</h1>
       <p class="mt-2 text-sm text-gray-500">
         {{ orderId ? 'Hệ thống chưa nhận được thông tin thanh toán. Bạn có thể thử lại hoặc xem đơn hàng sau.' : 'Thiếu thông tin thanh toán.' }}
       </p>
       <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-        <UButton v-if="orderId" color="primary" size="lg" icon="i-ph-arrow-clockwise" label="Thử lại" @click="confirmPayment" />
-        <UButton color="secondary" size="lg" :to="orderId ? `/orders/${orderId}` : '/cart'" icon="i-ph-receipt" :label="orderId ? 'Xem đơn hàng' : 'Về giỏ hàng'" />
+        <NButton v-if="orderId" type="primary" size="large" @click="confirmPayment">
+          <template #icon><UiIcon name="refresh" size="18" /></template>
+          Thử lại
+        </NButton>
+        <NButton secondary size="large" @click="router.push(orderId ? `/orders/${orderId}` : '/cart')">
+          <template #icon><UiIcon name="receipt" size="18" /></template>
+          {{ orderId ? 'Xem đơn hàng' : 'Về giỏ hàng' }}
+        </NButton>
       </div>
     </div>
   </div>

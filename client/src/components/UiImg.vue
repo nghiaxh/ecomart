@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import UiIcon from '@/components/UiIcon.vue'
+
 withDefaults(
   defineProps<{
     src?: string | null
@@ -19,6 +21,6 @@ withDefaults(
     @error="($event.target as HTMLImageElement).src = '/images/placeholder.svg'"
   />
   <div v-else class="grid h-full w-full place-items-center text-gray-200">
-    <UIcon name="i-ph-image" class="h-12 w-12" />
+    <UiIcon name="image" size="48" />
   </div>
 </template>

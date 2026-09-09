@@ -1,6 +1,7 @@
 import type { OrderStatus, PaymentStatus, PaymentMethod } from '@/types'
 
 type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
+type BadgeType = 'primary' | 'info' | 'success' | 'warning' | 'error' | 'default'
 
 export const useStatusLabels = () => {
   const orderStatus: Record<OrderStatus, { label: string; color: BadgeColor }> = {
@@ -23,9 +24,20 @@ export const useStatusLabels = () => {
     COD: 'COD'
   }
 
+  const badgeType: Record<BadgeColor, BadgeType> = {
+    primary: 'primary',
+    secondary: 'default',
+    success: 'success',
+    info: 'info',
+    warning: 'warning',
+    error: 'error',
+    neutral: 'default'
+  }
+
   return {
     orderStatus,
     paymentStatus,
-    paymentMethod
+    paymentMethod,
+    badgeType
   }
 }

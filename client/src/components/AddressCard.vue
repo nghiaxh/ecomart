@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Address } from '@/types'
+import UiIcon from '@/components/UiIcon.vue'
 
 withDefaults(defineProps<{
   address: Address
@@ -51,7 +52,7 @@ const emit = defineEmits<{
         title="Đặt làm mặc định"
         @click="emit('setDefault', address)"
       >
-        <UIcon name="i-ph-check" class="h-4 w-4" />
+        <UiIcon name="check" size="18" />
       </button>
       <button
         type="button"
@@ -59,7 +60,7 @@ const emit = defineEmits<{
         title="Chỉnh sửa"
         @click="emit('edit', address)"
       >
-        <UIcon name="i-ph-pencil-simple" class="h-4 w-4" />
+        <UiIcon name="pencil" size="18" />
       </button>
       <button
         type="button"
@@ -67,7 +68,7 @@ const emit = defineEmits<{
         title="Xóa"
         @click="emit('delete', address)"
       >
-        <UIcon name="i-ph-trash" class="h-4 w-4" />
+        <UiIcon name="trash" size="18" />
       </button>
     </div>
   </div>

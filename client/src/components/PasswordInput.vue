@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { NInput } from 'naive-ui'
+import UiIcon from '@/components/UiIcon.vue'
+
 const props = withDefaults(
   defineProps<{
     modelValue: string
@@ -7,43 +10,28 @@ const props = withDefaults(
     label?: string
     placeholder?: string
     icon?: string
-    size?: 'md' | 'lg' | 'xl'
+    size?: 'small' | 'medium' | 'large'
   }>(),
-  { id: undefined, autocomplete: undefined, label: undefined, placeholder: undefined, icon: undefined, size: 'lg' }
+  { id: undefined, autocomplete: undefined, label: undefined, placeholder: undefined, icon: undefined, size: 'medium' }
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
-
-const show = ref(false)
-
-function toggle() {
-  show.value = !show.value
-}
 </script>
 
 <template>
-  <UInput
+  <NInput
     :id="props.id"
-    :model-value="props.modelValue"
-    :type="show ? 'text' : 'password'"
+    :value="props.modelValue"
+    type="password"
+    show-password-on="click"
     :autocomplete="props.autocomplete"
-    :label="label"
-    :placeholder="placeholder"
-    :icon="icon"
-    :size="size"
+    :placeholder="props.placeholder"
+    :size="props.size"
     class="w-full"
-    :ui="{ trailing: 'pe-1' }"
-    @update:model-value="emit('update:modelValue', $event as string)"
+    @update:value="emit('update:modelValue', $event)"
   >
-    <template #trailing>
-      <UButton
-        color="neutral"
-        variant="link"
-        size="sm"
-        :icon="show ? 'i-ph-eye-slash' : 'i-ph-eye'"
-        :aria-label="show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-        @click="toggle"
-      />
+    <template v-if="props.icon" #prefix>
+      <UiIcon :name="props.icon" size="18" />
     </template>
-  </UInput>
+  </NInput>
 </template>

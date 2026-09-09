@@ -4,7 +4,6 @@ export interface HomeStat {
 }
 
 export interface HomeFeature {
-  icon: string
   title: string
   desc: string
   photo: string
@@ -31,10 +30,10 @@ export const homeStats: HomeStat[] = [
 
 export function homeFeatures(supportPhone: string): HomeFeature[] {
   return [
-    { icon: 'i-ph-leaf', title: 'Sạch & an toàn', desc: 'Sản phẩm có nguồn gốc rõ ràng, đảm bảo vệ sinh thực phẩm.', photo: '/images/feature-safe.jpg' },
-    { icon: 'i-ph-truck', title: 'Giao hàng nhanh', desc: 'Nội thành nhận hàng trong ngày, toàn quốc 2-4 ngày.', photo: '/images/feature-truck.jpg' },
-    { icon: 'i-ph-wallet', title: 'Thanh toán linh hoạt', desc: 'COD hoặc quét mã QR qua PayOS tiện lợi.', photo: '/images/feature-pay.jpg' },
-    { icon: 'i-ph-headset', title: 'Hỗ trợ tận tâm', desc: `Hotline ${supportPhone} hỗ trợ 8h-20h mỗi ngày.`, photo: '/images/feature-support.jpg' }
+    { title: 'Sạch & an toàn', desc: 'Sản phẩm có nguồn gốc rõ ràng, đảm bảo vệ sinh thực phẩm.', photo: '/images/feature-safe.jpg' },
+    { title: 'Giao hàng nhanh', desc: 'Nội thành nhận hàng trong ngày, toàn quốc 2-4 ngày.', photo: '/images/feature-truck.jpg' },
+    { title: 'Thanh toán linh hoạt', desc: 'COD hoặc quét mã QR qua PayOS tiện lợi.', photo: '/images/feature-pay.jpg' },
+    { title: 'Hỗ trợ tận tâm', desc: `Hotline ${supportPhone} hỗ trợ 8h-20h mỗi ngày.`, photo: '/images/feature-support.jpg' }
   ]
 }
 

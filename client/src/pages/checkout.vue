@@ -1,12 +1,18 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useToast } from '@nuxt/ui/composables/useToast'
+import { useToast } from '@/composables/useToast'
 import type { Address, CheckoutResult } from '@/types'
-import { addressSchema, type AddressForm } from '@/schemas'
+import { addressSchema, type AddressForm as AddressFormData } from '@/schemas'
 import { useApi } from '@/composables/useApi'
 import { useCart } from '@/composables/useCart'
 import { useFormErrors } from '@/composables/useFormErrors'
 import { useFormat } from '@/composables/useFormat'
+import AddressForm from '@/components/AddressForm.vue'
+import AddressCard from '@/components/AddressCard.vue'
+import OrderSummaryCard from '@/components/OrderSummaryCard.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import { NButton, NInput } from 'naive-ui'
 
 const router = useRouter()
 const { request } = useApi()
@@ -23,7 +29,7 @@ const loading = ref(false)
 const showAddressForm = ref(false)
 const savingAddress = ref(false)
 
-const addressForm = ref<AddressForm>({
+const addressForm = ref<AddressFormData>({
   label: '', street: '', ward: '', district: '', city: '', receiverName: '', receiverPhone: '', isDefault: false
 })
 
@@ -34,7 +40,7 @@ async function loadAddresses() {
     const first = addresses.value[0]
     selectedAddressId.value = def?.id ?? first?.id ?? null
   } catch (error: any) {
-    toast.add({ title: error?.data?.message || 'Không thể tải địa chỉ', color: 'error' })
+    toast.add({ severity: 'error', summary: error?.data?.message || 'Không thể tải địa chỉ', life: 4000 })
   }
 }
 
@@ -42,7 +48,7 @@ async function loadCart() {
   try {
     await fetchCart()
   } catch {
-    toast.add({ title: 'Không thể tải giỏ hàng', color: 'error' })
+    toast.add({ severity: 'error', summary: 'Không thể tải giỏ hàng', life: 4000 })
   }
 }
 
@@ -66,7 +72,7 @@ async function createAddress() {
     showAddressForm.value = false
     resetAddressForm()
   } catch (error: any) {
-    toast.add({ title: error?.data?.message || 'Không thể lưu địa chỉ', color: 'error' })
+    toast.add({ severity: 'error', summary: error?.data?.message || 'Không thể lưu địa chỉ', life: 4000 })
   } finally {
     savingAddress.value = false
   }
@@ -74,7 +80,7 @@ async function createAddress() {
 
 async function checkout() {
   if (!selectedAddressId.value) {
-    toast.add({ title: 'Vui lòng chọn địa chỉ giao hàng', color: 'warning' })
+    toast.add({ severity: 'warn', summary: 'Vui lòng chọn địa chỉ giao hàng', life: 4000 })
     return
   }
   loading.value = true
@@ -87,10 +93,10 @@ async function checkout() {
       window.open(result.payosCheckoutUrl, '_blank')
     }
     await reset()
-    toast.add({ title: result.message || 'Đặt hàng thành công!', color: 'success' })
+    toast.add({ severity: 'success', summary: result.message || 'Đặt hàng thành công!', life: 4000 })
     router.push(`/orders/${result.orderId}`)
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Đặt hàng thất bại', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Đặt hàng thất bại', life: 4000 })
   } finally {
     loading.value = false
   }
@@ -112,7 +118,10 @@ onMounted(() => {
         <section class="rounded-2xl border border-emerald-100 bg-white p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold text-gray-700">Địa chỉ giao hàng</h2>
-            <UButton color="primary" variant="soft" size="md" icon="i-ph-plus" label="Thêm mới" @click="showAddressForm = !showAddressForm" />
+            <NButton quaternary type="primary" size="small" @click="showAddressForm = !showAddressForm">
+              <template #icon><UiIcon name="plus" size="16" /></template>
+              Thêm mới
+            </NButton>
           </div>
 
           <AddressForm
@@ -143,7 +152,7 @@ onMounted(() => {
           <div class="mt-4 grid gap-3 sm:grid-cols-2">
             <label class="flex items-center gap-3 rounded-xl border p-4 transition" :class="paymentMethod === 'COD' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'" >
               <input type="radio" v-model="paymentMethod" value="COD" class="accent-emerald-600" />
-              <span class="grid h-9 w-9 place-items-center rounded-lg bg-emerald-100 text-emerald-700"><UIcon name="i-ph-money" class="h-5 w-5" /></span>
+              <span class="grid h-9 w-9 place-items-center rounded-lg bg-emerald-100 text-emerald-700"><UiIcon name="money-bill" size="18" /></span>
               <div>
                 <p class="font-semibold text-gray-700">COD</p>
                 <p class="text-xs text-gray-400">Thanh toán khi nhận hàng</p>
@@ -151,7 +160,7 @@ onMounted(() => {
             </label>
             <label class="flex items-center gap-3 rounded-xl border p-4 transition" :class="paymentMethod === 'PAYOS' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'" >
               <input type="radio" v-model="paymentMethod" value="PAYOS" class="accent-emerald-600" />
-              <span class="grid h-9 w-9 place-items-center rounded-lg bg-emerald-100 text-emerald-700"><UIcon name="i-ph-qr-code" class="h-5 w-5" /></span>
+              <span class="grid h-9 w-9 place-items-center rounded-lg bg-emerald-100 text-emerald-700"><UiIcon name="qrcode" size="18" /></span>
               <div>
                 <p class="font-semibold text-gray-700">PayOS QR</p>
                 <p class="text-xs text-gray-400">Quét mã chuyển khoản</p>
@@ -177,8 +186,11 @@ onMounted(() => {
           </div>
         </template>
         <template #actions>
-          <UTextarea v-model="notes" placeholder="Ghi chú cho đơn hàng (tùy chọn)..." :rows="2" class="w-full"/>
-          <UButton color="primary" size="lg" block class="mt-4" :loading="loading" label="Đặt hàng" icon="i-ph-check-circle" @click="checkout" />
+          <NInput type="textarea" v-model:value="notes" placeholder="Ghi chú cho đơn hàng (tùy chọn)..." :rows="2" />
+          <NButton type="primary" size="large" block class="mt-4" :loading="loading" @click="checkout">
+            <template #icon><UiIcon name="check-circle" size="18" /></template>
+            Đặt hàng
+          </NButton>
         </template>
       </OrderSummaryCard>
     </div>

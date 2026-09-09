@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { ref, computed, watch, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useToast } from '@nuxt/ui/composables/useToast'
+import { useToast } from '@/composables/useToast'
 import { useHead } from '@unhead/vue'
 import type { MaterialType, Product, Review } from '@/types'
 import { reviewSchema } from '@/schemas'
@@ -8,6 +9,10 @@ import { useApi } from '@/composables/useApi'
 import { useAuth } from '@/composables/useAuth'
 import { useCart } from '@/composables/useCart'
 import { useFormat } from '@/composables/useFormat'
+import UiImg from '@/components/UiImg.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import AddToCartButton from '@/components/AddToCartButton.vue'
+import { NAvatar, NButton, NInput, NSkeleton } from 'naive-ui'
 
 const { request } = useApi()
 const { formatVND, formatKg, formatDate } = useFormat()
@@ -25,7 +30,7 @@ onMounted(async () => {
   try {
     product.value = await request<Product>(`/api/products/slug/${slug}`)
   } catch (error: any) {
-    toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
+    toast.add({ severity: 'error', summary: error?.data?.message || 'Không thể tải sản phẩm', life: 4000 })
   } finally {
     loading.value = false
   }
@@ -51,14 +56,14 @@ const avgRating = computed(() => reviews.value.length ? reviews.value.reduce((s,
 const reviewCount = computed(() => reviews.value.length)
 
 const MATERIAL_META: Record<MaterialType, { icon: string; color: string }> = {
-  ORGANIC: { icon: 'i-ph-leaf', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  RECYCLED: { icon: 'i-ph-recycle', color: 'bg-teal-50 text-teal-700 border-teal-200' },
-  NATURAL: { icon: 'i-ph-flower', color: 'bg-sky-50 text-sky-700 border-sky-200' },
-  SYNTHETIC: { icon: 'i-ph-flask', color: 'bg-slate-100 text-slate-700 border-slate-200' }
+  ORGANIC: { icon: 'sun', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  RECYCLED: { icon: 'sync', color: 'bg-teal-50 text-teal-700 border-teal-200' },
+  NATURAL: { icon: 'sun', color: 'bg-sky-50 text-sky-700 border-sky-200' },
+  SYNTHETIC: { icon: 'bolt', color: 'bg-slate-100 text-slate-700 border-slate-200' }
 }
 
 function materialIcon(type: string) {
-  return (MATERIAL_META[type as MaterialType] || { icon: 'i-ph-package' }).icon
+  return (MATERIAL_META[type as MaterialType] || { icon: 'box' }).icon
 }
 
 function materialColor(type: string) {
@@ -89,14 +94,14 @@ async function addToCart() {
     return
   }
   if (isAdmin.value) {
-    router.push('/admin')
+    router.push('/admin/products')
     return
   }
   if (!product.value || product.value.stock <= 0) return
   adding.value = true
   try {
     await addToCartApi(product.value.id, quantity.value)
-    toast.add({ title: 'Đã thêm vào giỏ hàng', icon: 'i-ph-check-circle', color: 'success' })
+    toast.add({ severity: 'success', summary: 'Đã thêm vào giỏ hàng', life: 4000 })
   } finally {
     adding.value = false
   }
@@ -107,7 +112,7 @@ async function submitReview() {
   const parsed = reviewSchema.safeParse(reviewForm)
   if (!parsed.success) {
     const first = parsed.error.issues[0]
-    toast.add({ title: first?.message || 'Đánh giá không hợp lệ', color: 'error' })
+    toast.add({ severity: 'error', summary: first?.message || 'Đánh giá không hợp lệ', life: 4000 })
     return
   }
   submittingReview.value = true
@@ -116,11 +121,11 @@ async function submitReview() {
       method: 'POST',
       body: { productId: product.value.id, rating: reviewForm.rating, content: reviewForm.content }
     })
-    toast.add({ title: 'Cảm ơn bạn đã đánh giá!', icon: 'i-ph-check-circle', color: 'success' })
+    toast.add({ severity: 'success', summary: 'Cảm ơn bạn đã đánh giá!', life: 4000 })
     reviewForm.content = ''
     await loadReviews()
   } catch (error: any) {
-    toast.add({ title: error?.data?.message || 'Không thể gửi đánh giá', color: 'error' })
+    toast.add({ severity: 'error', summary: error?.data?.message || 'Không thể gửi đánh giá', life: 4000 })
   } finally {
     submittingReview.value = false
   }
@@ -132,7 +137,7 @@ onMounted(loadReviews)
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6" v-if="product">
     <button @click="goBack" class="mb-4 inline-flex items-center gap-1 text-sm text-gray-400 transition hover:text-emerald-700">
-      <UIcon name="i-ph-caret-left" class="h-4 w-4" /> Quay lại
+      <UiIcon name="caret-left" size="16" /> Quay lại
     </button>
 
     <nav class="mb-6 text-sm text-gray-400">
@@ -196,7 +201,7 @@ onMounted(loadReviews)
               class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
               :class="materialColor(m.type)"
             >
-              <UIcon :name="materialIcon(m.type)" class="h-3.5 w-3.5" />
+              <UiIcon :name="materialIcon(m.type)" size="14" />
               {{ m.name }} · {{ m.percentage }}%
             </span>
           </div>
@@ -208,9 +213,13 @@ onMounted(loadReviews)
         <!-- Quantity + add + live total -->
         <div class="mt-8 flex flex-wrap items-center gap-4">
           <div class="flex items-center rounded-xl border border-emerald-200">
-            <UButton color="neutral" variant="ghost" icon="i-ph-minus" :disabled="quantity <= 1" class="min-h-11 min-w-11 justify-center" @click="quantity--" />
+            <NButton quaternary :disabled="quantity <= 1" class="min-h-11 min-w-11" @click="quantity--">
+              <template #icon><UiIcon name="minus" size="16" /></template>
+            </NButton>
             <span class="w-10 text-center font-semibold">{{ quantity }}</span>
-            <UButton color="neutral" variant="ghost" icon="i-ph-plus" :disabled="quantity >= product.stock" class="min-h-11 min-w-11 justify-center" @click="quantity++" />
+            <NButton quaternary :disabled="quantity >= product.stock" class="min-h-11 min-w-11" @click="quantity++">
+              <template #icon><UiIcon name="plus" size="16" /></template>
+            </NButton>
           </div>
           <AddToCartButton v-if="!isAdmin" :stock="product.stock" :loading="adding" @add="addToCart" />
           <span class="text-sm text-gray-500">
@@ -227,32 +236,36 @@ onMounted(loadReviews)
           <h2 class="text-2xl font-extrabold text-gray-700">Đánh giá</h2>
           <template v-if="reviewCount > 0">
             <div class="flex items-center gap-1.5 rounded-full bg-yellow-50 px-3 py-1">
-              <UIcon name="i-ph-star-fill" class="h-4 w-4 text-yellow-400" />
+              <UiIcon name="star-fill" size="16" class="text-yellow-400" />
               <span class="text-sm font-bold text-gray-700">{{ avgRating.toFixed(1) }}</span>
             </div>
             <span class="text-sm text-gray-400">{{ reviewCount }} đánh giá</span>
           </template>
         </div>
-        <UButton
+        <NButton
           v-if="isLoggedIn"
-          color="primary"
-          variant="soft"
-          size="sm"
-          :icon="reviewFormOpen ? 'i-ph-x' : 'i-ph-pencil-simple'"
-          :label="reviewFormOpen ? 'Đóng' : 'Viết đánh giá'"
+          type="primary"
+          secondary
+          size="small"
           @click="reviewFormOpen = !reviewFormOpen"
-        />
+        >
+          <template #icon><UiIcon :name="reviewFormOpen ? 'times' : 'pencil'" size="16" /></template>
+          {{ reviewFormOpen ? 'Đóng' : 'Viết đánh giá' }}
+        </NButton>
       </div>
 
       <div v-if="isLoggedIn && reviewFormOpen" class="mt-6 rounded-2xl border border-emerald-100 bg-white p-4">
         <div class="flex items-center gap-1">
           <button v-for="s in 5" :key="s" type="button" :aria-label="`Đánh giá ${s} sao`" :class="s <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'" @click="reviewForm.rating = s">
-            <UIcon name="i-ph-star-fill" class="h-6 w-6" />
+            <UiIcon name="star-fill" size="22" />
           </button>
         </div>
         <div class="mt-3 flex items-end gap-3">
-          <UTextarea v-model="reviewForm.content" placeholder="Chia sẻ trải nghiệm của bạn..." class="flex-1" :rows="2" />
-          <UButton color="primary" label="Gửi" icon="i-ph-paper-plane-tilt" :loading="submittingReview" @click="submitReview" />
+          <NInput v-model:value="reviewForm.content" type="textarea" placeholder="Chia sẻ trải nghiệm của bạn..." :rows="2" class="flex-1" />
+          <NButton type="primary" :loading="submittingReview" @click="submitReview">
+            <template #icon><UiIcon name="send" size="16" /></template>
+            Gửi
+          </NButton>
         </div>
       </div>
 
@@ -260,12 +273,12 @@ onMounted(loadReviews)
         <div v-for="r in reviews" :key="r.id" class="rounded-2xl border border-emerald-50 bg-white p-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <UAvatar :alt="r.customerName" size="sm" />
+              <NAvatar size="medium">{{ r.customerName?.charAt(0)?.toUpperCase() || '?' }}</NAvatar>
               <span class="font-medium text-gray-700">{{ r.customerName }}</span>
             </div>
             <div class="flex items-center gap-2 text-xs text-gray-400">
               <span class="flex gap-0.5">
-                <UIcon v-for="s in 5" :key="s" :name="s <= r.rating ? 'i-ph-star-fill' : 'i-ph-star'" :class="s <= r.rating ? 'text-yellow-400' : 'text-gray-300'" class="h-4 w-4" />
+                <UiIcon v-for="s in 5" :key="s" :name="s <= r.rating ? 'star-fill' : 'star'" size="16" :class="s <= r.rating ? 'text-yellow-400' : 'text-gray-300'" />
               </span>
               <span>{{ formatDate(r.createdAt) }}</span>
             </div>
@@ -293,14 +306,14 @@ onMounted(loadReviews)
   </div>
 
   <div v-else-if="loading" class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-    <USkeleton class="mb-4 h-4 w-20 rounded" />
+    <NSkeleton class="mb-4 h-4 w-20 rounded" />
     <div class="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
-      <USkeleton class="aspect-[4/3] rounded-2xl" />
+      <NSkeleton class="aspect-[4/3] rounded-2xl" />
       <div class="space-y-4">
-        <USkeleton class="h-8 w-3/4 rounded" />
-        <USkeleton class="h-4 w-1/2 rounded" />
-        <USkeleton class="h-20 rounded-xl" />
-        <USkeleton class="h-10 w-40 rounded-xl" />
+        <NSkeleton class="h-8 w-3/4 rounded" />
+        <NSkeleton class="h-4 w-1/2 rounded" />
+        <NSkeleton class="h-20 rounded-xl" />
+        <NSkeleton class="h-10 w-40 rounded-xl" />
       </div>
     </div>
   </div>

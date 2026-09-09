@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue'
-import { useToast } from '@nuxt/ui/composables/useToast'
+import { ref, computed, watch } from 'vue'
+import { useToast } from '@/composables/useToast'
 import type { Cart } from '@/types'
 import { useApi } from '@/composables/useApi'
 import { useAuth } from '@/composables/useAuth'
@@ -45,8 +45,9 @@ export const useCart = () => {
 
   const notifyError = (error: any, fallback: string) => {
     toast.add({
-      title: error?.data?.message || fallback,
-      color: 'error'
+      severity: 'error',
+      summary: error?.data?.message || fallback,
+      life: 4000
     })
   }
 

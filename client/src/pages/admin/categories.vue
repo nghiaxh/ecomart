@@ -1,10 +1,14 @@
 <script setup lang="ts">
-
+import { ref, reactive, computed, h, onMounted } from 'vue'
+import { useToast } from '@/composables/useToast'
 import type { CategoryRequest, CategoryResponse } from '@/types'
 import { categorySchema } from '@/schemas'
 import { useApi } from '@/composables/useApi'
 import { useConfirm } from '@/composables/useConfirm'
 import { useFormErrors } from '@/composables/useFormErrors'
+import UiIcon from '@/components/UiIcon.vue'
+import type { DataTableColumns } from 'naive-ui'
+import { NButton, NCheckbox, NDataTable, NInput, NInputNumber, NModal, NTag } from 'naive-ui'
 
 const { request } = useApi()
 const { errors, applyIssues, clearErrors } = useFormErrors()
@@ -16,22 +20,36 @@ const loading = ref(true)
 const busyIds = ref<Set<number>>(new Set())
 
 const categoryIconMap: Record<string, string> = {
-  leaf: 'i-ph-leaf',
-  apple: 'i-ph-apple-logo',
-  box: 'i-ph-package',
-  carrot: 'i-ph-carrot',
-  tag: 'i-ph-tag-simple'
+  leaf: 'leaf',
+  apple: 'apple',
+  box: 'box',
+  carrot: 'tag',
+  tag: 'tag'
 }
 
 function categoryIcon(icon?: string | null) {
-  if (!icon) return 'i-ph-tag-simple'
-  return categoryIconMap[icon] || `i-ph-${icon}`
+  if (!icon) return 'tag'
+  return categoryIconMap[icon] || 'tag'
 }
+
+interface CategoryRow {
+  item: CategoryResponse
+  level: 1 | 2
+}
+
+const categoryRows = computed<CategoryRow[]>(() =>
+  categories.value.flatMap((c) => [
+    { item: c, level: 1 as const },
+    ...c.children.map((child) => ({ item: child, level: 2 as const }))
+  ])
+)
 
 const showForm = ref(false)
 const editingId = ref<number | null>(null)
 const saving = ref(false)
 const form = reactive({ name: '', slug: '', icon: '', parentId: null as number | null, displayOrder: 0, active: true })
+
+const formTitle = computed(() => editingId.value ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới')
 
 async function load() {
   loading.value = true
@@ -71,11 +89,11 @@ async function submit() {
     } else {
       await request('/api/categories', { method: 'POST', body: payload })
     }
-    toast.add({ title: 'Đã lưu danh mục', color: 'success' })
+    toast.add({ severity: 'success', summary: 'Đã lưu danh mục', life: 4000 })
     showForm.value = false
     await load()
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Lưu thất bại', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Lưu thất bại', life: 4000 })
   } finally {
     saving.value = false
   }
@@ -87,14 +105,58 @@ async function remove(c: CategoryResponse) {
   busyIds.value.add(c.id)
   try {
     await request(`/api/categories/${c.id}`, { method: 'DELETE' })
-    toast.add({ title: 'Đã xóa danh mục', color: 'success' })
+    toast.add({ severity: 'success', summary: 'Đã xóa danh mục', life: 4000 })
     await load()
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Không thể xóa danh mục', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Không thể xóa danh mục', life: 4000 })
   } finally {
     busyIds.value.delete(c.id)
   }
 }
+
+const columns = computed<DataTableColumns<CategoryRow>>(() => [
+  {
+    key: 'name',
+    title: 'Danh mục',
+    render: (row) =>
+      row.level === 2
+        ? h('div', { class: 'flex items-center gap-2' }, [
+            h(UiIcon, { name: 'arrow-down-right', size: 16, class: 'shrink-0 text-emerald-500' }),
+            h('span', { class: 'text-gray-700' }, row.item.name)
+          ])
+        : h('div', { class: 'flex items-center gap-2' }, [
+            row.item.icon && categoryIcon(row.item.icon) !== 'tag'
+              ? h(UiIcon, { name: categoryIcon(row.item.icon), size: 16, class: 'text-emerald-600' })
+              : null,
+            h('span', { class: 'font-medium text-gray-700' }, row.item.name)
+          ])
+  },
+  {
+    key: 'slug',
+    title: 'Slug',
+    render: (row) => h('span', { class: 'text-gray-500' }, row.item.slug)
+  },
+  {
+    key: 'level',
+    title: 'Cấp',
+    render: (row) => h(NTag, { type: 'default' }, { default: () => row.level === 2 ? 'Cấp 2' : 'Cấp 1' })
+  },
+  {
+    key: 'active',
+    title: 'Trạng thái',
+    render: (row) => h(NTag, { type: row.item.active ? 'success' : 'default' }, { default: () => row.item.active ? 'Hiển thị' : 'Ẩn' })
+  },
+  {
+    key: 'actions',
+    title: 'Thao tác',
+    render: (row) => h('div', { class: 'flex justify-end gap-1' }, [
+      h(NButton, { quaternary: true, size: 'small', onClick: () => openEdit(row.item) }, { icon: () => h(UiIcon, { name: 'pencil', size: 16 }) }),
+      row.level === 1
+        ? h(NButton, { quaternary: true, size: 'small', loading: busyIds.value.has(row.item.id), onClick: () => remove(row.item) }, { icon: () => h(UiIcon, { name: 'trash', size: 16 }) })
+        : null
+    ])
+  }
+])
 
 onMounted(load)
 </script>
@@ -102,92 +164,58 @@ onMounted(load)
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <div class="mb-5 flex items-center justify-end">
-      <UButton color="primary" icon="i-ph-plus" label="Thêm danh mục" @click="openCreate" />
+      <NButton type="primary" @click="openCreate">
+        <template #icon><UiIcon name="plus" size="16" /></template>
+        Thêm danh mục
+      </NButton>
     </div>
 
-    <div v-if="showForm" class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-      <h2 class="mb-4 font-bold text-gray-700">{{ editingId ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}</h2>
+    <NModal
+      v-model:show="showForm"
+      preset="card"
+      :title="formTitle"
+      :style="{ width: '720px', maxWidth: '95vw' }"
+    >
       <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
         <div>
           <label class="mb-1 block text-sm text-gray-500">Tên</label>
-          <UInput v-model="form.name" />
+          <NInput v-model:value="form.name" />
           <p v-if="errors.name" class="text-xs text-red-600">{{ errors.name }}</p>
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Slug</label>
-          <UInput v-model="form.slug" />
+          <NInput v-model:value="form.slug" />
           <p v-if="errors.slug" class="text-xs text-red-600">{{ errors.slug }}</p>
         </div>
         <div>
-          <label class="mb-1 block text-sm text-gray-500">Icon (tên icon phosphor)</label>
-          <UInput v-model="form.icon" placeholder="ex: carrot, apple, tag-simple" />
+          <label class="mb-1 block text-sm text-gray-500">Icon (tên icon)</label>
+          <NInput v-model:value="form.icon" placeholder="ex: carrot, apple, tag" />
         </div>
         <div>
           <label class="mb-1 block text-sm text-gray-500">Thứ tự</label>
-          <UInput v-model="form.displayOrder" type="number" />
+          <NInputNumber v-model:value="form.displayOrder" :min="0" :show-button="false" />
         </div>
         <div class="flex items-end pb-1">
-          <UCheckbox v-model="form.active" label="Hiển thị" />
-        </div>
-        <div class="flex items-end justify-end gap-2 md:col-span-2">
-          <UButton color="neutral" variant="ghost" label="Hủy" @click="showForm = false" />
-          <UButton type="submit" color="primary" label="Lưu" :loading="saving" />
+          <NCheckbox v-model:checked="form.active">Hiển thị</NCheckbox>
         </div>
       </form>
-    </div>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <NButton quaternary @click="showForm = false">Hủy</NButton>
+          <NButton type="primary" :loading="saving" @click="submit">Lưu</NButton>
+        </div>
+      </template>
+    </NModal>
 
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-      <table class="w-full text-sm">
-        <thead class="sticky top-0 z-10 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-          <tr>
-            <th class="px-4 py-3">Danh mục</th>
-            <th class="px-4 py-3">Slug</th>
-            <th class="px-4 py-3">Cấp</th>
-            <th class="px-4 py-3">Trạng thái</th>
-            <th class="px-4 py-3 text-right">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <template v-for="c in categories" :key="c.id">
-            <tr class="transition hover:bg-gray-50/60">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <UIcon v-if="c.icon && categoryIcon(c.icon) !== 'i-ph-tag-simple'" :name="categoryIcon(c.icon)" class="h-4 w-4 text-emerald-600" />
-                  <span class="font-medium text-gray-700">{{ c.name }}</span>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-gray-500">{{ c.slug }}</td>
-              <td class="px-4 py-3"><UBadge color="neutral" label="Cấp 1" size="sm" /></td>
-              <td class="px-4 py-3"><UBadge :color="c.active ? 'success' : 'neutral'" :label="c.active ? 'Hiển thị' : 'Ẩn'" size="sm" /></td>
-              <td class="px-4 py-3">
-                <div class="flex justify-end gap-1">
-                  <UButton color="neutral" variant="ghost" icon="i-ph-pencil-simple" @click="openEdit(c)" />
-                  <UButton color="neutral" variant="ghost" icon="i-ph-trash" :loading="busyIds.has(c.id)" @click="remove(c)" />
-                </div>
-              </td>
-            </tr>
-            <tr v-for="child in c.children" :key="child.id" class="bg-gray-50/40 transition hover:bg-gray-50/80">
-              <td class="px-4 py-3 pl-8">
-                <span class="flex items-center gap-2 text-gray-700">
-                  <UIcon name="i-ph-corner-down-right" class="h-4 w-4 text-emerald-500" />
-                  {{ child.name }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-gray-500">{{ child.slug }}</td>
-              <td class="px-4 py-3"><UBadge color="neutral" variant="soft" label="Cấp 2" size="sm" /></td>
-              <td class="px-4 py-3"><UBadge :color="child.active ? 'success' : 'neutral'" :label="child.active ? 'Hiển thị' : 'Ẩn'" size="sm" /></td>
-              <td class="px-4 py-3">
-                <div class="flex justify-end gap-1">
-                  <UButton color="neutral" variant="ghost" icon="i-ph-pencil-simple" @click="openEdit(child)" />
-                </div>
-              </td>
-            </tr>
-          </template>
-          <tr v-if="!loading && !categories.length">
-            <td colspan="5" class="px-4 py-16 text-center text-gray-400">Không có danh mục.</td>
-          </tr>
-        </tbody>
-      </table>
+      <NDataTable :data="categoryRows" :columns="columns" :loading="loading" :row-key="(row) => row.item.id">
+        <template #empty>
+          <div v-if="!loading" class="flex flex-col items-center py-8 text-gray-400">
+            <UiIcon name="folder" size="32" class="mb-2 text-gray-300" />
+            <p class="text-sm">Không có danh mục.</p>
+          </div>
+        </template>
+      </NDataTable>
     </div>
   </div>
 </template>

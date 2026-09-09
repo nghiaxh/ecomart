@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AddressForm } from '@/schemas'
+import { NButton, NCheckbox, NInput } from 'naive-ui'
 
 const props = defineProps<{
   errors: Record<string, string>
@@ -24,13 +25,17 @@ const fields = [
 <template>
   <form class="mt-4 grid gap-3 sm:grid-cols-2" @submit.prevent="emit('submit')">
     <div v-for="f in fields" :key="f.key" :class="f.span ? 'sm:col-span-2' : ''">
-      <UInput v-model="(form as any)[f.key]" :placeholder="f.placeholder" />
+      <NInput v-model:value="(form as any)[f.key]" :placeholder="f.placeholder" class="w-full" />
       <p v-if="props.errors[f.key]" class="mt-1 text-xs text-red-600">{{ props.errors[f.key] }}</p>
     </div>
-    <UCheckbox v-model="form.isDefault" label="Đặt làm địa chỉ mặc định" />
+    <div class="flex items-center gap-2">
+      <NCheckbox v-model:checked="form.isDefault">
+        <label class="text-sm text-gray-700">Đặt làm địa chỉ mặc định</label>
+      </NCheckbox>
+    </div>
     <div class="flex justify-end gap-2 sm:col-span-2">
-      <UButton color="neutral" variant="ghost" label="Hủy" @click="emit('cancel')" />
-      <UButton type="submit" color="primary" label="Lưu địa chỉ" :loading="props.saving" />
+      <NButton quaternary @click="emit('cancel')">Hủy</NButton>
+      <NButton attr-type="submit" :loading="props.saving">Lưu địa chỉ</NButton>
     </div>
   </form>
 </template>

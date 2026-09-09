@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Product } from '@/types'
 import { useFormat } from '@/composables/useFormat'
+import UiImg from '@/components/UiImg.vue'
 
 defineProps<{ product: Product }>()
 const { formatVND, formatKg } = useFormat()

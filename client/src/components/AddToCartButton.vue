@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { NButton } from 'naive-ui'
+import UiIcon from '@/components/UiIcon.vue'
+
 const props = defineProps<{
   stock: number
   loading?: boolean
@@ -12,15 +16,8 @@ const label = computed(() => (props.stock <= 0 ? 'Hết hàng' : 'Thêm vào gi�
 </script>
 
 <template>
-  <UButton
-    color="primary"
-    size="lg"
-    :block="block"
-    icon="i-ph-shopping-cart"
-    :disabled="disabled"
-    :loading="loading"
-    @click="emit('add')"
-  >
+  <NButton type="primary" size="large" :block="block" :disabled="disabled" :loading="loading" @click="emit('add')">
+    <template #icon><UiIcon name="shopping-cart" /></template>
     {{ label }}
-  </UButton>
+  </NButton>
 </template>

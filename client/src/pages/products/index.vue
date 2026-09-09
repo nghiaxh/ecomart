@@ -1,8 +1,14 @@
 <script setup lang="ts">
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useToast } from '@nuxt/ui/composables/useToast'
+import { useToast } from '@/composables/useToast'
+import { useDebounceFn } from '@vueuse/core'
 import type { CategoryResponse, PageResponse, Product } from '@/types'
 import { useApi } from '@/composables/useApi'
+import ProductCard from '@/components/ProductCard.vue'
+import PaginationBar from '@/components/PaginationBar.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import { NButton, NInput, NSelect, NSkeleton } from 'naive-ui'
 
 const { request } = useApi()
 const route = useRoute()
@@ -114,7 +120,7 @@ async function load(initial = false) {
       total.value = 0
       totalPages.value = 0
     }
-    toast.add({ title: error?.data?.message || 'Không thể tải sản phẩm', color: 'error' })
+    toast.add({ severity: 'error', summary: error?.data?.message || 'Không thể tải sản phẩm', life: 4000 })
   } finally {
     if (seq === loadSeq) loading.value = false
   }
@@ -166,65 +172,68 @@ onMounted(() => {
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <!-- Category chips -->
     <div class="mb-6 flex flex-wrap gap-2">
-      <UButton
-        :color="!filters.category ? 'primary' : 'neutral'"
-        :variant="!filters.category ? 'solid' : 'soft'"
-        size="md"
-        label="Tất cả"
+      <NButton
+        :type="!filters.category ? 'primary' : 'default'"
+        :secondary="!!filters.category"
+        size="small"
         @click="setCategory()"
-      />
+      >Tất cả</NButton
+      >
       <template v-for="c in categories" :key="c.id">
-        <UButton
-          :color="filters.category === c.slug ? 'primary' : 'neutral'"
-          :variant="filters.category === c.slug ? 'solid' : 'soft'"
-          size="md"
-          :label="c.name"
+        <NButton
+          :type="filters.category === c.slug ? 'primary' : 'default'"
+          :secondary="filters.category !== c.slug"
+          size="small"
           @click="setCategory(c.slug)"
-        />
-        <UButton
+        >{{ c.name }}</NButton
+        >
+        <NButton
           v-for="child in c.children"
           :key="child.id"
-          :color="filters.category === child.slug ? 'primary' : 'neutral'"
-          :variant="filters.category === child.slug ? 'solid' : 'soft'"
-          size="md"
-          :label="child.name"
+          :type="filters.category === child.slug ? 'primary' : 'default'"
+          :secondary="filters.category !== child.slug"
+          size="small"
           @click="setCategory(child.slug)"
-        />
+        >{{ child.name }}</NButton
+        >
       </template>
     </div>
 
     <!-- Filters -->
     <div class="mb-8 grid gap-3 rounded-2xl border border-emerald-100 bg-white p-4 md:grid-cols-5">
-      <UInput v-model="filters.q" icon="i-ph-magnifying-glass" placeholder="Tìm sản phẩm..." />
-      <USelect
-        v-model="filters.priceRange"
-        :items="PRICE_RANGES"
-        label-key="label"
-        value-key="value"
+      <div>
+        <NInput v-model:value="filters.q" placeholder="Tìm sản phẩm..." clearable>
+          <template #prefix><UiIcon name="search" size="16" /></template>
+        </NInput>
+      </div>
+      <NSelect
+        v-model:value="filters.priceRange"
+        :options="PRICE_RANGES"
         placeholder="Khoảng giá"
       />
-      <USelect
-        v-model="filters.sort"
-        :items="SORT_OPTIONS"
-        label-key="label"
-        value-key="value"
+      <NSelect
+        v-model:value="filters.sort"
+        :options="SORT_OPTIONS"
         placeholder="Sắp xếp"
       />
-      <UButton color="primary" icon="i-ph-funnel" label="Lọc" @click="applyFilters" />
-      <UButton color="neutral" variant="ghost" label="Bỏ lọc" @click="clearFilters" />
+      <NButton type="primary" @click="applyFilters">
+        <template #icon><UiIcon name="filter" size="16" /></template>
+        Lọc
+      </NButton>
+      <NButton quaternary @click="clearFilters">Bỏ lọc</NButton>
     </div>
 
     <!-- Product grid -->
     <div v-if="loading" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-      <USkeleton v-for="i in 8" :key="i" class="h-72 rounded-2xl" />
+      <NSkeleton v-for="i in 8" :key="i" class="h-72 rounded-2xl" />
     </div>
     <div v-else-if="products.length" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       <ProductCard v-for="p in products" :key="p.id" :product="p" />
     </div>
     <div v-else class="py-20 text-center text-gray-400">
-      <UIcon name="i-ph-tray" class="mx-auto h-12 w-12 mb-3" />
+      <UiIcon name="inbox" size="48" class="mx-auto mb-3 block" />
       <p>Không tìm thấy sản phẩm phù hợp.</p>
-      <UButton class="mt-4" color="primary" variant="soft" label="Bỏ lọc" @click="clearFilters" />
+      <NButton class="mt-4" type="primary" secondary @click="clearFilters">Bỏ lọc</NButton>
     </div>
 
     <!-- Pagination -->

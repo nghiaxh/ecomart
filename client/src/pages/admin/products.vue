@@ -1,11 +1,18 @@
 <script setup lang="ts">
-
+import { ref, reactive, computed, h, onMounted, watch } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
+import { useToast } from '@/composables/useToast'
 import type { CategoryResponse, PageResponse, Product, ProductRequest } from '@/types'
 import { productSchema } from '@/schemas'
 import { useApi } from '@/composables/useApi'
 import { useConfirm } from '@/composables/useConfirm'
 import { useFormErrors } from '@/composables/useFormErrors'
 import { useFormat } from '@/composables/useFormat'
+import UiImg from '@/components/UiImg.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import PaginationBar from '@/components/PaginationBar.vue'
+import type { DataTableColumns } from 'naive-ui'
+import { NButton, NCheckbox, NDataTable, NInput, NInputNumber, NModal, NSelect, NTag } from 'naive-ui'
 
 const { request } = useApi()
 const { formatVND } = useFormat()
@@ -87,11 +94,11 @@ async function submit() {
     } else {
       await request('/api/products', { method: 'POST', body: payload })
     }
-    toast.add({ title: 'Đã lưu sản phẩm', color: 'success' })
+    toast.add({ severity: 'success', summary: 'Đã lưu sản phẩm', life: 4000 })
     showForm.value = false
     await load()
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Lưu thất bại', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Lưu thất bại', life: 4000 })
   } finally {
     saving.value = false
   }
@@ -104,7 +111,7 @@ async function toggle(p: Product) {
     await request(`/api/products/${p.id}/toggle`, { method: 'PATCH' })
     await load()
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Không thể cập nhật trạng thái', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Không thể cập nhật trạng thái', life: 4000 })
   } finally {
     busyIds.value.delete(p.id)
   }
@@ -116,14 +123,49 @@ async function remove(p: Product) {
   busyIds.value.add(p.id)
   try {
     await request(`/api/products/${p.id}`, { method: 'DELETE' })
-    toast.add({ title: 'Đã xóa sản phẩm', color: 'success' })
+    toast.add({ severity: 'success', summary: 'Đã xóa sản phẩm', life: 4000 })
     await load()
   } catch (e: any) {
-    toast.add({ title: e?.data?.message || 'Không thể xóa sản phẩm', color: 'error' })
+    toast.add({ severity: 'error', summary: e?.data?.message || 'Không thể xóa sản phẩm', life: 4000 })
   } finally {
     busyIds.value.delete(p.id)
   }
 }
+
+const columns = computed<DataTableColumns<Product>>(() => [
+  {
+    key: 'name',
+    title: 'Sản phẩm',
+    render: (row) => h('div', { class: 'flex min-w-0 items-center gap-3' }, [
+      h(UiImg, { src: row.images?.[0], alt: row.name, imgClass: 'h-10 w-10 shrink-0 rounded-lg object-cover' }),
+      h('span', { class: 'whitespace-normal font-medium text-gray-700' }, row.name)
+    ])
+  },
+  {
+    key: 'price',
+    title: 'Giá',
+    render: (row) => h('span', { class: 'text-gray-600 tabular-nums' }, formatVND(row.price))
+  },
+  {
+    key: 'stock',
+    title: 'Tồn kho',
+    render: (row) => h('span', { class: 'text-gray-600 tabular-nums' }, row.stock)
+  },
+  {
+    key: 'active',
+    title: 'Trạng thái',
+    render: (row) => h(NTag, { type: row.active ? 'success' : 'default' }, { default: () => row.active ? 'Bán' : 'Ẩn' })
+  },
+  {
+    key: 'actions',
+    title: 'Thao tác',
+    render: (row) => h('div', { class: 'flex justify-end gap-1' }, [
+      h(NButton, { quaternary: true, size: 'small', onClick: () => openEdit(row) }, { icon: () => h(UiIcon, { name: 'pencil', size: 16 }) }),
+      h(NButton, { quaternary: true, size: 'small', loading: busyIds.value.has(row.id), onClick: () => toggle(row) }, { icon: () => h(UiIcon, { name: row.active ? 'eye-slash' : 'eye', size: 16 }) }),
+      h(NButton, { quaternary: true, size: 'small', loading: busyIds.value.has(row.id), onClick: () => remove(row) }, { icon: () => h(UiIcon, { name: 'trash', size: 16 }) })
+    ])
+  }
+])
 
 const debouncedLoad = useDebounceFn(load, 400)
 
@@ -134,101 +176,26 @@ watch(search, debouncedLoad)
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <UInput v-model="search" icon="i-ph-magnifying-glass" placeholder="Tìm sản phẩm..." class="w-full max-w-md" />
-      <UButton color="primary" icon="i-ph-plus" label="Thêm sản phẩm" @click="openCreate" />
-    </div>
-
-    <div v-if="showForm" class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-      <h2 class="mb-4 font-bold text-gray-700">{{ editingId ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h2>
-      <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
-        <div class="md:col-span-1">
-          <label class="mb-1 block text-sm text-gray-500">Tên</label>
-          <UInput v-model="form.name" />
-          <p v-if="errors.name" class="text-xs text-red-600">{{ errors.name }}</p>
-        </div>
-        <div class="md:col-span-1">
-          <label class="mb-1 block text-sm text-gray-500">Slug</label>
-          <UInput v-model="form.slug" />
-          <p v-if="errors.slug" class="text-xs text-red-600">{{ errors.slug }}</p>
-        </div>
-        <div class="md:col-span-1">
-          <label class="mb-1 block text-sm text-gray-500">Danh mục</label>
-          <USelect v-model="form.categoryId" :items="categories.map(c => ({ label: c.name, value: c.id }))" label-key="label" value-key="value" />
-          <p v-if="errors.categoryId" class="text-xs text-red-600">{{ errors.categoryId }}</p>
-        </div>
-        <div class="md:col-span-1">
-          <label class="mb-1 block text-sm text-gray-500">Giá (₫)</label>
-          <UInput v-model="form.price" type="number" />
-          <p v-if="errors.price" class="text-xs text-red-600">{{ errors.price }}</p>
-        </div>
-        <div class="md:col-span-1">
-          <label class="mb-1 block text-sm text-gray-500">Tồn kho</label>
-          <UInput v-model="form.stock" type="number" />
-          <p v-if="errors.stock" class="text-xs text-red-600">{{ errors.stock }}</p>
-        </div>
-        <div class="md:col-span-1">
-          <label class="mb-1 block text-sm text-gray-500">Khối lượng (kg)</label>
-          <UInput v-model="form.weight" type="number" step="0.1" />
-        </div>
-        <div class="md:col-span-1">
-          <label class="mb-1 block text-sm text-gray-500">Xuất xứ</label>
-          <UInput v-model="form.origin" />
-        </div>
-        <div class="md:col-span-1">
-          <label class="mb-1 block text-sm text-gray-500">Hình ảnh URL</label>
-          <UInput v-model="form.imageUrl" placeholder="https://..." />
-        </div>
-        <div class="md:col-span-3">
-          <label class="mb-1 block text-sm text-gray-500">Mô tả</label>
-          <UTextarea v-model="form.description" :rows="3" />
-        </div>
-        <div class="md:col-span-3">
-          <UCheckbox v-model="form.active" label="Đang bán" />
-        </div>
-        <div class="md:col-span-3 flex justify-end gap-2">
-          <UButton color="neutral" variant="ghost" label="Hủy" @click="showForm = false" />
-          <UButton type="submit" color="primary" label="Lưu" :loading="saving" />
-        </div>
-      </form>
+      <div class="relative max-w-md flex-1">
+        <NInput v-model:value="search" placeholder="Tìm sản phẩm..." clearable>
+          <template #prefix><UiIcon name="search" size="16" /></template>
+        </NInput>
+      </div>
+      <NButton type="primary" @click="openCreate">
+        <template #icon><UiIcon name="plus" size="16" /></template>
+        Thêm sản phẩm
+      </NButton>
     </div>
 
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-      <table class="w-full text-sm">
-        <thead class="sticky top-0 z-10 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-          <tr>
-            <th class="px-4 py-3">Sản phẩm</th>
-            <th class="px-4 py-3">Giá</th>
-            <th class="px-4 py-3">Tồn kho</th>
-            <th class="px-4 py-3">Trạng thái</th>
-            <th class="px-4 py-3 text-right">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr v-for="p in products" :key="p.id" class="transition hover:bg-gray-50/60">
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <UiImg :src="p.images?.[0]" :alt="p.name" img-class="h-10 w-10 rounded-lg object-cover" />
-                <span class="font-medium text-gray-700">{{ p.name }}</span>
-              </div>
-            </td>
-            <td class="px-4 py-3 text-gray-600 tabular-nums">{{ formatVND(p.price) }}</td>
-            <td class="px-4 py-3 text-gray-600 tabular-nums">{{ p.stock }}</td>
-            <td class="px-4 py-3">
-              <UBadge :color="p.active ? 'success' : 'neutral'" :label="p.active ? 'Bán' : 'Ẩn'" size="sm" />
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex justify-end gap-1">
-                <UButton color="neutral" variant="ghost" icon="i-ph-pencil-simple" @click="openEdit(p)" />
-                <UButton color="neutral" variant="ghost" :icon="p.active ? 'i-ph-eye-slash' : 'i-ph-eye'" :loading="busyIds.has(p.id)" @click="toggle(p)" />
-                <UButton color="neutral" variant="ghost" icon="i-ph-trash" :loading="busyIds.has(p.id)" @click="remove(p)" />
-              </div>
-            </td>
-          </tr>
-          <tr v-if="!loading && !products.length">
-            <td colspan="5" class="px-4 py-16 text-center text-gray-400">Không có sản phẩm.</td>
-          </tr>
-        </tbody>
-      </table>
+      <NDataTable :data="products" :columns="columns" :loading="loading" striped>
+        <template #empty>
+          <div v-if="!loading" class="flex flex-col items-center py-8 text-gray-400">
+            <UiIcon name="inbox" size="32" class="mb-2 text-gray-300" />
+            <p class="text-sm">Không có sản phẩm.</p>
+          </div>
+        </template>
+      </NDataTable>
     </div>
 
     <PaginationBar
@@ -238,5 +205,65 @@ watch(search, debouncedLoad)
       @prev="page--; load()"
       @next="page++; load()"
     />
+
+    <NModal
+      v-model:show="showForm"
+      preset="card"
+      :title="editingId ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'"
+      :style="{ width: '920px', maxWidth: '95vw' }"
+    >
+      <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submit">
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Tên</label>
+          <NInput v-model:value="form.name" />
+          <p v-if="errors.name" class="text-xs text-red-600">{{ errors.name }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Slug</label>
+          <NInput v-model:value="form.slug" />
+          <p v-if="errors.slug" class="text-xs text-red-600">{{ errors.slug }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Danh mục</label>
+          <NSelect v-model:value="form.categoryId" :options="categories.map(c => ({ label: c.name, value: c.id }))" placeholder="Chọn danh mục" />
+          <p v-if="errors.categoryId" class="text-xs text-red-600">{{ errors.categoryId }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Giá (₫)</label>
+          <NInputNumber v-model:value="form.price" :min="0" :show-button="false" />
+          <p v-if="errors.price" class="text-xs text-red-600">{{ errors.price }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Tồn kho</label>
+          <NInputNumber v-model:value="form.stock" :min="0" :show-button="false" />
+          <p v-if="errors.stock" class="text-xs text-red-600">{{ errors.stock }}</p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Khối lượng (kg)</label>
+          <NInputNumber v-model:value="form.weight" :min="0" :show-button="false" />
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Xuất xứ</label>
+          <NInput v-model:value="form.origin" />
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Hình ảnh URL</label>
+          <NInput v-model:value="form.imageUrl" placeholder="https://..." />
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-gray-500">Mô tả</label>
+          <NInput v-model:value="form.description" type="textarea" :rows="3" />
+        </div>
+        <div class="flex items-center gap-2 md:col-span-3">
+          <NCheckbox v-model:checked="form.active">Đang bán</NCheckbox>
+        </div>
+      </form>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <NButton quaternary @click="showForm = false">Hủy</NButton>
+          <NButton type="primary" :loading="saving" @click="submit">Lưu</NButton>
+        </div>
+      </template>
+    </NModal>
   </div>
 </template>

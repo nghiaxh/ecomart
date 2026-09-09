@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useToast } from '@/composables/useToast'
+import { useIntervalFn } from '@vueuse/core'
 import type { Order } from '@/types'
 import { useApi } from '@/composables/useApi'
 import { useFormat } from '@/composables/useFormat'
 import { useStatusLabels } from '@/composables/useStatusLabels'
-
+import UiImg from '@/components/UiImg.vue'
+import UiIcon from '@/components/UiIcon.vue'
+import { NButton, NSkeleton, NTag } from 'naive-ui'
 
 const { request } = useApi()
 const { formatVND, formatDate } = useFormat()
-const { orderStatus, paymentStatus, paymentMethod } = useStatusLabels()
+const { orderStatus, paymentStatus, paymentMethod, badgeType } = useStatusLabels()
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const order = ref<Order | null>(null)
@@ -38,7 +44,7 @@ async function pollOnce() {
       pause()
       polling.value = false
       if (next.payment.status === 'PAID') {
-        toast.add({ title: 'Thanh toán đã được xác nhận', icon: 'i-ph-check-circle', color: 'success' })
+        toast.add({ severity: 'success', summary: 'Thanh toán đã được xác nhận', life: 4000 })
       }
     }
   } catch {
@@ -56,7 +62,7 @@ onMounted(async () => {
       resume()
     }
   } catch (error: any) {
-    toast.add({ title: error?.data?.message || 'Không thể tải đơn hàng', color: 'error' })
+    toast.add({ severity: 'error', summary: error?.data?.message || 'Không thể tải đơn hàng', life: 4000 })
   } finally {
     loading.value = false
   }
@@ -67,7 +73,9 @@ onMounted(async () => {
   <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
     <div v-if="order">
       <div class="flex items-center gap-3">
-        <UButton icon="i-ph-arrow-left" color="neutral" variant="ghost" to="/orders" />
+        <NButton quaternary @click="router.push('/orders')">
+          <template #icon><UiIcon name="arrow-left" size="18" /></template>
+        </NButton>
         <div>
           <h1 class="text-2xl font-extrabold text-gray-700">Đơn hàng #{{ order.id }}</h1>
           <p class="text-sm text-gray-400">{{ formatDate(order.createdAt) }}</p>
@@ -80,7 +88,7 @@ onMounted(async () => {
           <div class="mt-3 space-y-3">
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-500">Đơn hàng:</span>
-              <UBadge :color="orderStatus[order.status].color" :label="orderStatus[order.status].label" />
+              <NTag :type="badgeType[orderStatus[order.status].color]">{{ orderStatus[order.status].label }}</NTag>
             </div>
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-500">Thanh toán:</span>
@@ -127,7 +135,7 @@ onMounted(async () => {
     </div>
 
     <div v-else-if="loading" class="py-12">
-      <USkeleton class="h-64 rounded-2xl" />
+      <NSkeleton class="h-64 rounded-2xl" />
     </div>
     <div v-else class="py-24 text-center text-gray-400">Không tìm thấy đơn hàng.</div>
   </div>
