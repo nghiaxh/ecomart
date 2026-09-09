@@ -1,7 +1,0 @@
-spring:
-  devtools:
-    restart:
-      enabled: true
-      poll-interval: 500ms
-      quiet-period: 300ms
-      exclude: static/**,public/**

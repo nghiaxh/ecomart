@@ -175,4 +175,4 @@ Biến chỉ dùng trong `docker-compose.yml`:
 | `VITE_API_TARGET` | nơi Vite proxy chuyển `/api` tới ở dev (mặc định `http://localhost:8080`; trong compose `client-dev`: `http://server-dev:8080`) |
 | `VITE_API_BASE` | nếu đặt, client gọi thẳng backend qua CORS, bỏ proxy |
 
-Chạy độc lập (dev): cần Postgres tại `localhost:5432` và nạp các biến từ `.env` cho `mvn spring-boot:run`. Hoặc chạy toàn bộ stack: `docker compose --profile prod up --build` (sản phẩm, client ở cổng 80) hoặc `docker compose --profile dev up` (hot-reload, client ở cổng 5173).
+Chạy độc lập (dev): cần Postgres tại `localhost:5432` và nạp các biến từ `.env` cho `mvn spring-boot:run`. Hoặc chạy toàn bộ stack: `docker compose --profile prod up --build` (sản phẩm, client ở cổng 80) hoặc `docker compose --profile dev up --watch` (server tự rebuild + recreate khi sửa code qua `develop.watch`, client HMR ở cổng 5173).

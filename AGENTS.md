@@ -30,11 +30,11 @@ Must run inside `client/` or `server/` (no workspace root scripts).
 **Server** (`./server`):
 - `mvn spring-boot:run` (needs Postgres at `localhost:5432` and env vars — see JWT/PAYOS keys in `.env`; not auto-loaded)
 - `mvn package` / `mvn test` (JUnit + Testcontainers; tests need Docker, `src/test/resources/application.yml` disables Flyway and uses `create-drop`)
-- Or dev via compose: `docker compose --profile dev up` (postgres + `server-dev` with `m2-cache`)
+- Or dev via compose: `docker compose --profile dev up --watch` (postgres + `server-dev` with `m2-cache`; rebuild-on-edit via Compose `develop.watch`)
 
 **Full stack** (repo root):
 - Prod: `docker compose --profile prod up --build`
-- Dev: `docker compose --profile dev up`
+- Dev: `docker compose --profile dev up --watch`
 - Plain `docker compose up --build` only starts postgres (server/client run under profiles). Server env names in compose match `application.yml`: `SPRING_DATASOURCE_URL`/`_USERNAME`/`_PASSWORD`, `JWT_SECRET`, `JWT_ACCESS_EXPIRATION`, `JWT_REFRESH_EXPIRATION`, `PAYOS_*`, `SEED_*`, `CLIENT_URL`.
 
 ## Gotchas

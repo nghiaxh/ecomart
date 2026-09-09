@@ -79,10 +79,10 @@ docker compose --profile prod up --build
 `server`, `client` chạy dưới profile `prod` (`docker compose up --build` không tham số chỉ khởi động postgres). Với profile `dev`, máy chạy `server-dev` + `client-dev` có volume mount để hot-reload:
 
 ```bash
-docker compose --profile dev up
+docker compose --profile dev up --watch
 ```
 
-Profile `dev` tự reload khi sửa code: server restart nhờ DevTools + watcher (`server/dev-watch.sh`, chỉ `--build` lại khi đổi `pom.xml`/`Dockerfile.dev`), client hot-reload qua HMR (bật polling `CHOKIDAR_USEPOLLING`).
+Profile `dev` tự reload khi sửa code: server dùng `develop.watch` của Compose (`action: rebuild`) — mỗi lần sửa `server/src`, `pom.xml` hoặc `Dockerfile.dev` thì Compose tự build image mới và tạo lại container; client hot-reload qua Vite HMR (bật polling `CHOKIDAR_USEPOLLING`, devtools qua `vite-plugin-vue-devtools`). Chạy `up --watch` để bật cơ chế theo dõi file.
 
 ### Chạy dev riêng lẻ
 
@@ -98,7 +98,7 @@ npm test           # test đơn vị (Vitest)
 mvn spring-boot:run
 mvn package
 ```
-Lưu ý: `mvn spring-boot:run` **không** tự đọc `.env` — cần nạp các biến môi trường từ `.env` (JWT_SECRET, PAYOS_*, DB_*) hoặc chạy qua `docker compose --profile dev up`.
+Lưu ý: `mvn spring-boot:run` **không** tự đọc `.env` — cần nạp các biến môi trường từ `.env` (JWT_SECRET, PAYOS_*, DB_*) hoặc chạy qua `docker compose --profile dev up --watch`.
 
 ## Tài khoản demo
 

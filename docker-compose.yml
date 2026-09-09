@@ -68,7 +68,6 @@ services:
     container_name: ecomart-server-dev
     env_file: .env
     environment:
-      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -91,9 +90,17 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./server:/app
-      - /app/target
       - m2-cache:/root/.m2
+    develop:
+      watch:
+        - action: rebuild
+          path: ./server/src
+          ignore:
+            - target/
+        - action: rebuild
+          path: ./server/pom.xml
+        - action: rebuild
+          path: ./server/Dockerfile.dev
     networks:
       - ecomart
 

@@ -2,7 +2,7 @@ FROM maven:3.9-eclipse-temurin-25
 WORKDIR /app
 COPY pom.xml .
 RUN mvn -B dependency:go-offline
-COPY dev-watch.sh /usr/local/bin/dev-watch.sh
-RUN chmod +x /usr/local/bin/dev-watch.sh
+COPY src ./src
+RUN mvn -B package -DskipTests && cp target/*.jar app.jar
 EXPOSE 8080
-CMD ["dev-watch.sh"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
