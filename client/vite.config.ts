@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
-import ui from '@nuxt/ui/vite'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig(({ mode }) => {
@@ -10,17 +10,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      tailwindcss(),
       vue(),
-      ...(mode === 'development' ? [vueDevTools()] : []),
-      ui({
-        colorMode: false,
-        autoImport: {
-          imports: ['vue', 'vue-router', '@vueuse/core']
-        },
-        components: {
-          dirs: [fileURLToPath(new URL('./src/components', import.meta.url))]
-        }
-      })
+      ...(mode === 'development' ? [vueDevTools()] : [])
     ],
     resolve: {
       alias: {
