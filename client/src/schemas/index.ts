@@ -80,12 +80,4 @@ export const updateUserSchema = z.object({
   hireDate: z.string().optional()
 })
 
-export type LoginForm = z.infer<typeof loginSchema>
-export type RegisterForm = z.infer<typeof registerSchema>
 export type AddressForm = z.infer<typeof addressSchema>
-export type ReviewForm = z.infer<typeof reviewSchema>
-export type ProfileForm = z.infer<typeof profileSchema>
-export type ProductForm = z.infer<typeof productSchema>
-export type CategoryForm = z.infer<typeof categorySchema>
-export type CreateUserForm = z.infer<typeof createUserSchema>
-export type UpdateUserForm = z.infer<typeof updateUserSchema>

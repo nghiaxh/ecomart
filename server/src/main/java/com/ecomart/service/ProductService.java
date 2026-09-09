@@ -43,8 +43,7 @@ public class ProductService {
         return search(keyword, categoryId, minPrice, maxPrice, onlyActive(showAll, isAdmin), pageable);
     }
 
-    @Transactional(readOnly = true)
-    public PageResponse<ProductResponse> search(String keyword, Long categoryId, Double minPrice,
+    private PageResponse<ProductResponse> search(String keyword, Long categoryId, Double minPrice,
                                                 Double maxPrice, boolean onlyActive, Pageable pageable) {
         String q = keyword == null || keyword.isBlank() ? "" : keyword.trim();
         List<Long> categoryIds = resolveCategoryIds(categoryId);
@@ -83,14 +82,14 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductResponse getBySlug(String slug) {
         Product product = productRepository.findBySlug(slug)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         return Mapper.toProduct(product);
     }
 
     @Transactional(readOnly = true)
     public ProductResponse getById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         return Mapper.toProduct(product);
     }
 
@@ -104,10 +103,10 @@ public class ProductService {
     @Transactional
     public ProductResponse create(ProductRequest request) {
         if (productRepository.existsBySlug(request.slug())) {
-            throw new BadRequestException("Slug đã tồn tại");
+            throw new BadRequestException("Slug already exists");
         }
         Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         Product product = productRepository.save(new Product());
         Mapper.mergeProduct(product, request, category);
         attachMaterials(product, request);
@@ -117,9 +116,9 @@ public class ProductService {
     @Transactional
     public ProductResponse update(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         Mapper.mergeProduct(product, request, category);
         product.getMaterials().clear();
         attachMaterials(product, request);
@@ -129,7 +128,7 @@ public class ProductService {
     @Transactional
     public void toggleActive(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         product.setActive(!product.isActive());
         productRepository.save(product);
     }
@@ -137,7 +136,7 @@ public class ProductService {
     @Transactional
     public void delete(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         product.setActive(false);
         productRepository.save(product);
     }
@@ -148,7 +147,7 @@ public class ProductService {
         }
         for (ProductRequest.ProductMaterialRequest m : req.materials()) {
             Material material = materialRepository.findById(m.materialId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vật liệu"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Material not found"));
             product.getMaterials().add(Mapper.productMaterial(product, material, m.percentage()));
         }
     }

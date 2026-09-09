@@ -41,9 +41,6 @@ app:
     admin-password: ${SEED_ADMIN_PASSWORD:}
     customer-password: ${SEED_CUSTOMER_PASSWORD:}
 
-google:
-  client-id: ${GOOGLE_CLIENT_ID:}
-
 payos:
   client-id: ${PAYOS_CLIENT_ID:}
   api-key: ${PAYOS_API_KEY:}

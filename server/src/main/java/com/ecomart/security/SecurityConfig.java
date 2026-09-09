@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,17 +25,11 @@ import java.io.IOException;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final PasswordEncoder passwordEncoder;
-    private final UserDetailsServiceImpl userDetailsService;
     private final ObjectMapper objectMapper;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          PasswordEncoder passwordEncoder,
-                          UserDetailsServiceImpl userDetailsService,
                           ObjectMapper objectMapper) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.passwordEncoder = passwordEncoder;
-        this.userDetailsService = userDetailsService;
         this.objectMapper = objectMapper;
     }
 
@@ -49,10 +42,10 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(
                                 (request, response, authException) -> writeError(
-                                        request, response, HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập"))
+                                        request, response, HttpStatus.UNAUTHORIZED, "Authentication required"))
                         .accessDeniedHandler(
                                 (request, response, accessDeniedException) -> writeError(
-                                        request, response, HttpStatus.FORBIDDEN, "Bạn không có quyền truy cập")))
+                                        request, response, HttpStatus.FORBIDDEN, "Access denied")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**").permitAll()

@@ -36,17 +36,19 @@ describe('useAuth', () => {
     expect(isAdmin.value).toBe(false)
   })
 
-  it('setSession persists token to sessionStorage by default', () => {
-    const { setSession } = useAuth()
-    setSession({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+  it('login persists token to sessionStorage by default', async () => {
+    requestMock.mockResolvedValue({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+    const { login } = useAuth()
+    await login('minh', 'secret')
     expect(sessionStorage.getItem('ecomart_token')).toBe('tok')
     expect(sessionStorage.getItem('ecomart_session')).toContain('minh')
     expect(localStorage.getItem('ecomart_token')).toBeNull()
   })
 
-  it('setSession with remember persists to localStorage', () => {
-    const { setSession } = useAuth()
-    setSession({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' }, { remember: true })
+  it('login with remember persists to localStorage', async () => {
+    requestMock.mockResolvedValue({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+    const { login } = useAuth()
+    await login('minh', 'secret', { remember: true })
     expect(localStorage.getItem('ecomart_token')).toBe('tok')
     expect(localStorage.getItem('ecomart_session')).toContain('minh')
     expect(sessionStorage.getItem('ecomart_token')).toBeNull()
@@ -68,10 +70,11 @@ describe('useAuth', () => {
     expect(isAdmin.value).toBe(true)
   })
 
-  it('logout clears both storages and navigates home', () => {
+  it('logout clears both storages and navigates home', async () => {
     const pushSpy = vi.spyOn(router, 'push').mockImplementation(() => Promise.resolve())
-    const { setSession, logout, isLoggedIn } = useAuth()
-    setSession({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' }, { remember: true })
+    requestMock.mockResolvedValue({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+    const { login, logout, isLoggedIn } = useAuth()
+    await login('minh', 'secret', { remember: true })
     logout()
     expect(isLoggedIn.value).toBe(false)
     expect(localStorage.getItem('ecomart_token')).toBeNull()
@@ -96,9 +99,10 @@ describe('useAuth', () => {
     expect(sessionStorage.getItem('ecomart_token')).toBeNull()
   })
 
-  it('updateSession merges partial fields in the same storage', () => {
-    const { setSession, updateSession } = useAuth()
-    setSession({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+  it('updateSession merges partial fields in the same storage', async () => {
+    requestMock.mockResolvedValue({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+    const { login, updateSession } = useAuth()
+    await login('minh', 'secret')
     updateSession({ username: 'minh98' })
     expect(JSON.parse(sessionStorage.getItem('ecomart_session')!).username).toBe('minh98')
   })

@@ -33,7 +33,6 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
-    private final CustomerRepository customerRepository;
     private final NotificationService notificationService;
     private final PayOSClient payOSClient;
     private final ShopProperties shopProperties;
@@ -46,7 +45,6 @@ public class OrderService {
                         OrderItemRepository orderItemRepository,
                         PaymentRepository paymentRepository,
                         ProductRepository productRepository,
-                        CustomerRepository customerRepository,
                         NotificationService notificationService,
                         PayOSClient payOSClient,
                         ShopProperties shopProperties) {
@@ -58,7 +56,6 @@ public class OrderService {
         this.orderItemRepository = orderItemRepository;
         this.paymentRepository = paymentRepository;
         this.productRepository = productRepository;
-        this.customerRepository = customerRepository;
         this.notificationService = notificationService;
         this.payOSClient = payOSClient;
         this.shopProperties = shopProperties;
@@ -78,35 +75,35 @@ public class OrderService {
         String checkoutUrl = createPayOSLink(order, payment, method);
         clearCart(cart);
 
-        notificationService.send(customer, "Đơn hàng #" + order.getId() + " đã được tạo",
-                "Đơn hàng của bạn với tổng giá trị " + Math.round(order.getTotal()) + "đ đã được ghi nhận.",
+        notificationService.send(customer, "Order #" + order.getId() + " has been created",
+                "Your order with total value " + Math.round(order.getTotal()) + "đ has been recorded.",
                 NotificationType.ORDER, String.valueOf(order.getId()));
 
         return new CheckoutResponse(order.getId(), order.getStatus().name(), checkoutUrl,
-                method == PaymentMethod.COD ? "Đặt hàng thành công, thanh toán khi nhận hàng" : "Vui lòng hoàn tất thanh toán");
+                method == PaymentMethod.COD ? "Order placed successfully, pay on delivery" : "Please complete payment");
     }
 
     private Cart resolveCart() {
         Cart cart = cartService.getCart();
         if (cart.getItems().isEmpty()) {
-            throw new BadRequestException("Giỏ hàng trống");
+            throw new BadRequestException("Cart is empty");
         }
         return cart;
     }
 
     private Address resolveAddress(Long addressId) {
         return addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy địa chỉ giao hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery address not found"));
     }
 
     private void validateStock(Cart cart) {
         for (CartItem ci : cart.getItems()) {
             Product p = ci.getProduct();
             if (!p.isActive()) {
-                throw new BadRequestException("Sản phẩm " + p.getName() + " đã ngừng kinh doanh");
+                throw new BadRequestException("Product " + p.getName() + " has been discontinued");
             }
             if (ci.getQuantity() > p.getStock()) {
-                throw new BadRequestException("Sản phẩm " + p.getName() + " không đủ hàng");
+                throw new BadRequestException("Product " + p.getName() + " has insufficient stock");
             }
         }
     }
@@ -181,7 +178,7 @@ public class OrderService {
         paymentRepository.save(payment);
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
-        throw new BadRequestException("Không thể tạo thanh toán PayOS, vui lòng thử lại hoặc chọn COD");
+        throw new BadRequestException("Unable to create PayOS payment, please try again or select COD");
     }
 
     private void clearCart(Cart cart) {
@@ -214,7 +211,7 @@ public class OrderService {
     @Transactional
     public OrderResponse updateStatus(Long orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         order.setStatus(status);
         orderRepository.save(order);
         return Mapper.toOrder(order);
@@ -223,7 +220,7 @@ public class OrderService {
     @Transactional
     public OrderResponse confirmPayment(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         markPaid(order);
         return Mapper.toOrder(order);
     }
@@ -238,10 +235,10 @@ public class OrderService {
 
     private Order findOwnedOrder(Long orderId, Long customerId, boolean adminBypass) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         if (!order.getCustomer().getId().equals(customerId)
                 && !(adminBypass && securityUtils.currentUserHasRole("ADMIN"))) {
-            throw new AccessDeniedException("Không thể truy cập đơn hàng này");
+            throw new AccessDeniedException("Cannot access this order");
         }
         return order;
     }
@@ -253,8 +250,8 @@ public class OrderService {
             payment.setPaidAt(java.time.Instant.now());
             paymentRepository.save(payment);
             notificationService.send(order.getCustomer(),
-                    "Thanh toán đơn hàng #" + order.getId() + " thành công",
-                    "Cảm ơn bạn! Thanh toán cho đơn hàng đã được hoàn tất.",
+                    "Payment for order #" + order.getId() + " successful",
+                    "Thank you! Payment for the order has been completed.",
                     NotificationType.ORDER, String.valueOf(order.getId()));
         }
     }

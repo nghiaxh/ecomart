@@ -23,18 +23,15 @@ function isValidSessionShape(value: unknown): value is Session {
 export const useAuth = () => {
   const { request } = useApi()
 
-  const token = computed(() => session.value?.token || null)
   const isLoggedIn = computed(() => !!session.value)
   const isAdmin = computed(() => session.value?.role === 'ADMIN')
-
-  const isRemembered = () => isPersistentSession()
 
   const persist = (value: Session | null, remember?: boolean) => {
     if (!value) {
       clearSession()
       return
     }
-    const usePersistent = remember ?? isRemembered()
+    const usePersistent = remember ?? isPersistentSession()
     saveSession(JSON.stringify(value), value.token, usePersistent)
   }
 
@@ -122,12 +119,9 @@ export const useAuth = () => {
 
   return {
     session,
-    token,
     isLoggedIn,
     isAdmin,
-    isRemembered,
     restore,
-    setSession,
     login,
     register,
     refresh,

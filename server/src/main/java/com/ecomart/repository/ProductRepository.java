@@ -5,14 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Override
     @EntityGraph(attributePaths = {"images", "category"})
@@ -26,13 +25,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @EntityGraph(attributePaths = {"images", "category"})
     List<Product> findTop8ByIsActiveTrueOrderByCreatedAtDesc();
-
-    @Query("SELECT p FROM Product p LEFT JOIN p.category c WHERE p.isActive = true "
-            + "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) "
-            + "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')) "
-            + "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    @EntityGraph(attributePaths = {"images", "category"})
-    List<Product> searchActiveByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE (:onlyActive = false OR p.isActive = true) "
             + "AND (:keyword = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) "

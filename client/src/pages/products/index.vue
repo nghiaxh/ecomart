@@ -93,7 +93,6 @@ const activeCategory = computed(() => {
 })
 
 const products = ref<Product[]>([])
-const total = ref(0)
 const totalPages = ref(0)
 const loading = ref(true)
 
@@ -110,14 +109,12 @@ async function load(initial = false) {
     const data = await request<PageResponse<Product>>(`/api/products?${buildParams().toString()}`)
     if (seq !== loadSeq) return
     products.value = data.content
-    total.value = data.totalElements
     totalPages.value = data.totalPages
     syncUrl()
   } catch (error: any) {
     if (seq !== loadSeq) return
     if (initial) {
       products.value = []
-      total.value = 0
       totalPages.value = 0
     }
     toast.add({ severity: 'error', summary: error?.data?.message || 'Không thể tải sản phẩm', life: 4000 })

@@ -2,7 +2,6 @@ export type UserRole = 'CUSTOMER' | 'ADMIN'
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'COMPLETED' | 'CANCELLED'
 export type PaymentMethod = 'PAYOS' | 'COD'
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED'
-export type NotificationType = 'ORDER'
 export type MaterialType = 'ORGANIC' | 'RECYCLED' | 'NATURAL' | 'SYNTHETIC'
 
 export interface AuthResponse {

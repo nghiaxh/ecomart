@@ -71,10 +71,10 @@ public class AddressService {
         return Mapper.toAddress(addressRepository.save(address));
     }
 
-    public Address getOwned(Long id, Long customerId) {
+    private Address getOwned(Long id, Long customerId) {
         return addressRepository.findById(id)
                 .filter(a -> a.getCustomer().getId().equals(customerId))
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy địa chỉ"));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
     }
 
     private void clearDefault(Long customerId) {
