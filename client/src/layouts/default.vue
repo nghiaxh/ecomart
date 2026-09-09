@@ -36,7 +36,7 @@ function scrollHome() {
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <header class="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/90 backdrop-blur">
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl shadow-2xs">
       <div class="mx-auto grid h-16 grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6">
         <RouterLink to="/" class="flex items-center gap-2 justify-self-start">
           <span class="text-lg font-extrabold tracking-tight text-emerald-800">EcoMart</span>

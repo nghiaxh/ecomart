@@ -40,10 +40,10 @@ const aboutPoints = homeAboutPoints
 <template>
   <div>
     <!-- Hero -->
-    <section class="relative min-h-130 overflow-hidden bg-emerald-900"
+    <section class="relative min-h-160 overflow-hidden bg-emerald-900"
       style="background-image: url('/images/hero-bg.jpg'); background-size: cover; background-position: center;">
       <div class="absolute inset-0 bg-emerald-900/50 backdrop-blur-sm"></div>
-      <div class="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
+      <div class="relative z-10 mx-auto my-8 max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
         <div class="max-w-2xl">
           <p
             class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white">
@@ -65,19 +65,6 @@ const aboutPoints = homeAboutPoints
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- Stats -->
-    <section class="border-b border-emerald-100 bg-white">
-      <Reveal>
-        <div class="mx-auto grid max-w-7xl grid-cols-3 divide-x divide-emerald-100 px-4 py-10 sm:px-6">
-          <div v-for="s in stats" :key="s.label" class="px-4 text-center sm:px-8">
-            <p class="text-3xl font-extrabold tracking-tight text-emerald-700 tabular-nums sm:text-4xl">{{ s.value }}
-            </p>
-            <p class="mt-1 text-xs text-gray-500 sm:text-sm">{{ s.label }}</p>
-          </div>
-        </div>
-      </Reveal>
     </section>
 
     <!-- Banner carousel -->
@@ -278,27 +265,6 @@ const aboutPoints = homeAboutPoints
           </div>
         </Reveal>
       </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-      <Reveal>
-        <div
-          class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-emerald-800 px-6 py-12 text-center sm:px-12">
-          <UiIcon name="sun" size="96" class="pointer-events-none absolute -left-10 -top-10 text-white/10" aria-hidden="true" />
-          <UiIcon name="sun" size="160" class="pointer-events-none absolute -bottom-12 -right-12 text-white/10" aria-hidden="true" />
-            <div>
-              <h2 class="text-2xl font-extrabold text-white sm:text-3xl">Bắt đầu mua sắm xanh cùng EcoMart</h2>
-              <p class="mx-auto mt-3 max-w-xl text-emerald-50">
-                Đăng ký tài khoản miễn phí để nhận ưu đãi và đặt hàng thực phẩm tươi sạch mỗi ngày.
-              </p>
-            </div>
-            <NButton size="large" type="primary" class="mt-6" @click="$router.push('/products')">
-              <template #icon><UiIcon name="shopping-bag" /></template>
-              Mua sắm ngay
-            </NButton>
-      </div>
-    </Reveal>
     </section>
   </div>
 </template>
