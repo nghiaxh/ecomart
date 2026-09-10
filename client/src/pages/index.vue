@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import type { CategoryResponse, Product } from '@/types'
-import { categoryImage, homeAboutPoints, homeBanners, homeFeatures, homeStats, homeSteps, homeTestimonials } from '@/data/home'
+import { categoryImage, homeAboutPoints, homeBanners, homeFeatures, homeSteps, homeTestimonials } from '@/data/home'
 import { useApi } from '@/composables/useApi'
 import Reveal from '@/components/Reveal.vue'
 import SectionHeader from '@/components/SectionHeader.vue'
@@ -31,7 +31,6 @@ onMounted(async () => {
   }
 })
 
-const stats = homeStats
 const features = homeFeatures(supportPhone)
 const steps = homeSteps
 const testimonials = homeTestimonials
@@ -209,69 +208,90 @@ const aboutPoints = homeAboutPoints
     </section>
 
     <!-- About / mission -->
-    <section id="about" class="py-16">
+    <section id="about" class="py-14">
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
-          <div class="mx-auto max-w-2xl text-center">
-            <p class="text-md font-semibold uppercase tracking-wide text-emerald-600">Về EcoMart</p>
-            <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-gray-700">Tươi sạch mỗi ngày, giá cả hợp lý</h2>
-            <p class="mx-auto mt-4 max-w-xl leading-relaxed text-gray-500">
-              EcoMart cam kết mang đến sản phẩm có nguồn gốc rõ ràng, chất lượng đảm bảo với mức giá phù hợp.
-              Đặt hàng nhanh chóng, giao tận nơi và thanh toán linh hoạt.
-            </p>
-            <ul class="my-8 flex flex-wrap items-center justify-center gap-3">
-              <li
-                v-for="item in aboutPoints"
-                :key="item"
-                class="flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm text-gray-700">
-                <span class="grid h-5 w-5 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                  <UiIcon name="check" size="14" />
-                </span>
-                {{ item }}
-              </li>
-            </ul>
-            <NButton type="primary" size="large" class="mt-8" @click="$router.push('/products')">
-              <template #icon><UiIcon name="shopping-bag" /></template>
-              Khám phá sản phẩm
-            </NButton>
+          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Về EcoMart</p>
+              <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-gray-700 sm:text-3xl">Tươi sạch mỗi ngày, giá cả hợp lý</h2>
+              <p class="mt-3 max-w-md text-sm leading-relaxed text-gray-500">
+                EcoMart cam kết mang đến sản phẩm có nguồn gốc rõ ràng, chất lượng đảm bảo với mức giá phù hợp.
+                Đặt hàng nhanh chóng, giao tận nơi và thanh toán linh hoạt.
+              </p>
+              <ul class="mt-6 grid max-w-md gap-2.5 sm:grid-cols-2">
+                <li v-for="item in aboutPoints" :key="item" class="flex items-start gap-2.5">
+                  <span class="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+                    <UiIcon name="check" size="12" />
+                  </span>
+                  <span class="text-sm text-gray-600">{{ item }}</span>
+                </li>
+              </ul>
+              <div class="mt-7">
+                <NButton size="small" class="w-fit" @click="$router.push('/products')">
+                  <template #icon><UiIcon name="shopping-bag" size="14" /></template>
+                  Khám phá sản phẩm
+                </NButton>
+              </div>
+            </div>
+            <div class="overflow-hidden rounded-2xl shadow-sm ring-1 ring-emerald-100"
+              style="background-image: url('/images/feature-safe.jpg'); background-size: cover; background-position: center;">
+              <div class="aspect-[4/3]" aria-hidden="true"></div>
+            </div>
           </div>
         </Reveal>
       </div>
     </section>
 
     <!-- Contact -->
-    <section id="contact" class="py-16">
+    <section id="contact" class="py-14">
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
-          <div class="rounded-3xl border border-emerald-100 bg-white p-8 sm:p-10">
-            <div class="mx-auto max-w-2xl text-center">
-              <p class="text-md font-semibold uppercase tracking-wide text-emerald-600">Liên hệ</p>
-              <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-gray-700">Chúng tôi luôn sẵn sàng hỗ trợ</h2>
-              <p class="mx-auto mt-4 max-w-xl leading-relaxed text-gray-500">
+          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+            <div class="order-2 lg:order-1 overflow-hidden rounded-2xl shadow-sm ring-1 ring-emerald-100"
+              style="background-image: url('/images/feature-support.jpg'); background-size: cover; background-position: center;">
+              <div class="aspect-[4/3]" aria-hidden="true"></div>
+            </div>
+            <div class="order-1 lg:order-2">
+              <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Liên hệ</p>
+              <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-gray-700 sm:text-3xl">Chúng tôi luôn sẵn sàng hỗ trợ</h2>
+              <p class="mt-3 max-w-md text-sm leading-relaxed text-gray-500">
                 Mọi thắc mắc về sản phẩm, đơn hàng hay góp ý, đừng ngần ngại liên hệ với EcoMart.
               </p>
-            </div>
-            <div class="mt-8 grid gap-4 sm:grid-cols-3">
-              <div class="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50/60 p-6 text-center">
-                <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                  <UiIcon name="phone" size="20" />
-                </span>
-                <p class="text-sm font-semibold text-gray-700">Hotline</p>
-                <a :href="`tel:${supportPhone.replace(/\s/g, '')}`" class="text-sm font-medium text-emerald-700 hover:underline">{{ supportPhone }}</a>
+              <div class="mt-6 space-y-4">
+                <div class="flex items-center gap-3">
+                  <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+                    <UiIcon name="phone" size="16" />
+                  </span>
+                  <div>
+                    <p class="text-xs text-gray-400">Hotline</p>
+                    <a :href="`tel:${supportPhone.replace(/\s/g, '')}`" class="text-sm font-semibold text-gray-700 hover:text-emerald-700">{{ supportPhone }}</a>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+                    <UiIcon name="envelope" size="16" />
+                  </span>
+                  <div>
+                    <p class="text-xs text-gray-400">Email</p>
+                    <a :href="`mailto:${supportEmail}`" class="text-sm font-semibold text-gray-700 hover:text-emerald-700">{{ supportEmail }}</a>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+                    <UiIcon name="refresh" size="16" />
+                  </span>
+                  <div>
+                    <p class="text-xs text-gray-400">Giờ hỗ trợ</p>
+                    <p class="text-sm font-semibold text-gray-700">8:00 – 20:00 hằng ngày</p>
+                  </div>
+                </div>
               </div>
-              <div class="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50/60 p-6 text-center">
-                <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                  <UiIcon name="envelope" size="20" />
-                </span>
-                <p class="text-sm font-semibold text-gray-700">Email</p>
-                <a :href="`mailto:${supportEmail}`" class="text-sm font-medium text-emerald-700 hover:underline">{{ supportEmail }}</a>
-              </div>
-              <div class="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50/60 p-6 text-center">
-                <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                  <UiIcon name="refresh" size="20" />
-                </span>
-                <p class="text-sm font-semibold text-gray-700">Giờ hỗ trợ</p>
-                <p class="text-sm text-gray-500">8:00 – 20:00 hằng ngày</p>
+              <div class="mt-7">
+                <NButton type="primary" size="small" class="w-fit" @click="$router.push('/products')">
+                  <template #icon><UiIcon name="shopping-bag" size="14" /></template>
+                  Mua sắm ngay
+                </NButton>
               </div>
             </div>
           </div>
