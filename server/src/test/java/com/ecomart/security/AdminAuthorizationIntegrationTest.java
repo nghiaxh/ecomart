@@ -1,5 +1,6 @@
 package com.ecomart.security;
 
+import com.ecomart.AbstractPostgresIntegrationTest;
 import com.ecomart.domain.enums.UserRole;
 import com.ecomart.dto.request.CreateUserRequest;
 import com.ecomart.dto.request.ProductRequest;
@@ -10,31 +11,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 
-@Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
-class AdminAuthorizationIntegrationTest {
-
-    @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
-
-    @DynamicPropertySource
-    static void datasource(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRES::getUsername);
-        registry.add("spring.datasource.password", POSTGRES::getPassword);
-    }
+class AdminAuthorizationIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;
