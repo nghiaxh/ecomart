@@ -2,12 +2,22 @@
 defineProps<{ title: string; subtitle?: string }>()
 </script>
 
+<style>
+html:has(.auth-shell) {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+html:has(.auth-shell)::-webkit-scrollbar {
+  display: none;
+}
+</style>
+
 <template>
   <div
-    class="relative flex min-h-[100dvh] items-center justify-center overflow-hidden p-4"
+    class="auth-shell relative flex min-h-[100dvh] items-center justify-center overflow-hidden p-4"
     style="background-image: url('/images/auth-bg.jpg'); background-size: cover; background-position: center; background-color: #065f46;"
   >
-    <div class="absolute inset-0 bg-emerald-900/50" aria-hidden="true"></div>
+    <div class="absolute inset-0 bg-emerald-900/50 backdrop-blur-sm" aria-hidden="true"></div>
 
     <div class="relative z-10 w-full max-w-[420px] rounded-2xl bg-white p-8 shadow-2xl shadow-emerald-950/30 sm:p-10">
       <div class="flex flex-col items-center justify-around">

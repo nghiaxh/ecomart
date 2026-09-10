@@ -1,4 +1,3 @@
-import { nextTick } from 'vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 import DefaultLayout from '@/layouts/default.vue'
@@ -59,21 +58,42 @@ function smoothScroll(): 'auto' | 'smooth' {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
 }
 
+const HEADER_HEIGHT = 64
+
+function scrollToHash(hash: string): Promise<false> {
+  return new Promise(resolve => {
+    let attempts = 0
+    const maxAttempts = 60
+    const tryScroll = () => {
+      const el = document.querySelector(hash)
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - HEADER_HEIGHT
+        window.scrollTo({ top, behavior: smoothScroll() })
+        resolve(false)
+      } else if (++attempts < maxAttempts) {
+        requestAnimationFrame(tryScroll)
+      } else {
+        resolve(false)
+      }
+    }
+    requestAnimationFrame(tryScroll)
+  })
+}
+
 export const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {
       if (from.name !== to.name) {
-        return new Promise(resolve => {
-          router.afterEach(() => {
-            nextTick(() => {
-              resolve({ el: to.hash, behavior: smoothScroll(), top: 64 })
-            })
-          })
-        })
+        return scrollToHash(to.hash)
       }
-      return { el: to.hash, behavior: smoothScroll(), top: 64 }
+      const el = document.querySelector(to.hash)
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - HEADER_HEIGHT
+        window.scrollTo({ top, behavior: smoothScroll() })
+      }
+      return false
     }
     if (savedPosition) {
       return savedPosition
