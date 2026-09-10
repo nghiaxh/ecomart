@@ -14,7 +14,8 @@ app:
   jwt:
     # Test-only secret; must be >= 32 chars for the token provider.
     secret: this-is-a-test-only-jwt-secret-1234567890
-    expiration-ms: 3600000
+    access-expiration-ms: 3600000
+    refresh-expiration-ms: 10800000
   client-url: http://localhost:5173
   shop:
     shipping-fee: 20000

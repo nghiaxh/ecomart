@@ -107,7 +107,7 @@ public class ProductService {
         }
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-        Product product = productRepository.save(new Product());
+        Product product = new Product();
         Mapper.mergeProduct(product, request, category);
         attachMaterials(product, request);
         return Mapper.toProduct(productRepository.save(product));
