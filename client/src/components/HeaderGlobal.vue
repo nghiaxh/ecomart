@@ -77,8 +77,8 @@ function scrollHome() {
           </RouterLink>
         </template>
         <template v-else>
-          <NButton type="default" size="medium" @click="router.push('/login')">Đăng nhập</NButton>
-          <NButton type="primary" size="medium" class="ml-1" @click="router.push('/register')">Đăng ký</NButton>
+            <NButton type="default" size="medium" @click="router.push('/login')">Đăng nhập</NButton>
+            <NButton type="primary" size="medium" class="ml-1" @click="router.push('/register')">Đăng ký</NButton>
         </template>
       </div>
     </div>

@@ -228,7 +228,7 @@ const aboutPoints = homeAboutPoints
                 </li>
               </ul>
               <div class="mt-7">
-                <NButton size="small" class="w-fit" @click="$router.push('/products')">
+                <NButton size="medium" class="w-fit" @click="$router.push('/products')">
                   <template #icon><UiIcon name="shopping-bag" size="14" /></template>
                   Khám phá sản phẩm
                 </NButton>
@@ -288,7 +288,7 @@ const aboutPoints = homeAboutPoints
                 </div>
               </div>
               <div class="mt-7">
-                <NButton type="primary" size="small" class="w-fit" @click="$router.push('/products')">
+                <NButton type="primary" size="medium" class="w-fit" @click="$router.push('/products')">
                   <template #icon><UiIcon name="shopping-bag" size="14" /></template>
                   Mua sắm ngay
                 </NButton>
