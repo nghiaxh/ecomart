@@ -27,24 +27,6 @@ test('double-click add-to-cart creates a single cart line without error', async 
   }
 })
 
-test('quantity cannot exceed stock on product page', async ({ authedPage: page, request }) => {
-  const res = await request.get(`${API_BASE}/api/products?page=0&size=20`)
-  const products = ((await res.json()) as { content: Array<{ slug: string; stock: number }> }).content
-  const limited = products.find((p) => p.stock > 0 && p.stock <= 10) ?? products[0]
-  if (!limited) test.skip(true, 'no product')
-
-  await gotoReady(page, `/products/${limited.slug}`)
-  const plus = page.getByRole('button', { name: 'plus' }).or(page.locator('button:has-text("+")'))
-  expect(await page.getByText(/Còn \d+ sản phẩm|Chỉ còn|Hết hàng/).count()).toBeGreaterThanOrEqual(0)
-})
-
-test('out-of-stock product disables add-to-cart', async ({ request }) => {
-  const res = await request.get(`${API_BASE}/api/products?page=0&size=50`)
-  const products = ((await res.json()) as { content: Array<{ id: number; stock: number }> }).content
-  const empty = products.find((p) => p.stock <= 0)
-  test.skip(!empty, 'no out-of-stock product in seed')
-})
-
 test('products page survives reload failure keeping list with error toast', async ({ authedPage: page }) => {
   await gotoReady(page, '/products')
   const cards = page.locator('a[href^="/products/"]')
@@ -70,5 +52,3 @@ test('products page survives reload failure keeping list with error toast', asyn
   expect(await cards.count()).toBe(countBefore)
   await page.unroute('**/api/products**')
 })
-
-

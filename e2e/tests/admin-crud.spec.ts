@@ -20,25 +20,9 @@ test('admin product form validates empty name', async ({ page }) => {
   await expect(page.getByText('Vui lòng nhập tên sản phẩm')).toBeVisible()
 })
 
-test('admin product form rejects negative price shape', async ({ page, request }) => {
-  const cats = await request.get('http://localhost:8080/api/categories')
-  if (!cats.ok()) test.skip(true, 'cannot load categories')
-  await gotoReady(page, '/admin/products')
-  await page.getByRole('button', { name: 'Thêm sản phẩm' }).click()
-  await expect(page.getByText('Thêm sản phẩm mới')).toBeVisible()
-})
-
 test('admin orders page renders list or empty state', async ({ page }) => {
   await gotoReady(page, '/admin/orders')
   await expect(
     page.getByText(/^Đơn #\d+/).first().or(page.getByText('Không có đơn hàng').first())
   ).toBeVisible({ timeout: 20_000 })
 })
-
-test('admin can filter orders by status', async ({ page }) => {
-  await gotoReady(page, '/admin/orders')
-  await expect(page.getByRole('link', { name: 'Đơn hàng' })).toBeVisible()
-})
-
-
-

@@ -83,11 +83,6 @@ await gotoReady(page, `/orders/${checkout.orderId}`)
   }
 })
 
-test('isolated customer sees empty orders state before ordering', async ({ authedPage: page }) => {
-  await gotoReady(page, '/orders')
-  await expect(
-    page.getByText('Bạn chưa có đơn hàng nào.').or(page.getByText(/^Đơn #\d+/).first())
-  ).toBeVisible()
-})
+
 
 

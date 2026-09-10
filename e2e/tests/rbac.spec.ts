@@ -33,10 +33,10 @@ test('customer can open customer routes but not admin routes', async ({ page }) 
   }
 })
 
-test('admin can open admin routes', async ({ page }) => {
+test('admin can open admin routes via login form', async ({ page }) => {
   await loginAsAdmin(page)
-  await gotoReady(page, '/admin/products')
   await expect(page.getByRole('link', { name: 'Sản phẩm' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Thống kê' })).toBeVisible()
   await gotoReady(page, '/admin/orders')
   await expect(page.getByRole('link', { name: 'Đơn hàng' })).toBeVisible()
 })
@@ -47,5 +47,3 @@ test('unauthenticated API calls to cart/orders are rejected', async ({ request }
   const orders = await request.get(`${API_BASE}/api/orders/mine?page=0&size=5`)
   expect([401, 403]).toContain(orders.status())
 })
-
-

@@ -6,7 +6,9 @@ import {
   reviewSchema,
   profileSchema,
   productSchema,
-  categorySchema
+  categorySchema,
+  createUserSchema,
+  updateUserSchema
 } from './index'
 
 describe('loginSchema', () => {
@@ -98,5 +100,40 @@ describe('categorySchema', () => {
   })
   it('rejects missing name', () => {
     expect(categorySchema.safeParse({ name: '', slug: 'rau-cu' }).success).toBe(false)
+  })
+})
+
+describe('createUserSchema', () => {
+  const valid = {
+    username: 'minh', email: 'minh@example.com', numberPhone: '0901234567',
+    password: '123456', role: 'CUSTOMER'
+  }
+  it('accepts valid user for both roles', () => {
+    expect(createUserSchema.safeParse(valid).success).toBe(true)
+    expect(createUserSchema.safeParse({ ...valid, role: 'ADMIN' }).success).toBe(true)
+  })
+  it('accepts optional hireDate', () => {
+    expect(createUserSchema.safeParse({ ...valid, hireDate: '2026-09-01' }).success).toBe(true)
+  })
+  it('rejects invalid email, phone, short password and unknown role', () => {
+    expect(createUserSchema.safeParse({ ...valid, email: 'nope' }).success).toBe(false)
+    expect(createUserSchema.safeParse({ ...valid, numberPhone: '123' }).success).toBe(false)
+    expect(createUserSchema.safeParse({ ...valid, password: '123' }).success).toBe(false)
+    expect(createUserSchema.safeParse({ ...valid, role: 'STAFF' }).success).toBe(false)
+  })
+})
+
+describe('updateUserSchema', () => {
+  const base = { username: 'minh', email: 'minh@example.com', numberPhone: '0901234567', role: 'CUSTOMER' }
+  it('accepts a valid update without password', () => {
+    expect(updateUserSchema.safeParse(base).success).toBe(true)
+  })
+  it('accepts empty password (no change) or a valid new one', () => {
+    expect(updateUserSchema.safeParse({ ...base, password: '' }).success).toBe(true)
+    expect(updateUserSchema.safeParse({ ...base, password: 'newpass' }).success).toBe(true)
+  })
+  it('rejects short password and malformed phone', () => {
+    expect(updateUserSchema.safeParse({ ...base, password: '123' }).success).toBe(false)
+    expect(updateUserSchema.safeParse({ ...base, numberPhone: 'abc' }).success).toBe(false)
   })
 })

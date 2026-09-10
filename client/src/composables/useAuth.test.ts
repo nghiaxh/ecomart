@@ -106,4 +106,55 @@ describe('useAuth', () => {
     updateSession({ username: 'minh98' })
     expect(JSON.parse(sessionStorage.getItem('ecomart_session')!).username).toBe('minh98')
   })
+
+  it('register posts payload and persists the session', async () => {
+    requestMock.mockResolvedValue({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+    const { register } = useAuth()
+    await register({ username: 'minh', email: 'a@b.c', numberPhone: '0901234567', password: 'secret' })
+    expect(requestMock).toHaveBeenCalledWith('/api/auth/register', {
+      method: 'POST',
+      body: { username: 'minh', email: 'a@b.c', numberPhone: '0901234567', password: 'secret' }
+    })
+    expect(sessionStorage.getItem('ecomart_token')).toBe('tok')
+    expect(sessionStorage.getItem('ecomart_session')).toContain('minh')
+  })
+
+  it('refresh rotates the refresh token and persists the new pair', async () => {
+    requestMock.mockResolvedValueOnce({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+    const { login, refresh } = useAuth()
+    await login('minh', 'secret')
+    requestMock.mockResolvedValueOnce({ token: 'tok2', refreshToken: 'ref2', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+    await refresh()
+    expect(requestMock).toHaveBeenCalledWith('/api/auth/refresh', {
+      method: 'POST',
+      body: { refreshToken: 'ref' }
+    })
+    expect(sessionStorage.getItem('ecomart_token')).toBe('tok2')
+  })
+
+  it('refresh throws when there is no stored refresh token', async () => {
+    const { refresh } = useAuth()
+    await expect(refresh()).rejects.toThrow('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại')
+  })
+
+  it('forceLogout clears session and storage without navigating', async () => {
+    const pushSpy = vi.spyOn(router, 'push')
+    requestMock.mockResolvedValue({ token: 'tok', refreshToken: 'ref', expiresIn: 3600, id: 1, username: 'minh', email: 'a@b.c', numberPhone: '0901234567', role: 'CUSTOMER' })
+    const { login, forceLogout, isLoggedIn } = useAuth()
+    await login('minh', 'secret', { remember: true })
+    forceLogout()
+    expect(isLoggedIn.value).toBe(false)
+    expect(localStorage.getItem('ecomart_token')).toBeNull()
+    expect(localStorage.getItem('ecomart_session')).toBeNull()
+    expect(pushSpy).not.toHaveBeenCalled()
+  })
+
+  it('restore with a corrupted session clears the storage', () => {
+    sessionStorage.setItem('ecomart_session', JSON.stringify({ foo: 'bar', token: 'x' }))
+    const { restore, isLoggedIn } = useAuth()
+    restore()
+    expect(isLoggedIn.value).toBe(false)
+    expect(sessionStorage.getItem('ecomart_session')).toBeNull()
+    expect(sessionStorage.getItem('ecomart_token')).toBeNull()
+  })
 })
