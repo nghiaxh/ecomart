@@ -1,3 +1,4 @@
+import { nextTick } from 'vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 import DefaultLayout from '@/layouts/default.vue'
@@ -63,6 +64,15 @@ export const router = createRouter({
   routes,
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {
+      if (from.name !== to.name) {
+        return new Promise(resolve => {
+          router.afterEach(() => {
+            nextTick(() => {
+              resolve({ el: to.hash, behavior: smoothScroll(), top: 64 })
+            })
+          })
+        })
+      }
       return { el: to.hash, behavior: smoothScroll(), top: 64 }
     }
     if (savedPosition) {
