@@ -18,7 +18,7 @@ EcoMart là ứng dụng **siêu thị trực tuyến** theo mô hình monorepo 
 
 - **client/**: Vue 3 + Vite 8 + Vue Router 5 + Naive UI 2.45 (native light theme, CSS in JS, import thủ công từng component) + xicons (@vicons/ionicons5 qua wrapper UiIcon) + Axios + TypeScript + Zod 4. Admin stats dùng Chart.js (vue-chartjs). SPA thuần, không SSR. Giao diện tiếng Việt (chuỗi tích hợp sẵn của Naive UI là tiếng Anh qua locale enUS). Ở dev, Vite proxy /api tới VITE_API_TARGET (mặc định http://localhost:8080); ở prod, container nginx (nginx.conf) proxy /api tới service server. Nếu đặt VITE_API_BASE, client gọi thẳng backend qua CORS và bỏ proxy.
 - **server/**: Spring Boot 3.5 + Spring Security (JWT access và refresh) + Spring Data JPA. Tổng cộng 11 controller, mỗi resource đi theo chuỗi controller, service, repository.
-- **PostgreSQL**: ddl-auto: update đồng bộ schema khi khởi động. Flyway bật (baseline-on-migrate, baseline-version 1, migrations trong classpath:db/migration), hiện có migration V2\_\_drop_banners.sql (xoá bảng banners).
+- **PostgreSQL**: ddl-auto: update đồng bộ schema khi khởi động. Flyway bật (baseline-on-migrate, baseline-version 1, migrations trong classpath:db/migration), hiện chưa có migration thật nào (chỉ còn .gitkeep).
 
 ## Luồng dữ liệu chính
 
@@ -112,7 +112,7 @@ common/      SecurityUtils (current user id), Mapper (entity và DTO hai chiều
 exception/   xử lý lỗi API (ApiError, GlobalExceptionHandler, UnauthorizedException, ...)
 ```
 
-Migrations nằm ở `server/src/main/resources/db/migration` (hiện có `V2__drop_banners.sql`; schema mới tiếp theo đặt trong `V3__...`).
+Migrations nằm ở `server/src/main/resources/db/migration` (hiện chưa có script nào, chỉ còn `.gitkeep`; migration mới đầu tiên đặt trong `V2__...` vì baseline-version là 1).
 
 ### Client (client/)
 
@@ -143,7 +143,7 @@ nginx.conf           prod: serve dist/ và proxy /api tới server
 ## Điểm quan trọng khi làm việc
 
 - **Đồng bộ types**: client/src/types/index.ts (TS) và client/src/schemas/index.ts (Zod) phải giữ song song với DTO backend. Thêm hoặc sửa trường ở server thì cập nhật cả hai.
-- **Flyway và ddl-auto**: schema vẫn do ddl-auto: update quản lý (JPA_DDL_AUTO ghi đè mặc định). Flyway đã bật (baseline-on-migrate, baseline-version 1) và hiện có migration V2**drop_banners.sql. Khi thêm migration mới, đặt file V3**... trong server/src/main/resources/db/migration. Với DB có sẵn dữ liệu, tránh xoá hoặc đổi tên cột đang được dùng.
+- **Flyway và ddl-auto**: schema vẫn do ddl-auto: update quản lý (JPA_DDL_AUTO ghi đè mặc định). Flyway đã bật (baseline-on-migrate, baseline-version 1), hiện chưa có migration thật (chỉ còn .gitkeep). Khi thêm migration mới, đặt file V2__... trong server/src/main/resources/db/migration. Với DB có sẵn dữ liệu, tránh xoá hoặc đổi tên cột đang được dùng.
 - **UI là Naive UI, không phải PrimeVue**: toàn bộ component và hook của Naive UI import thủ công theo file (NButton, NInput, NDataTable...), không auto import hoặc unplugin. Toast và dialog đi qua useToast và useConfirm (bọc useMessage và useDialog) để call site và unit test không đổi. Icons dùng UiIcon (xicons Ionicon5), không dùng pi pi-\*.
 - **Mọi request qua useApi()**: không gọi Axios hoặc $fetch trực tiếp trong page để đảm bảo header JWT luôn được đính và cơ chế auto refresh hoạt động.
 - **Quyền ADMIN kiểm soát ở server**: SecurityConfig bắt buộc xác thực tại tầng HTTP (anyRequest().authenticated()); admin write dùng @PreAuthorize("hasRole('ADMIN')"); controller user scoped dùng @PreAuthorize("isAuthenticated()"). Hết phiên hoặc refresh lỗi thì trả 401 (UnauthorizedException, chỉ ở AuthService và webhook PayOS chưa auth); đã login nhưng đụng tài nguyên người khác thì trả 403 (AccessDeniedException). Route guard client chỉ là UX.
