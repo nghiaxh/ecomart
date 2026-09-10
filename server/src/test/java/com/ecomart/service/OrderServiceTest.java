@@ -17,7 +17,6 @@ import com.ecomart.config.ShopProperties;
 import com.ecomart.integration.payos.PayOSClient;
 import com.ecomart.repository.AddressRepository;
 import com.ecomart.repository.CartItemRepository;
-import com.ecomart.repository.CustomerRepository;
 import com.ecomart.repository.OrderItemRepository;
 import com.ecomart.repository.OrderRepository;
 import com.ecomart.repository.PaymentRepository;
@@ -45,7 +44,6 @@ class OrderServiceTest {
     @Mock OrderItemRepository orderItemRepository;
     @Mock PaymentRepository paymentRepository;
     @Mock ProductRepository productRepository;
-    @Mock CustomerRepository customerRepository;
     @Mock NotificationService notificationService;
     @Mock PayOSClient payOSClient;
 
@@ -55,7 +53,7 @@ class OrderServiceTest {
     void setUp() {
         service = new OrderService(securityUtils, cartService, cartItemRepository, addressRepository,
                 orderRepository, orderItemRepository, paymentRepository, productRepository,
-                customerRepository, notificationService, payOSClient, new ShopProperties(20000));
+                notificationService, payOSClient, new ShopProperties(20000));
     }
 
     private Customer customer(long id) {

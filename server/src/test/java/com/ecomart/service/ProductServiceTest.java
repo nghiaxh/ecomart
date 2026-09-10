@@ -75,7 +75,7 @@ class ProductServiceTest {
                 .thenReturn(new PageImpl<>(List.of(product(10L, childA), product(11L, childB))));
 
         PageResponse<ProductResponse> result =
-                service.search(null, 1L, null, null, true, PageRequest.of(0, 12));
+                service.search(null, 1L, null, null, true, true, PageRequest.of(0, 12));
 
         assertEquals(2, result.content().size());
         ArgumentCaptor<List<Long>> ids = ArgumentCaptor.forClass(List.class);
@@ -91,7 +91,7 @@ class ProductServiceTest {
                 .thenReturn(new PageImpl<>(List.of(product(10L, category(2L)))));
 
         PageResponse<ProductResponse> result =
-                service.search(null, 2L, null, null, true, PageRequest.of(0, 12));
+                service.search(null, 2L, null, null, true, true, PageRequest.of(0, 12));
 
         assertEquals(1, result.content().size());
         ArgumentCaptor<List<Long>> ids = ArgumentCaptor.forClass(List.class);
@@ -104,7 +104,7 @@ class ProductServiceTest {
         when(categoryRepository.existsById(999L)).thenReturn(false);
 
         PageResponse<ProductResponse> result =
-                service.search(null, 999L, null, null, true, PageRequest.of(0, 12));
+                service.search(null, 999L, null, null, true, true, PageRequest.of(0, 12));
 
         assertTrue(result.content().isEmpty());
         assertEquals(0, result.totalElements());
@@ -116,7 +116,7 @@ class ProductServiceTest {
         when(productRepository.search(eq(""), any(), eq(null), eq(null), eq(true), any()))
                 .thenReturn(new PageImpl<>(List.of(product(10L, category(2L)))));
 
-        service.search(null, null, null, null, true, PageRequest.of(0, 12));
+        service.search(null, null, null, null, true, true, PageRequest.of(0, 12));
 
         ArgumentCaptor<List<Long>> ids = ArgumentCaptor.forClass(List.class);
         verify(productRepository).search(eq(""), ids.capture(), eq(null), eq(null), eq(true), any());
