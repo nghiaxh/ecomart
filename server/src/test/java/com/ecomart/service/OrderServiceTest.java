@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -64,7 +65,7 @@ class OrderServiceTest {
     void setUp() {
         service = new OrderService(securityUtils, cartService, cartItemRepository, addressRepository,
                 orderRepository, orderItemRepository, paymentRepository, productRepository,
-                notificationService, payOSClient, new ShopProperties(20000));
+                notificationService, payOSClient, new ShopProperties(20000), mock(ActivityLogService.class));
     }
 
     private Customer customer(long id) {

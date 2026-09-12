@@ -112,14 +112,14 @@ describe('createUserSchema', () => {
     expect(createUserSchema.safeParse(valid).success).toBe(true)
     expect(createUserSchema.safeParse({ ...valid, role: 'ADMIN' }).success).toBe(true)
   })
-  it('accepts optional hireDate', () => {
-    expect(createUserSchema.safeParse({ ...valid, hireDate: '2026-09-01' }).success).toBe(true)
+  it('accepts STAFF role and optional hireDate', () => {
+    expect(createUserSchema.safeParse({ ...valid, role: 'STAFF', hireDate: '2026-09-01' }).success).toBe(true)
   })
   it('rejects invalid email, phone, short password and unknown role', () => {
     expect(createUserSchema.safeParse({ ...valid, email: 'nope' }).success).toBe(false)
     expect(createUserSchema.safeParse({ ...valid, numberPhone: '123' }).success).toBe(false)
     expect(createUserSchema.safeParse({ ...valid, password: '123' }).success).toBe(false)
-    expect(createUserSchema.safeParse({ ...valid, role: 'STAFF' }).success).toBe(false)
+    expect(createUserSchema.safeParse({ ...valid, role: 'SUPERUSER' }).success).toBe(false)
   })
 })
 

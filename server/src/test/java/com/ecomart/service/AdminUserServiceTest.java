@@ -2,6 +2,7 @@ package com.ecomart.service;
 
 import com.ecomart.domain.entity.Admin;
 import com.ecomart.domain.entity.Customer;
+import com.ecomart.domain.entity.Staff;
 import com.ecomart.domain.entity.User;
 import com.ecomart.domain.enums.UserRole;
 import com.ecomart.dto.request.CreateUserRequest;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +45,8 @@ class AdminUserServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new AdminUserService(userRepository, cartRepository, passwordEncoder, entityManager);
+        service = new AdminUserService(userRepository, cartRepository, passwordEncoder, entityManager,
+                mock(ActivityLogService.class));
     }
 
     @Test
@@ -92,6 +95,47 @@ class AdminUserServiceTest {
         assertEquals(UserRole.CUSTOMER, result.role());
         verify(userRepository).save(any(Customer.class));
         verify(cartRepository).save(any());
+    }
+
+    @Test
+    void createUserWithStaffRoleBuildsStaff() {
+        when(passwordEncoder.encode("secret")).thenReturn("hash");
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        CreateUserRequest req = new CreateUserRequest("nhanvien1", "nv1@ecomart.vn", "0900000007",
+                "secret", UserRole.STAFF, LocalDate.of(2026, 3, 1));
+
+        UserSummaryResponse result = service.createUser(req);
+
+        assertEquals(UserRole.STAFF, result.role());
+        verify(userRepository).save(any(Staff.class));
+        verify(cartRepository, never()).save(any());
+    }
+
+    @Test
+    void switchCustomerToStaffRecreatesAsStaff() {
+        Customer customer = new Customer();
+        customer.setId(1L);
+        customer.setUsername("khach1");
+        customer.setRole(UserRole.CUSTOMER);
+        java.util.concurrent.atomic.AtomicReference<User> savedRef = new java.util.concurrent.atomic.AtomicReference<>();
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.of(customer))
+                .thenAnswer(inv -> Optional.ofNullable(savedRef.get()));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User saved = inv.getArgument(0);
+            saved.setId(1L);
+            savedRef.set(saved);
+            return saved;
+        });
+        UpdateUserRequest req = new UpdateUserRequest("khach1", "k1@ecomart.vn", "0900000008",
+                UserRole.STAFF, null, LocalDate.of(2026, 4, 1));
+
+        UserSummaryResponse result = service.updateUser(1L, req, 99L);
+
+        assertEquals(UserRole.STAFF, result.role());
+        verify(userRepository).save(any(Staff.class));
+        verify(userRepository).delete(customer);
+        verify(cartRepository, never()).save(any());
     }
 
     @Test

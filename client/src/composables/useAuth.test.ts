@@ -31,9 +31,11 @@ describe('useAuth', () => {
   })
 
   it('starts logged out', () => {
-    const { isLoggedIn, isAdmin } = useAuth()
+    const { isLoggedIn, isAdmin, isStaff, isStaffOrAdmin } = useAuth()
     expect(isLoggedIn.value).toBe(false)
     expect(isAdmin.value).toBe(false)
+    expect(isStaff.value).toBe(false)
+    expect(isStaffOrAdmin.value).toBe(false)
   })
 
   it('login persists token to sessionStorage by default', async () => {
@@ -56,10 +58,21 @@ describe('useAuth', () => {
 
   it('isLoggedIn reflects a restored session from sessionStorage', () => {
     sessionStorage.setItem('ecomart_session', JSON.stringify({ token: 'tok', id: 1, username: 'minh', email: 'a@b.c', role: 'ADMIN' }))
-    const { isLoggedIn, isAdmin, restore } = useAuth()
+    const { isLoggedIn, isAdmin, isStaff, isStaffOrAdmin, restore } = useAuth()
     restore()
     expect(isLoggedIn.value).toBe(true)
     expect(isAdmin.value).toBe(true)
+    expect(isStaff.value).toBe(false)
+    expect(isStaffOrAdmin.value).toBe(true)
+  })
+
+  it('isStaff flags a staff session', () => {
+    sessionStorage.setItem('ecomart_session', JSON.stringify({ token: 'tok', id: 1, username: 'nhanvien', email: 'nv@a.bc', role: 'STAFF' }))
+    const { isAdmin, isStaff, isStaffOrAdmin, restore } = useAuth()
+    restore()
+    expect(isAdmin.value).toBe(false)
+    expect(isStaff.value).toBe(true)
+    expect(isStaffOrAdmin.value).toBe(true)
   })
 
   it('restore keeps backward compatibility with localStorage', () => {

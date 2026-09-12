@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewServiceTest {
@@ -37,7 +38,8 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReviewService(securityUtils, reviewRepository, productRepository);
+        service = new ReviewService(securityUtils, reviewRepository, productRepository,
+                mock(ActivityLogService.class));
     }
 
     private Customer customer(long id) {
@@ -88,14 +90,14 @@ class ReviewServiceTest {
 
     @Test
     void nonAdminCannotIncludeHiddenReviews() {
-        when(securityUtils.currentUserHasRole("ADMIN")).thenReturn(false);
+        when(securityUtils.currentUserHasAnyRole("ADMIN", "STAFF")).thenReturn(false);
 
         assertThrows(AccessDeniedException.class, () -> service.listForProduct(5L, true));
     }
 
     @Test
-    void adminIncludeHiddenListsAllReviews() {
-        when(securityUtils.currentUserHasRole("ADMIN")).thenReturn(true);
+    void editorIncludesHiddenListsAllReviews() {
+        when(securityUtils.currentUserHasAnyRole("ADMIN", "STAFF")).thenReturn(true);
         when(reviewRepository.findByProductIdOrderByCreatedAtDesc(5L))
                 .thenReturn(List.of(review(1L, true), review(2L, false)));
 

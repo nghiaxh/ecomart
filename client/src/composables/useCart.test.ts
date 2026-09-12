@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const { requestMock, toastMock, authMock } = vi.hoisted(() => ({
   requestMock: vi.fn(),
   toastMock: vi.fn(),
-  authMock: { isLoggedIn: { value: true }, isAdmin: { value: false } }
+  authMock: { isLoggedIn: { value: true }, isStaffOrAdmin: { value: false } }
 }))
 
 vi.mock('@/composables/useApi', () => ({
@@ -32,7 +32,7 @@ const cart = {
 describe('useCart', () => {
   beforeEach(() => {
     authMock.isLoggedIn = ref(true)
-    authMock.isAdmin = ref(false)
+    authMock.isStaffOrAdmin = ref(false)
     requestMock.mockReset()
     toastMock.mockReset()
     requestMock.mockResolvedValue(null)
@@ -78,7 +78,7 @@ describe('useCart', () => {
     authMock.isLoggedIn.value = false
     const { fetchCart } = useCart()
     requestMock.mockResolvedValue(cart)
-    authMock.isAdmin.value = true
+    authMock.isStaffOrAdmin.value = true
     authMock.isLoggedIn.value = true
     const p1 = fetchCart()
     const p2 = fetchCart()

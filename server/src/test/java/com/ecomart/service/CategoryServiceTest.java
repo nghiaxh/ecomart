@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,11 +34,18 @@ class CategoryServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CategoryService(categoryRepository, productRepository);
+        service = new CategoryService(categoryRepository, productRepository, mock(ActivityLogService.class));
     }
 
     private CategoryRequest request(String name, String slug) {
         return new CategoryRequest(null, name, slug, "leaf", 1, true);
+    }
+
+    private Category category(long id) {
+        Category category = new Category();
+        category.setId(id);
+        category.setName("Rau củ quả");
+        return category;
     }
 
     @Test
@@ -63,7 +71,7 @@ class CategoryServiceTest {
 
     @Test
     void deleteCategoryWithProductsThrows() {
-        when(categoryRepository.existsById(5L)).thenReturn(true);
+        when(categoryRepository.findById(5L)).thenReturn(Optional.of(category(5L)));
         when(categoryRepository.findByParentId(5L)).thenReturn(List.of());
         when(productRepository.existsByCategoryId(5L)).thenReturn(true);
 
@@ -71,6 +79,13 @@ class CategoryServiceTest {
 
         assertEquals("Cannot delete a category that contains products", ex.getMessage());
         verify(categoryRepository, never()).deleteById(5L);
+    }
+
+    @Test
+    void deleteMissingCategoryThrows() {
+        when(categoryRepository.findById(404L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.delete(404L));
     }
 
     @Test
