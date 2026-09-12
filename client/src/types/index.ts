@@ -1,8 +1,14 @@
-export type UserRole = 'CUSTOMER' | 'ADMIN'
+export type UserRole = 'CUSTOMER' | 'STAFF' | 'ADMIN'
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'COMPLETED' | 'CANCELLED'
 export type PaymentMethod = 'PAYOS' | 'COD'
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED'
 export type MaterialType = 'ORGANIC' | 'RECYCLED' | 'NATURAL' | 'SYNTHETIC'
+export type ChatRole = 'user' | 'assistant'
+
+export interface ChatMessage {
+  role: ChatRole
+  content: string
+}
 
 export interface AuthResponse {
   token: string
@@ -178,6 +184,20 @@ export interface UserSummary {
   avatarUrl?: string
   role: UserRole
   isActive: boolean
+  createdAt: string
+  hireDate?: string
+}
+
+export interface ActivityLog {
+  id: number
+  userId?: number
+  username?: string
+  role?: string
+  action: string
+  entityType?: string
+  entityId?: number
+  entityName?: string
+  detail?: string
   createdAt: string
 }
 

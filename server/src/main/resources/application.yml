@@ -14,11 +14,6 @@ spring:
         jdbc:
           time_zone: UTC
         format_sql: false
-  flyway:
-    enabled: ${FLYWAY_ENABLED:true}
-    baseline-on-migrate: true
-    baseline-version: 1
-    locations: classpath:db/migration
   jackson:
     default-property-inclusion: non_null
 
@@ -33,6 +28,9 @@ app:
   client-url: ${CLIENT_URL:http://localhost:5173}
   shop:
     shipping-fee: ${SHIPPING_FEE:20000}
+  chat:
+    bm25-threshold: ${CHAT_BM25_THRESHOLD:1.0}
+    product-refresh-ms: ${CHAT_PRODUCT_REFRESH_MS:300000}
   http:
     connect-timeout-ms: ${HTTP_CONNECT_TIMEOUT_MS:5000}
     read-timeout-ms: ${HTTP_READ_TIMEOUT_MS:120000}
@@ -40,6 +38,10 @@ app:
     enabled: ${SEED_ENABLED:true}
     admin-password: ${SEED_ADMIN_PASSWORD:}
     customer-password: ${SEED_CUSTOMER_PASSWORD:}
+
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-2.0-flash}
 
 payos:
   client-id: ${PAYOS_CLIENT_ID:}

@@ -48,6 +48,7 @@ public class SecurityConfig {
                                         request, response, HttpStatus.FORBIDDEN, "Access denied")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/chat").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/payments/payos/webhook").permitAll()

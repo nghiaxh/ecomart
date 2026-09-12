@@ -1,0 +1,200 @@
+[
+  {
+    "id": "gioi-thieu-01",
+    "category": "store",
+    "keywords": ["ecomart là gì", "giới thiệu ecomart", "cửa hàng xanh", "siêu thị xanh", "about", "về ecomart"],
+    "answer": "EcoMart là siêu thị xanh (eco-friendly) chuyên rau củ quả, trái cây và thực phẩm tươi sạch. Chúng tôi ưu tiên nguồn hàng hữu cơ, bao bì thân thiện môi trường và giao hàng tận nơi."
+  },
+  {
+    "id": "gio-mo-cua-01",
+    "category": "store",
+    "keywords": ["giờ mở cửa", "giờ làm việc", "mấy giờ mở", "mấy giờ đóng", "mở cửa", "thời gian hoạt động", "working hours"],
+    "answer": "EcoMart mở cửa từ 7h00 đến 22h00 tất cả các ngày trong tuần, kể cả cuối tuần và ngày lễ."
+  },
+  {
+    "id": "thanh-lap-01",
+    "category": "store",
+    "keywords": ["trụ sở", "địa chỉ cửa hàng", "cửa hàng ở đâu", "showroom", "địa chỉ"],
+    "answer": "Bạn có thể xem địa chỉ và bản đồ trên trang Liên hệ của EcoMart hoặc gọi hotline 0900 000 000 để được hướng dẫn chi tiết nhất."
+  },
+  {
+    "id": "lien-he-01",
+    "category": "store",
+    "keywords": ["liên hệ", "hotline", "số điện thoại", "email hỗ trợ", "hỗ trợ khách hàng", "contact"],
+    "answer": "Bạn có thể liên hệ hotline 0900 000 000 hoặc email contact@ecomart.vn. Tổng đài hỗ trợ từ 7h00 đến 22h00 hằng ngày."
+  },
+  {
+    "id": "giao-hang-01",
+    "category": "shipping",
+    "keywords": ["phí giao hàng", "phí ship", "ship bao nhiêu", "cước phí vận chuyển", "miễn phí ship", "shipping fee"],
+    "answer": "Phí giao hàng là 20.000₫ cho mỗi đơn. Mức phí cụ thể được tính khi bạn đặt hàng, dựa trên khu vực giao."
+  },
+  {
+    "id": "giao-hang-02",
+    "category": "shipping",
+    "keywords": ["thời gian giao hàng", "giao hàng bao lâu", "khi nào nhận hàng", "thời gian ship", "giao trong ngày", "delivery time"],
+    "answer": "Đơn hàng nội thành thường được giao trong vòng 2 đồng hồ. Khu vực tỉnh xa hơn có thể từ 1 đến 2 ngày làm việc."
+  },
+  {
+    "id": "giao-hang-03",
+    "category": "shipping",
+    "keywords": ["khu vực giao hàng", "giao hàng ở đâu", "giao toàn quốc", "vận chuyển ngoại thành", "co gioi han giao"],
+    "answer": "EcoMart giao hàng tại nội thành và các tỉnh lân cận. Bạn nhập địa chỉ khi thanh toán để hệ thống báo chính xác thời gian nhận hàng."
+  },
+  {
+    "id": "doi-tra-01",
+    "category": "policy",
+    "keywords": ["chính sách đổi trả", "đổi hàng", "trả hàng", "hoàn tiền", "hàng lỗi", "sai sản phẩm", "return policy"],
+    "answer": "EcoMart hỗ trợ đổi trả trong vòng 48 giờ nếu sản phẩm bị lỗi, sai hàng hoặc không đạt chất lượng. Bạn liên hệ hotline kèm mã đơn để được xử lý nhanh."
+  },
+  {
+    "id": "doi-tra-02",
+    "category": "policy",
+    "keywords": ["hàng hết hạn sử dụng", "sản phẩm kém chất lượng", "rau bị héo", "trái cây hư", "đồ tươi bị hỏng"],
+    "answer": "Nếu sản phẩm tươi bị hư, héo khi nhận hàng, hãy chụp ảnh đơn hàng và gửi qua hotline trong vòng 24 giờ, EcoMart sẽ xử lý đổi mới hoặc hoàn tiền."
+  },
+  {
+    "id": "thanh-toan-01",
+    "category": "payment",
+    "keywords": ["cách thanh toán", "hình thức thanh toán", "thanh toán khi nhận hàng", "cod", "trả tiền mặt", "payment methods"],
+    "answer": "EcoMart hỗ trợ thanh toán khi nhận hàng (COD) và thanh toán qua mã QR PayOS ngay khi đặt đơn."
+  },
+  {
+    "id": "thanh-toan-02",
+    "category": "payment",
+    "keywords": ["thanh toán online", "quẹt thẻ", "chuyển khoản", "trả qua qr", "payos là gì", "thanh toán mã qr"],
+    "answer": "Với thanh toán PayOS, bạn quét mã QR và thanh toán qua ngân hàng hoặc ví điện tử. Đơn hàng thanh toán online sẽ được ưu tiên xử lý sớm hơn."
+  },
+  {
+    "id": "thanh-toan-03",
+    "category": "payment",
+    "keywords": ["thanh toán thất bại", "không thanh toán được", "lỗi thanh toán", "chuyển tiền lỗi", "trừ tiền nhưng không có đơn"],
+    "answer": "Nếu gặp lỗi thanh toán hoặc bị trừ tiền mà không tạo được đơn, hãy liên hệ hotline 0900 000 000 kèm mã giao dịch để chúng tôi kiểm tra và hoàn tiền."
+  },
+  {
+    "id": "don-hang-01",
+    "category": "order",
+    "keywords": ["xem đơn hàng", "tra cứu đơn hàng", "đơn hàng của tôi", "kiểm tra đơn", "trạng thái đơn", "order status"],
+    "answer": "Bạn vào mục Đơn hàng trong tài khoản để theo dõi trạng thái: chờ xác nhận, đã xác nhận, đang giao và hoàn thành."
+  },
+  {
+    "id": "don-hang-02",
+    "category": "order",
+    "keywords": ["huỷ đơn hàng", "hủy đơn", "không muốn mua nữa", "thoát đơn", "cancel order"],
+    "answer": "Đơn chưa xác nhận có thể hủy trong mục Đơn hàng. Đơn đang giao hoặc đã thanh toán, bạn vui lòng liên hệ hotline để EcoMart hỗ trợ."
+  },
+  {
+    "id": "don-hang-03",
+    "category": "order",
+    "keywords": ["sửa đơn hàng", "đổi địa chỉ nhận hàng", "thêm sản phẩm vào đơn", "cập nhật đơn", "edit order"],
+    "answer": "Trước khi đơn được xác nhận, bạn có thể liên hệ hotline để cập nhật địa chỉ hoặc nội dung đơn hàng."
+  },
+  {
+    "id": "tai-khoan-01",
+    "category": "account",
+    "keywords": ["đăng ký tài khoản", "tạo tài khoản", "đăng ký thành viên", "register", "tạo nick"],
+    "answer": "Bạn bấm Đăng ký ở góc trên bên phải, điền tên, email hoặc số điện thoại và mật khẩu là xong. Tài khoản được dùng cho cả web lẫn app."
+  },
+  {
+    "id": "tai-khoan-02",
+    "category": "account",
+    "keywords": ["quên mật khẩu", "đổi mật khẩu", "không đăng nhập được", "reset mật khẩu", "forgot password"],
+    "answer": "Bạn mở trang đăng nhập và chọn quên mật khẩu để nhận hướng dẫn đặt lại qua email hoặc số điện thoại đã đăng ký."
+  },
+  {
+    "id": "tai-khoan-03",
+    "category": "account",
+    "keywords": ["sửa thông tin cá nhân", "cập nhật hồ sơ", "đổi email", "đổi số điện thoại", "profile"],
+    "answer": "Vào mục Tài khoản, bấm Cập nhật để sửa tên, email, số điện thoại và ảnh đại diện. Địa chỉ giao hàng quản lý riêng tại mục Địa chỉ."
+  },
+  {
+    "id": "san-pham-01",
+    "category": "product",
+    "keywords": ["có những sản phẩm nào", "danh mục sản phẩm", "bán những gì", "hàng hóa", "sản phẩm"],
+    "answer": "EcoMart có các nhóm hàng chính: trái cây tươi, rau củ sạch, thực phẩm khô và sản phẩm xanh/bao bì thân thiện môi trường."
+  },
+  {
+    "id": "san-pham-02",
+    "category": "product",
+    "keywords": ["sản phẩm mới", "hàng mới về", "sản phẩm nổi bật", "best seller", "mới nhất", "bán chạy"],
+    "answer": "Trang chủ có mục sản phẩm mới nhất và bán chạy. Nếu muốn gợi ý chi tiết hơn, bạn cứ nêu tên món bạn đang cần."
+  },
+  {
+    "id": "san-pham-03",
+    "category": "product",
+    "keywords": ["sản phẩm hết hàng", "hàng hết", "tạm hết", "hết stock", "out of stock", "bao giờ có hàng lại"],
+    "answer": "Một số sản phẩm có thể tạm hết hàng và được hiển thị nhãn Hết hàng trên trang. Hàng về lại sẽ được cập nhật trên danh mục tương ứng."
+  },
+  {
+    "id": "san-pham-04",
+    "category": "product",
+    "keywords": ["xuất xứ", "nguồn gốc sản phẩm", "hàng nhập khẩu", "hàng nội địa", "vùng trồng", "origin"],
+    "answer": "Mỗi sản phẩm đều ghi rõ xuất xứ và vùng trồng trên trang chi tiết, ví dụ Cam sành Việt từ Tây Ninh, Cherry từ Chile."
+  },
+  {
+    "id": "chat-luong-01",
+    "category": "quality",
+    "keywords": ["chất lượng", "đảm bảo an toàn", "rau sạch không", "có hóa chất không", "hữu cơ", "organic", "atiso sử dụng thuốc"],
+    "answer": "EcoMart kiểm soát nguồn hàng từ vùng trồng uy tín, ưu tiên sản phẩm organic, hạn chế hóa chất và đóng gói bao bì thân thiện môi trường."
+  },
+  {
+    "id": "chat-luong-02",
+    "category": "quality",
+    "keywords": ["bảo quản sản phẩm", "cách bảo quản rau củ", "trữ trái cây trong tủ lạnh", "giữ tươi lâu", "storage"],
+    "answer": "Rau củ nên bảo quản trong ngăn mát tủ lạnh và dùng trong 2-3 ngày. Trái cây chín để ngăn mát, trái chưa chín để ở nhiệt độ thường."
+  },
+  {
+    "id": "mua-si-01",
+    "category": "bulk",
+    "keywords": ["mua số lượng lớn", "mua sỉ", "đặt hàng số lượng nhiều", "wholesale", "mua buôn"],
+    "answer": "Nhu cầu mua số lượng lớn, bạn liên hệ hotline để được báo giá sỉ và ưu đãi riêng cho đơn hàng tập thể."
+  },
+  {
+    "id": "hoa-don-01",
+    "category": "invoice",
+    "keywords": ["xuất hóa đơn", "lấy hóa đơn", "hóa đơn VAT", "invoice", "chứng từ"],
+    "answer": "Bạn vui lòng ghi chú mã số thuế và thông tin công ty khi đặt hàng, EcoMart sẽ hỗ trợ xuất hóa đơn VAT cho đơn phù hợp."
+  },
+  {
+    "id": "thanh-vien-01",
+    "category": "member",
+    "keywords": ["thành viên", "tích điểm", "ưu đãi thành viên", "khách hàng thân thiết", "voucher", "mã giảm giá", "khuyen mai", "giảm giá"],
+    "answer": "EcoMart thường xuyên có ưu đãi, giảm giá và voucher cho thành viên. Các nội dung này được hiển thị tại trang chủ và mục Khuyến mãi."
+  },
+  {
+    "id": "quy-trinh-01",
+    "category": "process",
+    "keywords": ["cách đặt hàng", "đặt hàng thế nào", "hướng dẫn mua hàng", "quy trình mua", "bước đặt hàng", "how to order"],
+    "answer": "Chọn sản phẩm, bấm Thêm vào giỏ, sau đó vào Giỏ hàng và Thanh toán. Chọn địa chỉ, phương thức thanh toán rồi xác nhận đơn là xong."
+  },
+  {
+    "id": "quy-trinh-02",
+    "category": "process",
+    "keywords": ["cần đăng nhập để mua không", "mua không cần tài khoản", "khách vãng lai", "checkout không đăng nhập", "guest checkout"],
+    "answer": "Khi thanh toán EcoMart yêu cầu bạn đăng nhập để lưu đơn hàng và địa chỉ. Bạn có thể đăng ký tài khoản mới trong vòng 1 phút."
+  },
+  {
+    "id": "quy-trinh-03",
+    "category": "process",
+    "keywords": ["trạng thái thanh toán", "đã thanh toán chưa", "kiểm tra thanh toán", "thanh toán đơn hàng"],
+    "answer": "Trạng thái thanh toán được hiển thị trong chi tiết đơn hàng: chờ thanh toán, đã thanh toán, thất bại hoặc đã hủy."
+  },
+  {
+    "id": "quy-trinh-04",
+    "category": "process",
+    "keywords": ["theo dõi giao hàng", "where is my order", "đang giao", "đơn đang ship", "tracking"],
+    "answer": "Khi đơn chuyển sang trạng thái Đang giao, bạn xem chi tiết đơn hàng để theo dõi tiến độ giao hàng."
+  },
+  {
+    "id": "bao-bi-01",
+    "category": "eco",
+    "keywords": ["bao bì thân thiện", "túi vải", "giảm rác thải", "xanh hóa", "bao bì tái chế", "eco friendly packaging"],
+    "answer": "EcoMart ưu tiên bao bì có thể tái chế hoặc tái sử dụng, hạn chế túi nilon, hướng đến mô hình mua sắm ít rác thải."
+  },
+  {
+    "id": "ve-sinh-01",
+    "category": "quality",
+    "keywords": ["vệ sinh an toàn thực phẩm", "kiểm định", "tem nhãn", "chứng nhận", "an toàn thực phẩm"],
+    "answer": "Nguồn hàng của EcoMart được kiểm soát theo tiêu chuẩn an toàn thực phẩm và có truy xuất nguồn gốc rõ ràng."
+  }
+]

@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router'
 import FooterGlobal from '@/components/FooterGlobal.vue'
 import HeaderGlobal from '@/components/HeaderGlobal.vue'
+import ChatWidget from '@/components/ChatWidget.vue'
 
 const route = useRoute()
 </script>
@@ -15,5 +16,6 @@ const route = useRoute()
     </main>
 
     <FooterGlobal v-if="route.name === 'home'" />
+    <ChatWidget />
   </div>
 </template>

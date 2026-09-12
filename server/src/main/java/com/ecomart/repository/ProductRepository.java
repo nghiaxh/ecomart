@@ -26,6 +26,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @EntityGraph(attributePaths = {"images", "category"})
     List<Product> findTop8ByIsActiveTrueOrderByCreatedAtDesc();
 
+    @EntityGraph(attributePaths = {"category"})
+    List<Product> findByIsActiveTrueAndStockOrderByNameAsc(int stock);
+
     @Query("SELECT p FROM Product p WHERE (:onlyActive = false OR p.isActive = true) "
             + "AND (:keyword = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) "
             + "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
