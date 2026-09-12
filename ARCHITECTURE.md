@@ -12,13 +12,12 @@ EcoMart là ứng dụng **siêu thị trực tuyến** theo mô hình monorepo 
 │(Vue 3 + Naive UI)│ ◀─────────────────────────────────────────  │  Java 25 + JPA       │
 └──────────────────┘    Authorization: Bearer (JWT)              └──────────┬───────────┘
                                                                             │
-                                                     PostgreSQL (ddl-auto: update
-                                                     + Flyway, baseline-on-migrate)
+                                                      PostgreSQL (ddl-auto: update)
 ```
 
 - **client/**: Vue 3 + Vite 8 + Vue Router 5 + Naive UI 2.45 (native light theme, CSS in JS, import thủ công từng component) + xicons (@vicons/ionicons5 qua wrapper UiIcon) + Axios + TypeScript + Zod 4. Admin stats dùng Chart.js (vue-chartjs). SPA thuần, không SSR. Giao diện tiếng Việt (chuỗi tích hợp sẵn của Naive UI là tiếng Anh qua locale enUS). Ở dev, Vite proxy /api tới VITE_API_TARGET (mặc định http://localhost:8080); ở prod, container nginx (nginx.conf) proxy /api tới service server. Nếu đặt VITE_API_BASE, client gọi thẳng backend qua CORS và bỏ proxy.
-- **server/**: Spring Boot 3.5 + Spring Security (JWT access và refresh) + Spring Data JPA. Tổng cộng 11 controller, mỗi resource đi theo chuỗi controller, service, repository.
-- **PostgreSQL**: ddl-auto: update đồng bộ schema khi khởi động. Flyway bật (baseline-on-migrate, baseline-version 1, migrations trong classpath:db/migration), hiện chưa có migration thật nào (chỉ còn .gitkeep).
+- **server/**: Spring Boot 3.5 + Spring Security (JWT access và refresh) + Spring Data JPA. Tổng cộng 12 controller, mỗi resource đi theo chuỗi controller, service, repository.
+- **PostgreSQL**: ddl-auto: update đồng bộ schema khi khởi động.
 
 ## Luồng dữ liệu chính
 
@@ -39,6 +38,7 @@ Các endpoint công khai duy nhất (phần còn lại yêu cầu xác thực):
 - POST /api/auth/\*\*: login, register, refresh, logout
 - GET /api/products/**, /api/categories/**, /api/reviews
 - POST /api/payments/payos/webhook
+- POST /api/chat: trợ lý ảo (stream SSE)
 - /error
 
 Bảo vệ route trên client bằng global guard beforeEach trong src/router/index.ts (chỉ là UX, không phải ranh giới bảo mật). Guard đọc meta trên route:
@@ -83,14 +83,28 @@ Trạng thái thanh toán: PENDING, PAID, FAILED hoặc CANCELLED.
 - Server có NotificationController (GET /api/notifications, GET /api/notifications/unread-count, PATCH /{id}/read, PATCH /read-all) và entity Notification lưu DB, gắn với user, đã @PreAuthorize("isAuthenticated()").
 - Giao diện người dùng hiện chưa hiển thị danh sách thông báo (chưa có component poll).
 
+### 6. Trợ lý ảo (Trợ lý EcoMart)
+
+Chat là endpoint công khai `POST /api/chat` trả về **SSE** (SseEmitter, timeout 90s). Client gửi `{ messages: [{ role, content }] }`, server stream các sự kiện `data:`: `{"text":"..."}` (từng đoạn câu trả lời), `{"source":"..."}` (local | bm25 | gemini | default) và cuối cùng `data:[DONE]`. Không yêu cầu đăng nhập nhưng nếu có JWT client vẫn đính `Authorization`.
+
+Pipeline trong ChatService.answer (theo thứ tự, dừng ở nguồn khớp đầu tiên):
+
+1. **Luồng định hướng câu hỏi (ChatIntent)**: keyword chuẩn hóa (không dấu) khai báo trong enum ChatIntent. Phân loại: phí giao hàng (dùng giá trị live từ app.shop.shipping-fee), sản phẩm hết hàng (query stock=0), sản phẩm mới (query mới nhất), danh mục (query gốc), thanh toán, đơn hàng, tài khoản, quên mật khẩu, trợ giúp, cảm ơn, tạm biệt, chào hỏi. So khớp không dấu (VietText.normalize + tokenize), fuzzy chỉ áp dụng cho token dài ≥ 5 ký tự để tránh nhầm "chay"/"chao"; GREETING chỉ khi câu ≤ 3 token.
+2. **BM25** (Bm25 common + VietText tokenize): index tự dựng và cache TTL theo app.chat.product-refresh-ms (mặc định 5 phút) gồm FAQ (data/chat-knowledge.json, 33 mục) + snapshot sản phẩm active (search("", ...) lấy 100 dòng). Trả câu trả lời FAQ nếu score ≥ app.chat.bm25-threshold (mặc định 1.0).
+3. **Gemini** (integration/gemini/GeminiClient): sinh câu trả lời tối đa 512 token dựa trên 8 lượt hội thoại gần nhất + system prompt tiếng Việt. Chỉ chạy khi có GEMINI_API_KEY; không có key thì bỏ qua.
+4. **Default**: câu trả lời cố định kèm hotline 0900 000 000.
+
+Client: composable useChat (fetch native, đọc stream SSE, không qua Axios vì cần body stream) + widget ChatWidget.vue (góc phải màn hình, ẩn trên route /admin/*; gợi ý câu hỏi nhanh, gửi bằng Enter hoặc nút send, hủy stream khi đóng). Text trả lời được stream với khoảng cách 18ms/đoạn; mỗi đoạn câu thừa dấu cách cuối khiến nối chuỗi khôi phục đúng văn bản gốc (stream() cũng gom xuống dòng thành khoảng trắng để giữ data: luôn 1 dòng).
+
 ## Cấu trúc mã nguồn
 
 ### Server (server/src/main/java/com/ecomart/)
 
 ```
-controller/  11 controller, mỗi resource một controller mỏng (logic nằm ở service), mapping dưới /api/...
+controller/  12 controller, mỗi resource một controller mỏng (logic nằm ở service), mapping dưới /api/...
 service/     nghiệp vụ chính, kiểm soát quyền và logic (webhook PayOS ở PaymentService,
-             thống kê admin ở AdminStatsService, quản lý người dùng admin ở AdminUserService)
+             thống kê admin ở AdminStatsService, quản lý người dùng admin ở AdminUserService,
+             chat ở ChatService với ChatIntent và ChatKnowledge)
 domain/
   entity/    JPA entities (User, Customer, Admin, Product, Category, Material,
              ProductImage, ProductMaterial, Cart, CartItem, Order, OrderItem, Payment,
@@ -107,12 +121,12 @@ dto/
 security/    JwtTokenProvider, JwtAuthenticationFilter, SecurityConfig, CorsConfig, UserDetailsServiceImpl
 integration/
   payos/     PayOSClient, thanh toán QR
-config/      AppConfig, RestTemplateConfig (timeout), DataSeeder, JwtProperties, PayOSProperties, ShopProperties
+  gemini/    GeminiClient, trợ lý ảo (nâng cao, tùy chọn)
+config/      AppConfig, RestTemplateConfig (timeout), DataSeeder, JwtProperties, PayOSProperties, ShopProperties,
+             GeminiProperties (api-key, model)
 common/      SecurityUtils (current user id), Mapper (entity và DTO hai chiều: toXxx và merge)
 exception/   xử lý lỗi API (ApiError, GlobalExceptionHandler, UnauthorizedException, ...)
 ```
-
-Migrations nằm ở `server/src/main/resources/db/migration` (hiện chưa có script nào, chỉ còn `.gitkeep`; migration mới đầu tiên đặt trong `V2__...` vì baseline-version là 1).
 
 ### Client (client/)
 
@@ -126,9 +140,10 @@ src/
                      admin/: statistic, products, categories, orders, users
   components/        ProductCard, FooterGlobal, UiImg, UiIcon, AuthShell, SectionHeader, Reveal,
                      PaginationBar, OrderSummaryCard, AddressForm, AddressCard,
-                     AddToCartButton, PasswordInput
+                     AddToCartButton, PasswordInput, ChatWidget
   composables/       useApi (mọi request qua Axios và auto refresh), useAuth (phiên JWT),
-                     useCart, useFormat, useStatusLabels, useFormErrors, useConfirm, useToast
+                     useCart, useFormat, useStatusLabels, useFormErrors, useConfirm, useToast,
+                     useChat (chat SSE trực tiếp bằng fetch, không qua Axios)
   utils/             session-storage (sở hữu khóa ecomart_session, ecomart_token và event unauthorized)
   data/              home.ts (dữ liệu marketing tĩnh trang chủ)
   layouts/           default (public, gồm navbar và FooterGlobal); trang login và register dùng layout trống
@@ -143,9 +158,9 @@ nginx.conf           prod: serve dist/ và proxy /api tới server
 ## Điểm quan trọng khi làm việc
 
 - **Đồng bộ types**: client/src/types/index.ts (TS) và client/src/schemas/index.ts (Zod) phải giữ song song với DTO backend. Thêm hoặc sửa trường ở server thì cập nhật cả hai.
-- **Flyway và ddl-auto**: schema vẫn do ddl-auto: update quản lý (JPA_DDL_AUTO ghi đè mặc định). Flyway đã bật (baseline-on-migrate, baseline-version 1), hiện chưa có migration thật (chỉ còn .gitkeep). Khi thêm migration mới, đặt file V2__... trong server/src/main/resources/db/migration. Với DB có sẵn dữ liệu, tránh xoá hoặc đổi tên cột đang được dùng.
+- **Schema DB**: schema do ddl-auto: update quản lý hoàn toàn (JPA_DDL_AUTO ghi đè mặc định). Không dùng Flyway; không thêm migration script. Khi đổi entity, Hibernate tự đồng bộ.
 - **UI là Naive UI, không phải PrimeVue**: toàn bộ component và hook của Naive UI import thủ công theo file (NButton, NInput, NDataTable...), không auto import hoặc unplugin. Toast và dialog đi qua useToast và useConfirm (bọc useMessage và useDialog) để call site và unit test không đổi. Icons dùng UiIcon (xicons Ionicon5), không dùng pi pi-\*.
-- **Mọi request qua useApi()**: không gọi Axios hoặc $fetch trực tiếp trong page để đảm bảo header JWT luôn được đính và cơ chế auto refresh hoạt động.
+- **Mọi request qua useApi()**: không gọi Axios hoặc $fetch trực tiếp trong page để đảm bảo header JWT luôn được đính và cơ chế auto refresh hoạt động. Ngoại lệ duy nhất là useChat dùng fetch native để đọc body stream SSE (endpoint public, vẫn đính Bearer khi có token).
 - **Quyền ADMIN kiểm soát ở server**: SecurityConfig bắt buộc xác thực tại tầng HTTP (anyRequest().authenticated()); admin write dùng @PreAuthorize("hasRole('ADMIN')"); controller user scoped dùng @PreAuthorize("isAuthenticated()"). Hết phiên hoặc refresh lỗi thì trả 401 (UnauthorizedException, chỉ ở AuthService và webhook PayOS chưa auth); đã login nhưng đụng tài nguyên người khác thì trả 403 (AccessDeniedException). Route guard client chỉ là UX.
 - **Không SSR**: SPA thuần, mọi trang (kể cả trang công khai) fetch client side trong onMounted. Filter products đồng bộ hai chiều với URL query (router.push hoặc replace).
 - **DataSeeder** (config/DataSeeder.java) idempotent theo slug hoặc tên: tạo 5 admin (admin và admin2...admin5) và 8 khách hàng (customer và customer2...customer8; mật khẩu demo Admin@123 hoặc Customer@123, ghi đè qua SEED_ADMIN_PASSWORD và SEED_CUSTOMER_PASSWORD), danh mục (3 gốc và 7 lá, kèm icon), vật liệu, 44 sản phẩm mẫu (ảnh WebP trong client/public/images/products/, 2 sản phẩm stock bằng 0 cho e2e cart-robustness), địa chỉ, giỏ hàng, 30 đơn hàng kèm thanh toán, 132 đánh giá (3 cho mỗi sản phẩm) và thông báo. Bộ dữ liệu đủ cho dashboard và stats admin. Tắt bằng SEED_ENABLED=false; reset dữ liệu demo bằng cách xoá volume pgdata.
@@ -179,8 +194,10 @@ Mọi bí mật nằm trong một file .env duy nhất ở root (được docker
 | CLIENT_URL                                                | nguồn CORS hợp lệ                                                         |
 | SEED_ENABLED, SEED_ADMIN_PASSWORD, SEED_CUSTOMER_PASSWORD | bật tắt và mật khẩu tài khoản demo                                        |
 | SHIPPING_FEE                                              | phí giao hàng (app.shop.shipping-fee, mặc định 20000)                     |
+| GEMINI_API_KEY, GEMINI_MODEL                              | trợ lý ảo nâng cao; GEMINI_API_KEY trống thì chat chỉ dùng local + FAQ    |
+| CHAT_BM25_THRESHOLD, CHAT_PRODUCT_REFRESH_MS              | ngưỡng BM25 và TTL cache index chat                                        |
 | HTTP_CONNECT_TIMEOUT_MS, HTTP_READ_TIMEOUT_MS             | timeout RestTemplate gọi PayOS                                            |
-| FLYWAY_ENABLED, JPA_DDL_AUTO                              | Flyway và cách đồng bộ schema (ddl-auto)                                  |
+| JPA_DDL_AUTO                                               | chế độ đồng bộ schema (ddl-auto)                                        |
 | GOOGLE_CLIENT_ID                                          | khai báo nhưng chưa bound và không dùng, không coi là tính năng hoạt động |
 
 Biến chỉ dùng trong docker-compose.yml:

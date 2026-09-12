@@ -12,7 +12,6 @@
 [![Vitest](https://img.shields.io/badge/Vitest-4.1-FCC72B?logo=vitest&logoColor=black)](https://vitest.dev)
 [![Playwright](https://img.shields.io/badge/Playwright-1.62-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
 [![Testcontainers](https://img.shields.io/badge/Testcontainers-1.21-2496ED)](https://java.testcontainers.org)
-[![Flyway](https://img.shields.io/badge/Flyway-11.7-CC0200?logo=flyway&logoColor=white)](https://flywaydb.org)
 
 Nền tảng mua sắm thực phẩm trực tuyến với sản phẩm tươi sạch, giao hàng nhanh và thanh toán tiện lợi cho mọi gia đình Việt.
 
@@ -24,6 +23,8 @@ Nền tảng mua sắm thực phẩm trực tuyến với sản phẩm tươi s�
 - Chi tiết sản phẩm với nhiều ảnh, đánh giá và badge hết hàng
 - Giỏ hàng, thanh toán mã QR PayOS hoặc COD
 - Theo dõi và hủy đơn hàng
+- Trợ lý ảo hỏi đáp trực tiếp (widget chat góc phải màn hình: phí giao hàng, sản phẩm,
+  danh mục, thanh toán; trả lời stream từng đoạn bằng SSE)
 
 ### Quản trị
 - Dashboard tổng quan và thống kê bán hàng
@@ -101,9 +102,10 @@ Ghi đè mật khẩu bằng `SEED_ADMIN_PASSWORD` và `SEED_CUSTOMER_PASSWORD`.
 | Tầng | Công nghệ |
 |------|-----------|
 | Client | Vue 3, Vite 8, Vue Router 5, Naive UI, TypeScript, Zod 4, Tailwind CSS, Axios, Chart.js |
-| Server | Spring Boot 3.5, Spring Security, Spring Data JPA, Lombok, Flyway |
+| Server | Spring Boot 3.5, Spring Security, Spring Data JPA, Lombok |
 | Database | PostgreSQL 18 |
 | Thanh toán | PayOS (mã QR và webhook), COD |
+| Trợ lý ảo | Server-Sent Events (SSE) + BM25 trên FAQ + Gemini (tùy chọn qua `GEMINI_API_KEY`) |
 | Hạ tầng | Docker Compose |
 | Kiểm thử | Vitest, JUnit, Testcontainers, Playwright |
 

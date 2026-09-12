@@ -55,7 +55,7 @@ mvn test      # unit + integration
 mvn verify    # như trên + sinh báo cáo JaCoCo (target/site/jacoco)
 ```
 
-Cấu hình test: `src/test/resources/application.yml` (Flyway tắt, `ddl-auto: create-drop`, JWT/seed test-only). Container PostgreSQL chung dùng chung qua `AbstractPostgresIntegrationTest`.
+Cấu hình test: `src/test/resources/application.yml` (`ddl-auto: create-drop`, JWT/seed test-only). Container PostgreSQL chung dùng chung qua `AbstractPostgresIntegrationTest`.
 
 ### Unit tests (mock bean)
 
