@@ -42,7 +42,7 @@ public class ReviewController {
     }
 
     @PatchMapping("/{id}/toggle")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ReviewResponse toggleHidden(@PathVariable Long id) {
         return reviewService.toggleHidden(id);
     }

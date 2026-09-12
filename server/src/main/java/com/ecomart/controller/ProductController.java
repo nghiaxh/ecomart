@@ -48,7 +48,7 @@ public class ProductController {
                                                  @RequestParam(defaultValue = "12") int size) {
         PageRequest pageRequest = pageRequest(page, size, sort);
         return productService.search(q, category, minPrice, maxPrice, showAll,
-                securityUtils.currentUserHasRole("ADMIN"), pageRequest);
+                securityUtils.currentUserHasAnyRole("ADMIN", "STAFF"), pageRequest);
     }
 
     private PageRequest pageRequest(int page, int size, String sort) {
@@ -79,26 +79,26 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ProductResponse create(@Valid @RequestBody ProductRequest request) {
         return productService.create(request);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         return productService.update(id, request);
     }
 
     @PatchMapping("/{id}/toggle")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ProductResponse toggleActive(@PathVariable Long id) {
         productService.toggleActive(id);
         return productService.getById(id);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public MessageResponse delete(@PathVariable Long id) {
         productService.delete(id);
         return new MessageResponse("Product deleted");

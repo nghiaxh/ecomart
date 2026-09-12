@@ -18,6 +18,7 @@ import AdminProductsPage from '@/pages/admin/products.vue'
 import AdminCategoriesPage from '@/pages/admin/categories.vue'
 import AdminOrdersPage from '@/pages/admin/orders.vue'
 import AdminUsersPage from '@/pages/admin/users.vue'
+import AdminActivityLogPage from '@/pages/admin/activity-log.vue'
 import { useAuth } from '@/composables/useAuth'
 
 const routes: RouteRecordRaw[] = [
@@ -45,11 +46,12 @@ const routes: RouteRecordRaw[] = [
       { path: 'orders', name: 'orders', component: OrdersIndexPage, meta: { customerOnly: true } },
       { path: 'orders/:id', name: 'order-detail', component: OrderDetailPage, meta: { customerOnly: true } },
 
-      { path: 'admin/products', name: 'admin-products', component: AdminProductsPage, meta: { requiresAdmin: true } },
-      { path: 'admin/categories', name: 'admin-categories', component: AdminCategoriesPage, meta: { requiresAdmin: true } },
-      { path: 'admin/orders', name: 'admin-orders', component: AdminOrdersPage, meta: { requiresAdmin: true } },
+      { path: 'admin/products', name: 'admin-products', component: AdminProductsPage, meta: { requiresStaffOrAdmin: true } },
+      { path: 'admin/categories', name: 'admin-categories', component: AdminCategoriesPage, meta: { requiresStaffOrAdmin: true } },
+      { path: 'admin/orders', name: 'admin-orders', component: AdminOrdersPage, meta: { requiresStaffOrAdmin: true } },
       { path: 'admin/users', name: 'admin-users', component: AdminUsersPage, meta: { requiresAdmin: true } },
-      { path: 'admin/statistic', name: 'admin-statistic', component: AdminStatisticsPage, meta: { requiresAdmin: true } }
+      { path: 'admin/statistic', name: 'admin-statistic', component: AdminStatisticsPage, meta: { requiresStaffOrAdmin: true } },
+      { path: 'admin/activity-log', name: 'admin-activity-log', component: AdminActivityLogPage, meta: { requiresAdmin: true } }
     ]
   }
 ]
@@ -106,21 +108,29 @@ export const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const { isLoggedIn, isAdmin, restore } = useAuth()
+  const { isLoggedIn, isAdmin, isStaff, restore } = useAuth()
   restore()
 
+  if (!isLoggedIn.value) {
+    if (to.meta.requiresAdmin || to.meta.requiresStaffOrAdmin || to.meta.requiresAuth || to.meta.customerOnly) {
+      return { path: '/login' }
+    }
+    return true
+  }
+
   if (to.meta.requiresAdmin) {
-    if (!isLoggedIn.value) return { path: '/login' }
     if (!isAdmin.value) return { path: '/' }
     return true
   }
+  if (to.meta.requiresStaffOrAdmin) {
+    if (!isAdmin.value && !isStaff.value) return { path: '/' }
+    return true
+  }
   if (to.meta.requiresAuth) {
-    if (!isLoggedIn.value) return { path: '/login' }
     return true
   }
   if (to.meta.customerOnly) {
-    if (!isLoggedIn.value) return { path: '/login' }
-    if (isAdmin.value) return { path: '/admin/products' }
+    if (isStaff.value || isAdmin.value) return { path: '/admin/products' }
     return true
   }
   return true

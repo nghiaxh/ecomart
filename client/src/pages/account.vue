@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
 import type { ProfileResponse, Address } from '@/types'
 import { addressSchema, profileSchema, type AddressForm as AddressFormData } from '@/schemas'
@@ -15,10 +15,14 @@ import { NAvatar, NButton, NInput, NSkeleton } from 'naive-ui'
 
 const { request } = useApi()
 const toast = useToast()
-const { session, updateSession, isAdmin, logout } = useAuth()
+const { session, updateSession, isAdmin, isStaff, logout } = useAuth()
 const { errors, applyIssues, clearErrors } = useFormErrors()
 const { confirm } = useConfirm()
 const { formatDate } = useFormat()
+
+const roleLabel = computed(() =>
+  isAdmin.value ? 'Quản trị' : isStaff.value ? 'Nhân viên' : 'Khách hàng'
+)
 
 const profile = ref<ProfileResponse | null>(null)
 const addresses = ref<Address[]>([])
@@ -228,8 +232,8 @@ onMounted(load)
                   <p class="text-lg font-bold text-gray-700">{{ profile.username }}</p>
                   <span
                     class="rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                    :class="isAdmin ? 'bg-slate-100 text-slate-700' : 'bg-emerald-100 text-emerald-700'"
-                  >{{ isAdmin ? 'Quản trị' : 'Khách hàng' }}</span>
+                    :class="isAdmin ? 'bg-slate-100 text-slate-700' : isStaff ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'"
+                  >{{ roleLabel }}</span>
                 </div>
                 <div class="mt-1 space-y-0.5 text-sm text-gray-400">
                   <p class="flex items-center gap-1.5"><UiIcon name="envelope" size="16" /> {{ profile.email }}</p>
@@ -282,7 +286,7 @@ onMounted(load)
         <div class="rounded-2xl border border-emerald-100 bg-white p-6">
           <h3 class="font-semibold text-gray-700">Đường dẫn</h3>
           <div class="mt-3 space-y-2">
-            <template v-if="!isAdmin">
+            <template v-if="!isAdmin && !isStaff">
               <RouterLink to="/orders" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
                 <UiIcon name="receipt" size="16" /> Đơn hàng
               </RouterLink>
@@ -290,7 +294,7 @@ onMounted(load)
                 <UiIcon name="shopping-cart" size="16" /> Giỏ hàng
               </RouterLink>
             </template>
-            <RouterLink v-if="isAdmin" to="/admin/products" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
+            <RouterLink v-if="isAdmin || isStaff" to="/admin/products" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700">
               <UiIcon name="th-large" size="16" /> Quản trị
             </RouterLink>
             <NButton quaternary type="error" block @click="logout">

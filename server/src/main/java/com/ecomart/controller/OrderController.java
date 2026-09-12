@@ -49,7 +49,7 @@ public class OrderController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public PageResponse<OrderResponse> allOrders(@RequestParam(required = false) OrderStatus status,
                                                  @RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "10") int size) {
@@ -57,14 +57,14 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public OrderResponse updateStatus(@PathVariable Long id,
                                       @Valid @RequestBody UpdateOrderStatusRequest request) {
         return orderService.updateStatus(id, request.status());
     }
 
     @PostMapping("/{id}/confirm-payment")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public OrderResponse confirmPayment(@PathVariable Long id) {
         return orderService.confirmPayment(id);
     }

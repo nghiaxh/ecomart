@@ -27,11 +27,7 @@ async function submit() {
   loading.value = true
   try {
     const data = await register(form, { remember: true })
-    if (data.role === 'ADMIN') {
-      router.push('/admin/products')
-    } else {
-      router.push('/')
-    }
+    router.push(data.role === 'CUSTOMER' ? '/' : '/admin/products')
   } catch (e: any) {
     toast.add({ severity: 'error', summary: e?.data?.message || 'Đăng ký thất bại', life: 4000 })
   } finally {

@@ -4,6 +4,7 @@ import com.ecomart.common.Mapper;
 import com.ecomart.domain.entity.Admin;
 import com.ecomart.domain.entity.Cart;
 import com.ecomart.domain.entity.Customer;
+import com.ecomart.domain.entity.Staff;
 import com.ecomart.domain.entity.User;
 import com.ecomart.domain.enums.UserRole;
 import com.ecomart.dto.request.CreateUserRequest;
@@ -32,15 +33,18 @@ public class AdminUserService {
     private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
     private final EntityManager entityManager;
+    private final ActivityLogService activityLogService;
 
     public AdminUserService(UserRepository userRepository,
                             CartRepository cartRepository,
                             PasswordEncoder passwordEncoder,
-                            EntityManager entityManager) {
+                            EntityManager entityManager,
+                            ActivityLogService activityLogService) {
         this.userRepository = userRepository;
         this.cartRepository = cartRepository;
         this.passwordEncoder = passwordEncoder;
         this.entityManager = entityManager;
+        this.activityLogService = activityLogService;
     }
 
     @Transactional(readOnly = true)
@@ -64,10 +68,15 @@ public class AdminUserService {
     public UserSummaryResponse createUser(CreateUserRequest request) {
         UserRole role = request.role() == null ? UserRole.CUSTOMER : request.role();
         assertUnique(request.username(), request.email());
-        User user = role == UserRole.ADMIN
-                ? buildAdmin(request, LocalDate.now())
-                : buildCustomer(request, LocalDate.now());
-        return Mapper.toUserSummary(userRepository.save(user));
+        User user = switch (role) {
+            case ADMIN -> buildAdmin(request, LocalDate.now());
+            case STAFF -> buildStaff(request, LocalDate.now());
+            default -> buildCustomer(request, LocalDate.now());
+        };
+        UserSummaryResponse saved = Mapper.toUserSummary(userRepository.save(user));
+        activityLogService.record(ActivityLogService.CREATE_USER, ActivityLogService.TYPE_USER, saved.id(),
+                saved.username(), "Tạo tài khoản " + saved.username() + " (" + saved.role() + ")");
+        return saved;
     }
 
     @Transactional
@@ -92,10 +101,19 @@ public class AdminUserService {
             if (user instanceof Admin admin && request.hireDate() != null) {
                 admin.setHireDate(request.hireDate());
             }
-            return Mapper.toUserSummary(userRepository.save(user));
+            if (user instanceof Staff staff && request.hireDate() != null) {
+                staff.setHireDate(request.hireDate());
+            }
+            UserSummaryResponse saved = Mapper.toUserSummary(userRepository.save(user));
+            activityLogService.record(ActivityLogService.UPDATE_USER, ActivityLogService.TYPE_USER, saved.id(),
+                    saved.username(), "Cập nhật tài khoản " + saved.username());
+            return saved;
         }
 
-        return Mapper.toUserSummary(switchRole(user, request));
+        UserSummaryResponse updated = Mapper.toUserSummary(switchRole(user, request));
+        activityLogService.record(ActivityLogService.UPDATE_USER, ActivityLogService.TYPE_USER, updated.id(),
+                updated.username(), "Thay đổi vai trò tài khoản " + updated.username());
+        return updated;
     }
 
     @Transactional
@@ -105,7 +123,10 @@ public class AdminUserService {
             throw new BadRequestException("Cannot deactivate your own account");
         }
         user.setActive(!user.isActive());
-        return Mapper.toUserSummary(userRepository.save(user));
+        UserSummaryResponse saved = Mapper.toUserSummary(userRepository.save(user));
+        activityLogService.record(ActivityLogService.TOGGLE_USER_ACTIVE, ActivityLogService.TYPE_USER, saved.id(),
+                saved.username(), (saved.isActive() ? "Kích hoạt" : "Vô hiệu hóa") + " tài khoản " + saved.username());
+        return saved;
     }
 
     private User switchRole(User user, UpdateUserRequest request) {
@@ -122,6 +143,14 @@ public class AdminUserService {
                 admin.setPasswordHash(passwordEncoder.encode(request.password()));
             }
             replacement = admin;
+        } else if (role == UserRole.STAFF) {
+            Staff staff = new Staff();
+            applyCommonFields(staff, request);
+            staff.setHireDate(request.hireDate() != null ? request.hireDate() : LocalDate.now());
+            if (request.password() != null && !request.password().isBlank()) {
+                staff.setPasswordHash(passwordEncoder.encode(request.password()));
+            }
+            replacement = staff;
         } else {
             Customer customer = new Customer();
             applyCommonFields(customer, request);
@@ -157,6 +186,18 @@ public class AdminUserService {
         admin.setActive(true);
         admin.setHireDate(request.hireDate() != null ? request.hireDate() : hireDate);
         return admin;
+    }
+
+    private Staff buildStaff(CreateUserRequest request, LocalDate hireDate) {
+        Staff staff = new Staff();
+        staff.setUsername(request.username());
+        staff.setEmail(request.email());
+        staff.setNumberPhone(request.numberPhone());
+        staff.setPasswordHash(passwordEncoder.encode(request.password()));
+        staff.setRole(UserRole.STAFF);
+        staff.setActive(true);
+        staff.setHireDate(request.hireDate() != null ? request.hireDate() : hireDate);
+        return staff;
     }
 
     private Customer buildCustomer(CreateUserRequest request, LocalDate unused) {

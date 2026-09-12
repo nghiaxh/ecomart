@@ -28,11 +28,7 @@ async function submit() {
   loading.value = true
   try {
     const data = await login(form.identifier, form.password, { remember: remember.value })
-    if (data.role === 'ADMIN') {
-      router.push('/admin/products')
-    } else {
-      router.push('/')
-    }
+    router.push(data.role === 'CUSTOMER' ? '/' : '/admin/products')
   } catch (e: any) {
     toast.add({ severity: 'error', summary: e?.data?.message || 'Đăng nhập thất bại', life: 4000 })
   } finally {

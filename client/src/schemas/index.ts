@@ -67,7 +67,7 @@ export const createUserSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
   numberPhone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ'),
   password: z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(100),
-  role: z.enum(['CUSTOMER', 'ADMIN']),
+  role: z.enum(['CUSTOMER', 'STAFF', 'ADMIN']),
   hireDate: z.string().optional()
 })
 
@@ -76,7 +76,7 @@ export const updateUserSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
   numberPhone: z.string().regex(/^(0|\+84)[0-9]{9,10}$/, 'Số điện thoại không hợp lệ'),
   password: z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(100).optional().or(z.literal('')),
-  role: z.enum(['CUSTOMER', 'ADMIN']),
+  role: z.enum(['CUSTOMER', 'STAFF', 'ADMIN']),
   hireDate: z.string().optional()
 })
 

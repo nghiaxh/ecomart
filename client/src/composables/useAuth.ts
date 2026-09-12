@@ -25,6 +25,8 @@ export const useAuth = () => {
 
   const isLoggedIn = computed(() => !!session.value)
   const isAdmin = computed(() => session.value?.role === 'ADMIN')
+  const isStaff = computed(() => session.value?.role === 'STAFF')
+  const isStaffOrAdmin = computed(() => isAdmin.value || isStaff.value)
 
   const persist = (value: Session | null, remember?: boolean) => {
     if (!value) {
@@ -121,6 +123,8 @@ export const useAuth = () => {
     session,
     isLoggedIn,
     isAdmin,
+    isStaff,
+    isStaffOrAdmin,
     restore,
     login,
     register,

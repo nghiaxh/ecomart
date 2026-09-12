@@ -27,6 +27,14 @@ public class SecurityUtils {
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
     }
 
+    public User currentUserOrNull() {
+        try {
+            return currentUser();
+        } catch (UnauthorizedException e) {
+            return null;
+        }
+    }
+
     public Long currentUserId() {
         return currentUser().getId();
     }
@@ -38,5 +46,18 @@ public class SecurityUtils {
         }
         return auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+    }
+
+    public boolean currentUserHasAnyRole(String... roles) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return false;
+        }
+        for (String role : roles) {
+            if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_" + role))) {
+                return true;
+            }
+        }
+        return false;
     }
 }

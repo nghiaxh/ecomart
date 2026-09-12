@@ -93,7 +93,30 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedDemoUsers() {
         seedAdmin();
+        seedStaff();
         seedCustomers();
+    }
+
+    private void seedStaff() {
+        staff("staff", "staff@ecomart.vn", "0902000000");
+        staff("staff2", "staff2@ecomart.vn", "0902000001");
+    }
+
+    private void staff(String username, String email, String phone) {
+        if (!seedEnabled || userRepository.existsByUsername(username)) {
+            return;
+        }
+        String password = seedAdminPassword != null && !seedAdminPassword.isBlank()
+                ? seedAdminPassword : "Staff@123";
+        Staff s = new Staff();
+        s.setUsername(username);
+        s.setEmail(email);
+        s.setNumberPhone(phone);
+        s.setPasswordHash(passwordEncoder.encode(password));
+        s.setRole(UserRole.STAFF);
+        s.setActive(true);
+        s.setHireDate(LocalDate.now().minusDays(60L));
+        userRepository.save(s);
     }
 
     private void seedAdmin() {

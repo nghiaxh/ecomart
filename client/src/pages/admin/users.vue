@@ -30,6 +30,7 @@ const busyIds = ref<Set<number>>(new Set())
 
 const roleOptions = [
   { label: 'Khách hàng', value: 'CUSTOMER' },
+  { label: 'Nhân viên', value: 'STAFF' },
   { label: 'Quản trị', value: 'ADMIN' }
 ]
 
@@ -38,7 +39,7 @@ interface UserFormState {
   email: string
   numberPhone: string
   password: string
-  role: 'CUSTOMER' | 'ADMIN'
+  role: 'CUSTOMER' | 'STAFF' | 'ADMIN'
   hireDate: string
 }
 
@@ -92,7 +93,7 @@ function openEdit(u: UserSummary) {
     numberPhone: u.numberPhone,
     password: '',
     role: u.role,
-    hireDate: ''
+    hireDate: u.hireDate ?? ''
   })
   editingId.value = u.id
   clearErrors()
@@ -135,7 +136,7 @@ async function submit() {
         hireDate: form.hireDate || undefined
       }
       await request('/api/admin/users', { method: 'POST', body: payload })
-      toast.add({ severity: 'success', summary: form.role === 'ADMIN' ? 'Đã tạo tài khoản quản trị' : 'Đã tạo tài khoản khách hàng', life: 4000 })
+      toast.add({ severity: 'success', summary: form.role === 'ADMIN' ? 'Đã tạo tài khoản quản trị' : form.role === 'STAFF' ? 'Đã tạo tài khoản nhân viên' : 'Đã tạo tài khoản khách hàng', life: 4000 })
     }
     showForm.value = false
     resetForm()
@@ -172,7 +173,7 @@ const editingUser = computed(() => editingId.value === null
 const editingSelf = computed(() => editingUser.value ? isSelf(editingUser.value) : false)
 
 function roleLabel(role: string) {
-  return role === 'ADMIN' ? 'Quản trị' : 'Khách hàng'
+  return role === 'ADMIN' ? 'Quản trị' : role === 'STAFF' ? 'Nhân viên' : 'Khách hàng'
 }
 
 const columns = computed<DataTableColumns<UserSummary>>(() => [
@@ -195,7 +196,7 @@ const columns = computed<DataTableColumns<UserSummary>>(() => [
   {
     key: 'role',
     title: 'Vai trò',
-    render: (row) => h(NTag, { type: row.role === 'ADMIN' ? 'default' : 'success' }, { default: () => roleLabel(row.role) })
+    render: (row) => h(NTag, { type: row.role === 'ADMIN' ? 'default' : row.role === 'STAFF' ? 'info' : 'success' }, { default: () => roleLabel(row.role) })
   },
   {
     key: 'isActive',
@@ -206,6 +207,11 @@ const columns = computed<DataTableColumns<UserSummary>>(() => [
     key: 'createdAt',
     title: 'Ngày tạo',
     render: (row) => h('span', { class: 'text-gray-500' }, formatDate(row.createdAt))
+  },
+  {
+    key: 'hireDate',
+    title: 'Ngày tuyển',
+    render: (row) => h('span', { class: 'text-gray-500' }, row.hireDate ? formatDate(row.hireDate) : '—')
   },
   {
     key: 'actions',
@@ -301,7 +307,7 @@ onMounted(load)
           <p v-if="errors.role" class="text-xs text-red-600">{{ errors.role }}</p>
           <p v-if="editingSelf" class="mt-1 text-xs text-gray-400">Không thể thay đổi vai trò của chính mình</p>
         </div>
-        <div v-if="form.role === 'ADMIN'">
+        <div v-if="form.role === 'ADMIN' || form.role === 'STAFF'">
           <label class="mb-1 block text-sm text-gray-500">Ngày tuyển dụng (tùy chọn)</label>
           <NInput v-model:value="form.hireDate" :input-props="{ type: 'date' }" placeholder="yyyy-mm-dd" />
         </div>

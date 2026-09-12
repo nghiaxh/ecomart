@@ -23,13 +23,16 @@ public class ReviewService {
     private final SecurityUtils securityUtils;
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
+    private final ActivityLogService activityLogService;
 
     public ReviewService(SecurityUtils securityUtils,
                          ReviewRepository reviewRepository,
-                         ProductRepository productRepository) {
+                         ProductRepository productRepository,
+                         ActivityLogService activityLogService) {
         this.securityUtils = securityUtils;
         this.reviewRepository = reviewRepository;
         this.productRepository = productRepository;
+        this.activityLogService = activityLogService;
     }
 
     @Transactional
@@ -51,7 +54,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewResponse> listForProduct(Long productId, boolean includeHidden) {
-        if (includeHidden && !securityUtils.currentUserHasRole("ADMIN")) {
+        if (includeHidden && !securityUtils.currentUserHasAnyRole("ADMIN", "STAFF")) {
             throw new AccessDeniedException("You do not have permission to view hidden reviews");
         }
         List<Review> reviews = includeHidden
@@ -65,6 +68,9 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
         review.setHidden(!review.isHidden());
-        return Mapper.toReview(reviewRepository.save(review));
+        ReviewResponse saved = Mapper.toReview(reviewRepository.save(review));
+        activityLogService.record(ActivityLogService.TOGGLE_REVIEW_VISIBILITY, ActivityLogService.TYPE_REVIEW,
+                saved.id(), saved.customerName(), (saved.hidden() ? "Ẩn" : "Hiện") + " đánh giá của " + saved.customerName());
+        return saved;
     }
 }

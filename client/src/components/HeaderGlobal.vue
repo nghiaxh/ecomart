@@ -6,7 +6,7 @@ import { useCart } from '@/composables/useCart'
 import UiIcon from '@/components/UiIcon.vue'
 import { NAvatar, NButton } from 'naive-ui'
 
-const { isLoggedIn, isAdmin, session } = useAuth()
+const { isLoggedIn, isStaffOrAdmin, isStaff, session } = useAuth()
 const { itemCount } = useCart()
 
 const route = useRoute()
@@ -19,17 +19,23 @@ const links = [
   { label: 'Liên hệ', to: '/#contact' }
 ]
 
-const adminLinks = [
+const backofficeLinks = [
   { label: 'Sản phẩm', to: '/admin/products' },
   { label: 'Danh mục', to: '/admin/categories' },
   { label: 'Đơn hàng', to: '/admin/orders' },
-  { label: 'Người dùng', to: '/admin/users' },
   { label: 'Thống kê', to: '/admin/statistic' }
 ]
 
-const userLinks = computed(() =>
-  isLoggedIn.value && !isAdmin.value ? [...links, { label: 'Đơn hàng', to: '/orders' }] : links
+const adminLinks = computed(() =>
+  isStaff.value
+    ? backofficeLinks
+    : [...backofficeLinks, { label: 'Người dùng', to: '/admin/users' }, { label: 'Nhật ký hệ thống', to: '/admin/activity-log' }]
 )
+
+const userLinks = computed(() => {
+  if (isStaffOrAdmin.value) return links
+  return isLoggedIn.value ? [...links, { label: 'Đơn hàng', to: '/orders' }] : links
+})
 
 function scrollHome() {
   if (route.name === 'home' && !route.hash) {
@@ -47,7 +53,7 @@ function scrollHome() {
       </RouterLink>
 
       <nav class="hidden items-center gap-6 lg:gap-8 md:flex justify-self-center">
-        <RouterLink v-for="link in (isAdmin ? adminLinks : userLinks)" :key="link.to" :to="link.to"
+        <RouterLink v-for="link in (isStaffOrAdmin ? adminLinks : userLinks)" :key="link.to" :to="link.to"
           class="text-sm font-medium text-gray-600 hover:text-emerald-700"
           @click="scrollHome">
           {{ link.label }}
@@ -56,11 +62,11 @@ function scrollHome() {
 
       <div class="flex items-center gap-1 justify-self-end">
         <NButton
-          v-if="isLoggedIn && !isAdmin"
+          v-if="isLoggedIn && !isStaffOrAdmin"
           quaternary
           aria-label="Giỏ hàng"
           class="relative"
-          @click="router.push(isLoggedIn ? '/cart' : '/login')"
+          @click="router.push('/cart')"
         >
           <template #icon><UiIcon name="shopping-cart" size="22" /></template>
           <span v-if="itemCount > 0" class="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold text-white">

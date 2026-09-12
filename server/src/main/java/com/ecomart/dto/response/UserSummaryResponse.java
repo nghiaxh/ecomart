@@ -3,6 +3,7 @@ package com.ecomart.dto.response;
 import com.ecomart.domain.enums.UserRole;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record UserSummaryResponse(
         Long id,
@@ -12,6 +13,7 @@ public record UserSummaryResponse(
         String avatarUrl,
         UserRole role,
         boolean isActive,
-        Instant createdAt
+        Instant createdAt,
+        LocalDate hireDate
 ) {
 }
