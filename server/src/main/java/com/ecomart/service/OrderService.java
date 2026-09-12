@@ -36,6 +36,7 @@ public class OrderService {
     private final NotificationService notificationService;
     private final PayOSClient payOSClient;
     private final ShopProperties shopProperties;
+    private final ActivityLogService activityLogService;
 
     public OrderService(SecurityUtils securityUtils,
                         CartService cartService,
@@ -47,7 +48,8 @@ public class OrderService {
                         ProductRepository productRepository,
                         NotificationService notificationService,
                         PayOSClient payOSClient,
-                        ShopProperties shopProperties) {
+                        ShopProperties shopProperties,
+                        ActivityLogService activityLogService) {
         this.securityUtils = securityUtils;
         this.cartService = cartService;
         this.cartItemRepository = cartItemRepository;
@@ -59,6 +61,7 @@ public class OrderService {
         this.notificationService = notificationService;
         this.payOSClient = payOSClient;
         this.shopProperties = shopProperties;
+        this.activityLogService = activityLogService;
     }
 
     @Transactional
@@ -214,6 +217,9 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         order.setStatus(status);
         orderRepository.save(order);
+        activityLogService.record(ActivityLogService.UPDATE_ORDER_STATUS, ActivityLogService.TYPE_ORDER,
+                order.getId(), "Đơn hàng #" + order.getId(), "Cập nhật trạng thái đơn hàng #"
+                        + order.getId() + " thành " + status);
         return Mapper.toOrder(order);
     }
 
@@ -222,6 +228,8 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         markPaid(order);
+        activityLogService.record(ActivityLogService.CONFIRM_PAYMENT, ActivityLogService.TYPE_ORDER,
+                order.getId(), "Đơn hàng #" + order.getId(), "Xác nhận thanh toán đơn hàng #" + order.getId());
         return Mapper.toOrder(order);
     }
 

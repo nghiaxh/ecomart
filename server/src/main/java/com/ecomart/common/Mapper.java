@@ -22,8 +22,9 @@ public final class Mapper {
     }
 
     public static UserSummaryResponse toUserSummary(User user) {
+        java.time.LocalDate hireDate = (user instanceof Staff s) ? s.getHireDate() : null;
         return new UserSummaryResponse(user.getId(), user.getUsername(), user.getEmail(), user.getNumberPhone(),
-                user.getAvatarUrl(), user.getRole(), user.isActive(), user.getCreatedAt());
+                user.getAvatarUrl(), user.getRole(), user.isActive(), user.getCreatedAt(), hireDate);
     }
 
     public static ProductResponse toProduct(Product p) {
@@ -108,6 +109,12 @@ public final class Mapper {
     public static NotificationResponse toNotification(Notification n) {
         return new NotificationResponse(n.getId(), n.getTitle(), n.getMessage(), n.getType(), n.isRead(),
                 n.getCreatedAt());
+    }
+
+    public static ActivityLogResponse toActivityLog(ActivityLog log) {
+        return new ActivityLogResponse(log.getId(), log.getUserId(), log.getUsername(), log.getRole(),
+                log.getAction(), log.getEntityType(), log.getEntityId(), log.getEntityName(),
+                log.getDetail(), log.getCreatedAt());
     }
 
     public static <T> PageResponse<T> toPage(org.springframework.data.domain.Page<?> page, List<T> content) {

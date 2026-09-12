@@ -28,13 +28,16 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final MaterialRepository materialRepository;
+    private final ActivityLogService activityLogService;
 
     public ProductService(ProductRepository productRepository,
                           CategoryRepository categoryRepository,
-                          MaterialRepository materialRepository) {
+                          MaterialRepository materialRepository,
+                          ActivityLogService activityLogService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.materialRepository = materialRepository;
+        this.activityLogService = activityLogService;
     }
 
     @Transactional(readOnly = true)
@@ -110,7 +113,10 @@ public class ProductService {
         Product product = new Product();
         Mapper.mergeProduct(product, request, category);
         attachMaterials(product, request);
-        return Mapper.toProduct(productRepository.save(product));
+        ProductResponse saved = Mapper.toProduct(productRepository.save(product));
+        activityLogService.record(ActivityLogService.CREATE_PRODUCT, ActivityLogService.TYPE_PRODUCT,
+                saved.id(), saved.name(), "Tạo sản phẩm " + saved.name());
+        return saved;
     }
 
     @Transactional
@@ -122,7 +128,10 @@ public class ProductService {
         Mapper.mergeProduct(product, request, category);
         product.getMaterials().clear();
         attachMaterials(product, request);
-        return Mapper.toProduct(productRepository.save(product));
+        ProductResponse saved = Mapper.toProduct(productRepository.save(product));
+        activityLogService.record(ActivityLogService.UPDATE_PRODUCT, ActivityLogService.TYPE_PRODUCT,
+                saved.id(), saved.name(), "Cập nhật sản phẩm " + saved.name());
+        return saved;
     }
 
     @Transactional
@@ -131,6 +140,8 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         product.setActive(!product.isActive());
         productRepository.save(product);
+        activityLogService.record(ActivityLogService.TOGGLE_PRODUCT_ACTIVE, ActivityLogService.TYPE_PRODUCT,
+                product.getId(), product.getName(), (product.isActive() ? "Kích hoạt" : "Ẩn") + " sản phẩm " + product.getName());
     }
 
     @Transactional
@@ -139,6 +150,8 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         product.setActive(false);
         productRepository.save(product);
+        activityLogService.record(ActivityLogService.DELETE_PRODUCT, ActivityLogService.TYPE_PRODUCT,
+                product.getId(), product.getName(), "Xóa sản phẩm " + product.getName());
     }
 
     private void attachMaterials(Product product, ProductRequest req) {
